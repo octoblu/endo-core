@@ -75,7 +75,7 @@ class MessagesService
     _.tap {}, (schemas) =>
       _.each filenames, (filename) =>
         filepath = path.join @schemaDir, filename
-        schemaName = _.replace filename, /-schema.json$/, ''
+        schemaName = _.camelCase(_.replace filename, /-schema.json$/, '')
         schemas[schemaName] = JSON.parse fs.readFileSync(filepath, 'utf8')
 
   _isImplemented: (jobType) =>

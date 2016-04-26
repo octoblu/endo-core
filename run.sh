@@ -37,12 +37,13 @@ run_yo(){
 remove_non_lib_files() {
   rm command.*
   rm -rf schemas
+  rm src/strategies/api-strategy.coffee
+  rm src/message-handlers.coffee
 }
 
 main(){
   local debug="$DEBUG"
   local skip_install="$SKIP_INSTALL"
-
   run_yo "$skip_install" \
   && remove_non_lib_files \
   && run_mocha
