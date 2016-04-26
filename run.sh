@@ -34,6 +34,11 @@ run_yo(){
     $args
 }
 
+remove_generated_files() {
+  rm -rf src
+  rm -rf test
+  rm endo-message-schema.json
+}
 remove_non_lib_files() {
   rm command.*
   rm -rf schemas
@@ -44,7 +49,8 @@ remove_non_lib_files() {
 main(){
   local debug="$DEBUG"
   local skip_install="$SKIP_INSTALL"
-  run_yo "$skip_install" \
+  remove_generated_files \
+  && run_yo "$skip_install" \
   && remove_non_lib_files \
   && run_mocha
 }
