@@ -31,11 +31,13 @@ class Router
     app.get  '/auth/api', passport.authenticate('api')
     app.get  '/auth/api/callback', passport.authenticate('api'), @credentialsDeviceController.upsert
 
+    app.post '/messages', @messagesController.create
+
+    app.all  '/:credentialsDeviceUuid/user-devices*', @userDevicesController.getCredentialsDevice
     app.get  '/:credentialsDeviceUuid/user-devices', @userDevicesController.list
     app.post '/:credentialsDeviceUuid/user-devices', @userDevicesController.create
-    app.delete '/:credentialsDeviceUuid/user-devices/:userDeviceUuid', @userDevicesController.delete
+    app.delete  '/:credentialsDeviceUuid/user-devices/:userDeviceUuid', @userDevicesController.delete
 
-    app.post '/messages', @messagesController.create
     app.use (req, res) => res.redirect '/auth/api'
 
 module.exports = Router
