@@ -44,6 +44,7 @@ describe 'messages', ->
         uuid: 'peter'
         token: 'i-could-eat'
         privateKey: @privateKey
+      userDeviceManagerUrl: 'http://manage-my.endo'
 
     @server = new Server serverOptions
 

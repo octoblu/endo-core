@@ -7,12 +7,14 @@ OctobluAuthController       = require './controllers/octoblu-auth-controller'
 UserDevicesController       = require './controllers/user-devices-controller'
 
 class Router
-  constructor: ({@credentialsDeviceService, @messagesService, @meshbluConfig}) ->
+  constructor: ({@credentialsDeviceService, @messagesService, @meshbluConfig, @serviceUrl, @userDeviceManagerUrl}) ->
     throw new Error 'credentialsDeviceService is required' unless @credentialsDeviceService?
     throw new Error 'meshbluConfig is required' unless @meshbluConfig?
     throw new Error 'messagesService is required' unless @messagesService?
+    throw new Error 'serviceUrl is required' unless @serviceUrl?
+    throw new Error 'userDeviceManagerUrl is required' unless @userDeviceManagerUrl?
 
-    @credentialsDeviceController = new CredentialsDeviceController {@credentialsDeviceService}
+    @credentialsDeviceController = new CredentialsDeviceController {@credentialsDeviceService, @serviceUrl, @userDeviceManagerUrl}
     @messagesController    = new MessagesController {@credentialsDeviceService, @messagesService}
     @octobluAuthController = new OctobluAuthController
     @userDevicesController = new UserDevicesController {@credentialsDeviceService}

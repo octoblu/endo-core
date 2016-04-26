@@ -1,5 +1,11 @@
+_ = require 'lodash'
+url = require 'url'
+
 class CredentialsDeviceController
-  constructor: ({@credentialsDeviceService}) ->
+  constructor: ({@credentialsDeviceService, @serviceUrl, @userDeviceManagerUrl}) ->
+    throw new Error 'credentialsDeviceService is required' unless @credentialsDeviceService?
+    throw new Error 'serviceUrl is required' unless @serviceUrl?
+    throw new Error 'userDeviceManagerUrl is required' unless @userDeviceManagerUrl?
 
   upsert: (req, res) =>
     {resourceOwnerID, resourceOwnerSecrets} = req.user
@@ -10,6 +16,14 @@ class CredentialsDeviceController
 
       credentialsDevice.update {resourceOwnerSecrets, authorizedUuid}, (error) =>
         return res.sendError error if error?
-        return res.redirect "/#{credentialsDevice.getUuid()}/user-devices"
+
+        serviceUrl = url.parse @serviceUrl
+        serviceUrl.pathname = credentialsDevice.getUuid()
+
+        userDeviceManagerUrl = url.parse @userDeviceManagerUrl, true
+        userDeviceManagerUrl.query.meshbluAuthBearer = req.meshbluAuth.bearerToken
+        userDeviceManagerUrl.query.credentialsDeviceUrl = url.format serviceUrl
+
+        return res.redirect url.format userDeviceManagerUrl
 
 module.exports = CredentialsDeviceController

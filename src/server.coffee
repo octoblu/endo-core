@@ -18,6 +18,7 @@ MessagesService          = require './services/messages-service'
 class Server
   constructor: (options)->
     {@apiStrategy, @deviceType, @meshbluConfig, @messageHandlers, @octobluStrategy, @schemas, @serviceUrl} = options
+    {@userDeviceManagerUrl} = options
     {@disableLogging, @logFn, @port} = options
 
     throw new Error('apiStrategy is required') unless @apiStrategy?
@@ -27,7 +28,7 @@ class Server
     throw new Error('octobluStrategy is required') unless @octobluStrategy?
     throw new Error('schemas are required') unless @schemas?
     throw new Error('serviceUrl is required') unless @serviceUrl?
-
+    throw new Error('userDeviceManagerUrl is required') unless @userDeviceManagerUrl?
 
   address: =>
     @server.address()
@@ -58,8 +59,8 @@ class Server
       throw new Error('Could not authenticate with meshblu!') if error?
       {imageUrl} = device.options
       credentialsDeviceService  = new CredentialsDeviceService {@deviceType, imageUrl, @meshbluConfig, @serviceUrl}
-      messagesService            = new MessagesService {@messageHandlers, @schemas}
-      router = new Router {credentialsDeviceService, messagesService, @meshbluConfig}
+      messagesService           = new MessagesService {@messageHandlers, @schemas}
+      router = new Router {credentialsDeviceService, messagesService, @meshbluConfig, @serviceUrl, @userDeviceManagerUrl}
       router.route app
 
       @server = app.listen @port, callback

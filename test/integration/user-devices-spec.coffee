@@ -32,6 +32,7 @@ describe 'Sample Spec', ->
       schemas:
         hello:   require '../data/schemas/hello-schema.json'
         namaste: require '../data/schemas/namaste-schema.json'
+      userDeviceManagerUrl: 'http://manage-my.endo'
 
     @meshblu
       .get '/v2/whoami'

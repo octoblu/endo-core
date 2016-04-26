@@ -50,6 +50,7 @@ describe 'Sample Spec', ->
         hello:   require '../data/schemas/hello-schema.json'
         namaste: require '../data/schemas/namaste-schema.json'
       serviceUrl: "http://the-endo-url"
+      userDeviceManagerUrl: 'http://manage-my.endo'
 
     @server = new Server serverOptions
 
@@ -239,8 +240,9 @@ describe 'Sample Spec', ->
       it 'should subscribe to its own received messages', ->
         @createMessageReceivedSubscription.done()
 
-      it 'should redirect to /cred-uuid/user-devices', ->
-        expect(@response.headers.location).to.equal '/cred-uuid/user-devices'
+      it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
+        EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid'
+        expect(@response.headers.location).to.equal EXPECTED
 
     describe 'when the credentials device does exist', ->
       beforeEach (done) ->
@@ -316,5 +318,6 @@ describe 'Sample Spec', ->
       it 'should return a 302', ->
         expect(@response.statusCode).to.equal 302
 
-      it 'should redirect to /cred-uuid/user-devices', ->
-        expect(@response.headers.location).to.equal '/cred-uuid/user-devices'
+      it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
+        EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid'
+        expect(@response.headers.location).to.equal EXPECTED
