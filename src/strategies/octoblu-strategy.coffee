@@ -1,9 +1,8 @@
 _               = require 'lodash'
-MeshbluConfig   = require 'meshblu-config'
 PassportOctoblu = require 'passport-octoblu'
 
 class OctobluStrategy extends PassportOctoblu
-  constructor: (env) ->
+  constructor: (env, meshbluConfig) ->
     throw new Error('Missing required environment variable: MESHBLU_UUID')  if _.isEmpty process.env.MESHBLU_UUID
     throw new Error('Missing required environment variable: MESHBLU_TOKEN') if _.isEmpty process.env.MESHBLU_TOKEN
     throw new Error('Missing required environment variable: ENDO_OCTOBLU_OAUTH_URL') if _.isEmpty process.env.ENDO_OCTOBLU_OAUTH_URL
@@ -13,7 +12,7 @@ class OctobluStrategy extends PassportOctoblu
       clientSecret:     process.env.MESHBLU_TOKEN
       authorizationURL: "#{process.env.ENDO_OCTOBLU_OAUTH_URL}/authorize"
       tokenURL:         "#{process.env.ENDO_OCTOBLU_OAUTH_URL}/access_token"
-      meshbluConfig:    new MeshbluConfig().toJSON()
+      meshbluConfig:    meshbluConfig
     }
 
     super options, (bearerToken, secret, {uuid}, next) =>
