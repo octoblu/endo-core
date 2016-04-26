@@ -28,6 +28,15 @@ class CredentialsDevice
         return callback error if error?
         return callback null, userDevice
 
+  deleteUserDeviceSubscription: ({userDeviceUuid}, callback) =>
+    subscription =
+      emitterUuid: userDeviceUuid
+      subscriberUuid: @uuid
+      type: 'message.received'
+
+    @meshblu.deleteSubscription subscription, (error, ignored) =>
+      callback error
+
   getUserDevices: (callback) =>
     @meshblu.subscriptions @uuid, (error, subscriptions) =>
       return callback error if error?

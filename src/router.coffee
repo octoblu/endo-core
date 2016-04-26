@@ -33,6 +33,7 @@ class Router
 
     app.get  '/:credentialsDeviceUuid/user-devices', @userDevicesController.list
     app.post '/:credentialsDeviceUuid/user-devices', @userDevicesController.create
+    app.delete '/:credentialsDeviceUuid/user-devices/:userDeviceUuid', @userDevicesController.delete
 
     app.post '/messages', @messagesController.create
     app.use (req, res) => res.redirect '/auth/api'
