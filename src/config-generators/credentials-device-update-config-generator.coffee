@@ -4,7 +4,7 @@ module.exports = ({authorizedUuid, resourceOwnerSecrets, serviceUrl}) ->
     'endo.resourceOwnerSecrets': resourceOwnerSecrets
     'meshblu.forwarders.message.received': [{
       type: 'webhook'
-      url:  "#{serviceUrl}/messages"
+      url:  "#{serviceUrl}/messages",
       method: 'POST'
       generateAndForwardMeshbluCredentials: true
     }]

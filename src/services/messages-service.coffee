@@ -12,8 +12,9 @@ MESSAGE_DATA_INVALID   = 'Message data does not match schema for jobType'
 MISSING_ROUTE_HEADER   = 'Missing x-meshblu-route header in request'
 
 class MessagesService
-  constructor: ({@messageHandlers}) ->
+  constructor: ({@messageHandlers, @schemaDir}) ->
     throw new Error 'messageHandlers are required' unless @messageHandlers
+    @schemaDir ?= path.join __dirname, '../../schemas'
 
     @endoMessageSchema = @_getEndoMessageSchemaSync()
     @schemas = @_getSchemasSync()
@@ -70,12 +71,10 @@ class MessagesService
     JSON.parse fs.readFileSync(filepath, 'utf8')
 
   _getSchemasSync: =>
-    directory = path.join __dirname, '../../schemas'
-    filenames = fs.readdirSync directory
-
+    filenames = fs.readdirSync @schemaDir
     _.tap {}, (schemas) =>
       _.each filenames, (filename) =>
-        filepath = path.join directory, filename
+        filepath = path.join @schemaDir, filename
         schemaName = _.replace filename, /-schema.json$/, ''
         schemas[schemaName] = JSON.parse fs.readFileSync(filepath, 'utf8')
 

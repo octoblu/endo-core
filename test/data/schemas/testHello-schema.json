@@ -1,0 +1,9 @@
+{
+  "title": "Hello",
+  "type": "object",
+  "properties": {
+    "greeting": {
+      "type": "string"
+    }
+  }
+}

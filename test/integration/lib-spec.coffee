@@ -6,6 +6,7 @@ shmock       = require '@octoblu/shmock'
 MockStrategy = require '../mock-strategy'
 Server       = require '../../src/server'
 Encryption   = require 'meshblu-encryption'
+path         = require 'path'
 
 describe 'Sample Spec', ->
   beforeEach (done) ->
@@ -45,6 +46,7 @@ describe 'Sample Spec', ->
         token: 'i-could-eat'
         privateKey: @privateKey
       port: undefined,
+      schemaDir: path.join __dirname, '../data/schemas'
       serviceUrl: "http://the-endo-url"
 
     @server = new Server serverOptions

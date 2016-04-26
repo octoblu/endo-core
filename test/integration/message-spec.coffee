@@ -1,5 +1,6 @@
 _            = require 'lodash'
 fs           = require 'fs'
+path         = require 'path'
 http         = require 'http'
 request      = require 'request'
 shmock       = require '@octoblu/shmock'
@@ -15,7 +16,7 @@ describe 'messages', ->
     @meshblu = shmock 0xd00d
     @apiStrategy = new MockStrategy name: 'api'
     @octobluStrategy = new MockStrategy name: 'octoblu'
-    @messageHandlers = hello: sinon.stub()
+    @messageHandlers = testHello: sinon.stub()
 
     @meshblu
       .get '/v2/whoami'
@@ -32,6 +33,7 @@ describe 'messages', ->
       apiStrategy: @apiStrategy
       octobluStrategy: @octobluStrategy
       messageHandlers: @messageHandlers
+      schemaDir: path.join __dirname, '../data/schemas'
       serviceUrl: 'http://octoblu.xxx'
       deviceType: 'endo-endor'
       meshbluConfig:
@@ -124,7 +126,7 @@ describe 'messages', ->
               ]
             json:
               metadata:
-                jobType: 'hello'
+                jobType: 'testHello'
               data:
                 greeting: {
                   salutation: 'hail fellow well met'
@@ -162,7 +164,7 @@ describe 'messages', ->
 
       describe 'when called with a valid message', ->
         beforeEach (done) ->
-          @messageHandlers.hello.yields null, 200, whatever: 'this is a response'
+          @messageHandlers.testHello.yields null, 200, whatever: 'this is a response'
           @responseHandler = @meshblu
             .post '/messages'
             .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
@@ -184,7 +186,7 @@ describe 'messages', ->
               ]
             json:
               metadata:
-                jobType: 'hello'
+                jobType: 'testHello'
               data:
                 greeting: 'hola'
             auth:
@@ -201,7 +203,7 @@ describe 'messages', ->
           @responseHandler.done()
 
         it 'should call the hello messageHandler with the message and auth', ->
-          expect(@messageHandlers.hello).to.have.been.calledWith sinon.match {
+          expect(@messageHandlers.testHello).to.have.been.calledWith sinon.match {
             auth:
               uuid: 'cred-uuid'
               token: 'cred-token'
@@ -214,7 +216,7 @@ describe 'messages', ->
 
       describe 'when called with a valid message, but theres an error', ->
         beforeEach (done) ->
-          @messageHandlers.hello.yields new Error 'Something very bad happened'
+          @messageHandlers.testHello.yields new Error 'Something very bad happened'
           @responseHandler = @meshblu
             .post '/messages'
             .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
@@ -236,7 +238,7 @@ describe 'messages', ->
               ]
             json:
               metadata:
-                jobType: 'hello'
+                jobType: 'testHello'
               data:
                 greeting: 'hola'
             auth:
@@ -247,7 +249,7 @@ describe 'messages', ->
             done error
 
         it 'should call the hello messageHandler with the message and auth', ->
-          expect(@messageHandlers.hello).to.have.been.calledWith sinon.match {
+          expect(@messageHandlers.testHello).to.have.been.calledWith sinon.match {
             auth:
               uuid: 'cred-uuid'
               token: 'cred-token'

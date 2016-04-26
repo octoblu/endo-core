@@ -1,15 +1,15 @@
-# endo-github
+# endo-lib
 
-[![Dependency status](http://img.shields.io/david/octoblu/endo-github.svg?style=flat)](https://david-dm.org/octoblu/endo-github)
-[![devDependency Status](http://img.shields.io/david/dev/octoblu/endo-github.svg?style=flat)](https://david-dm.org/octoblu/endo-github#info=devDependencies)
-[![Build Status](http://img.shields.io/travis/octoblu/endo-github.svg?style=flat&branch=master)](https://travis-ci.org/octoblu/endo-github)
+[![Dependency status](http://img.shields.io/david/octoblu/endo-lib.svg?style=flat)](https://david-dm.org/octoblu/endo-lib)
+[![devDependency Status](http://img.shields.io/david/dev/octoblu/endo-lib.svg?style=flat)](https://david-dm.org/octoblu/endo-lib#info=devDependencies)
+[![Build Status](http://img.shields.io/travis/octoblu/endo-lib.svg?style=flat&branch=master)](https://travis-ci.org/octoblu/endo-lib)
 
-[![NPM](https://nodei.co/npm/endo-github.svg?style=flat)](https://npmjs.org/package/endo-github)
+[![NPM](https://nodei.co/npm/endo-lib.svg?style=flat)](https://npmjs.org/package/endo-lib)
 
 ## Installing
 
 ```bash
-$ npm install endo-github
+$ npm install endo-lib
 ```
 
 ### Usage

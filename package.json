@@ -4,8 +4,8 @@
   "description": "Put some description here",
   "keywords": [
   ],
-  "homepage": "https://github.com/octoblu/github",
-  "bugs": "https://github.com/octoblu/github/issues",
+  "homepage": "https://github.com/octoblu/lib",
+  "bugs": "https://github.com/octoblu/lib/issues",
   "author": {
     "name": "Octoblu",
     "url": "https://github.com/octoblu"
@@ -13,7 +13,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/octoblu/github.git"
+    "url": "https://github.com/octoblu/lib.git"
   },
   "scripts": {
     "start": "node command.js",

@@ -8,17 +8,18 @@ errorHandler       = require 'errorhandler'
 meshbluHealthcheck = require 'express-meshblu-healthcheck'
 sendError          = require 'express-send-error'
 MeshbluConfig      = require 'meshblu-config'
-MeshbluHTTP       = require 'meshblu-http'
+MeshbluHTTP        = require 'meshblu-http'
 OctobluStrategy    = require 'passport-octoblu'
 passport           = require 'passport'
-debug              = require('debug')('endo:server')
+debug              = require('debug')('endo-lib:server')
 Router             = require './router'
 CredentialsDeviceService = require './services/credentials-device-service'
+MessagesService = require './services/messages-service'
 
 
 class Server
   constructor: (options)->
-    {@apiStrategy, @deviceType, @meshbluConfig, @messageHandlers, @octobluStrategy, @serviceUrl} = options
+    {@apiStrategy, @deviceType, @meshbluConfig, @messageHandlers, @octobluStrategy, @serviceUrl, @schemaDir} = options
     {@disableLogging, @logFn, @port} = options
 
     throw new Error('apiStrategy is required') unless @apiStrategy?
@@ -56,9 +57,9 @@ class Server
     meshblu.whoami (error, device) =>
       throw new Error('Could not authenticate with meshblu!') if error?
       {imageUrl} = device.options
-      credentialsDeviceService = new CredentialsDeviceService {@deviceType, imageUrl, @meshbluConfig, @serviceUrl}
-
-      router = new Router {credentialsDeviceService, @meshbluConfig, @messageHandlers}
+      credentialsDeviceService  = new CredentialsDeviceService {@deviceType, imageUrl, @meshbluConfig, @serviceUrl}
+      messagesService            = new MessagesService {@messageHandlers, @schemaDir}
+      router = new Router {credentialsDeviceService, messagesService, @meshbluConfig}
       router.route app
 
       @server = app.listen @port, callback

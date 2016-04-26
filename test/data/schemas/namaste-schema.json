@@ -1,0 +1,9 @@
+{
+  "title": "Namaste",
+  "type": "object",
+  "properties": {
+    "yoga_pose": {
+      "type": "string"
+    }
+  }
+}

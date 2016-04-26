@@ -4,9 +4,9 @@ MESHBLU_UUID='546a34c2-849f-4652-b273-18055bc53b84'
 MESHBLU_TOKEN='723dd594b16e36b47537baf4edaa6e2f995c1dcd'
 OCTOBLU_OAUTH_URL='http://oauth.octoblu.dev'
 
-GITHUB_CLIENT_ID='e73058c4bf7c9cb95007'
-GITHUB_CLIENT_SECRET='8479e154df17ad2ddc4aa835618171ceb10ded08'
-GITHUB_CALLBACK_URL='http://endo-github.octoblu.dev:3000/auth/api/callback'
+LIB_CLIENT_ID='e73058c4bf7c9cb95007'
+LIB_CLIENT_SECRET='8479e154df17ad2ddc4aa835618171ceb10ded08'
+LIB_CALLBACK_URL='http://endo-lib.octoblu.dev:3000/auth/api/callback'
 
 SERVICE_URI="http://192.168.100.34:3000"
 
@@ -17,26 +17,6 @@ MESHBLU_PROTOCOL="https"
 
 run_mocha(){
   mocha
-}
-
-run_server(){
-  local debug="$1"
-
-  env \
-    DEBUG="$debug" \
-    ENDO_OCTOBLU_OAUTH_URL="$OCTOBLU_OAUTH_URL" \
-    ENDO_GITHUB_GITHUB_CLIENT_ID="$GITHUB_CLIENT_ID" \
-    ENDO_GITHUB_GITHUB_CLIENT_SECRET="$GITHUB_CLIENT_SECRET" \
-    ENDO_GITHUB_GITHUB_CALLBACK_URL="$GITHUB_CALLBACK_URL" \
-    ENDO_GITHUB_SERVICE_URL="$SERVICE_URI" \
-    MESHBLU_SERVER="$MESHBLU_SERVER" \
-    MESHBLU_PORT="$MESHBLU_PORT" \
-    MESHBLU_PROTOCOL="$MESHBLU_PROTOCOL" \
-    MESHBLU_PRIVATE_KEY="$MESHBLU_PRIVATE_KEY" \
-    MESHBLU_UUID="$MESHBLU_UUID" \
-    MESHBLU_TOKEN="$MESHBLU_TOKEN" \
-    NODE_TLS_REJECT_UNAUTHORIZED="0" \
-    npm start
 }
 
 run_yo(){
@@ -54,12 +34,18 @@ run_yo(){
     $args
 }
 
+remove_non_lib_files() {
+  rm command.*
+  rm -rf schemas
+}
+
 main(){
   local debug="$DEBUG"
   local skip_install="$SKIP_INSTALL"
 
   run_yo "$skip_install" \
-  && run_mocha \
-  && run_server "$debug"
+  && remove_non_lib_files \
+  && run_mocha
 }
+
 main $@

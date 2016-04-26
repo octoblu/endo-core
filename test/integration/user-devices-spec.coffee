@@ -5,12 +5,13 @@ request      = require 'request'
 shmock       = require '@octoblu/shmock'
 MockStrategy = require '../mock-strategy'
 Server       = require '../../src/server'
+path         = require 'path'
 
 describe 'Sample Spec', ->
   beforeEach (done) ->
     @meshblu = shmock 0xd00d
 
-    @apiStrategy = new MockStrategy name: 'github'
+    @apiStrategy = new MockStrategy name: 'lib'
     @octobluStrategy = new MockStrategy name: 'octoblu'
 
     serverOptions =
@@ -19,7 +20,7 @@ describe 'Sample Spec', ->
       port: undefined,
       disableLogging: true
       apiStrategy: @apiStrategy
-      deviceType: 'endo-github'
+      deviceType: 'endo-lib'
       octobluStrategy: @octobluStrategy
       serviceUrl: 'http://octoblu.xxx'
       meshbluConfig:
@@ -28,6 +29,8 @@ describe 'Sample Spec', ->
         uuid: 'peter'
         token: 'i-could-eat'
         privateKey: @privateKey
+
+      schemaDir: path.join __dirname, '../data/schemas'
 
     @meshblu
       .get '/v2/whoami'
@@ -172,7 +175,7 @@ describe 'Sample Spec', ->
         @createUserDevice = @meshblu
           .post '/devices'
           .send
-            type: "endo-github"
+            type: "endo-lib"
             imageUrl: "http://this-is-an-image.exe"
             octoblu:
               flow:
