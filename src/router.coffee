@@ -35,6 +35,6 @@ class Router
     app.post '/:credentialsDeviceUuid/user-devices', @userDevicesController.create
 
     app.post '/messages', @messagesController.create
-    app.use (req, res) => res.send '/auth/api'
+    app.use (req, res) => res.redirect '/auth/api'
 
 module.exports = Router
