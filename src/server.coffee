@@ -7,14 +7,13 @@ cookieSession      = require 'cookie-session'
 errorHandler       = require 'errorhandler'
 meshbluHealthcheck = require 'express-meshblu-healthcheck'
 sendError          = require 'express-send-error'
-MeshbluConfig      = require 'meshblu-config'
 MeshbluHTTP        = require 'meshblu-http'
 passport           = require 'passport'
 debug              = require('debug')('endo:server')
-Router             = require './router'
-OctobluStrategy    = require './strategies/octoblu-strategy'
+
+Router                   = require './router'
 CredentialsDeviceService = require './services/credentials-device-service'
-MessagesService = require './services/messages-service'
+MessagesService          = require './services/messages-service'
 
 
 class Server
