@@ -28,7 +28,6 @@ class Router
     app.use meshbluAuth.retrieve()
     app.use meshbluAuth.gatewayRedirect('/auth/octoblu')
 
-    app.get  '/', (req, res) => res.send user: req.user, meshbluAuth: req.meshbluAuth
     app.get  '/auth/api', passport.authenticate('api')
     app.get  '/auth/api/callback', passport.authenticate('api'), @credentialsDeviceController.upsert
 
@@ -36,5 +35,6 @@ class Router
     app.post '/:credentialsDeviceUuid/user-devices', @userDevicesController.create
 
     app.post '/messages', @messagesController.create
+    app.use (req, res) => res.send '/auth/api'
 
 module.exports = Router
