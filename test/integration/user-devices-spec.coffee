@@ -29,8 +29,9 @@ describe 'Sample Spec', ->
         uuid: 'peter'
         token: 'i-could-eat'
         privateKey: @privateKey
-
-      schemaDir: path.join __dirname, '../data/schemas'
+      schemas:
+        hello:   require '../data/schemas/hello-schema.json'
+        namaste: require '../data/schemas/namaste-schema.json'
 
     @meshblu
       .get '/v2/whoami'

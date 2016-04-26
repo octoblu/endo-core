@@ -46,7 +46,9 @@ describe 'Sample Spec', ->
         token: 'i-could-eat'
         privateKey: @privateKey
       port: undefined,
-      schemaDir: path.join __dirname, '../data/schemas'
+      schemas:
+        hello:   require '../data/schemas/hello-schema.json'
+        namaste: require '../data/schemas/namaste-schema.json'
       serviceUrl: "http://the-endo-url"
 
     @server = new Server serverOptions
