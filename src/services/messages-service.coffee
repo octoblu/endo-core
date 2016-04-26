@@ -12,12 +12,11 @@ MESSAGE_DATA_INVALID   = 'Message data does not match schema for jobType'
 MISSING_ROUTE_HEADER   = 'Missing x-meshblu-route header in request'
 
 class MessagesService
-  constructor: ({@messageHandlers, @schemaDir}) ->
-    throw new Error 'messageHandlers are required' unless @messageHandlers
-    @schemaDir ?= path.join __dirname, '../../schemas'
+  constructor: ({@messageHandlers, @schemas}) ->
+    throw new Error 'messageHandlers are required' unless @messageHandlers?
+    throw new Error 'schemas are required' unless @schemas?
 
     @endoMessageSchema = @_getEndoMessageSchemaSync()
-    @schemas = @_getSchemasSync()
     @validator = new Validator
 
   reply: ({auth, route, code, response}, callback) =>
@@ -69,14 +68,6 @@ class MessagesService
   _getEndoMessageSchemaSync: =>
     filepath = path.join __dirname, '../../endo-message-schema.json'
     JSON.parse fs.readFileSync(filepath, 'utf8')
-
-  _getSchemasSync: =>
-    filenames = fs.readdirSync @schemaDir
-    _.tap {}, (schemas) =>
-      _.each filenames, (filename) =>
-        filepath = path.join @schemaDir, filename
-        schemaName = _.camelCase(_.replace filename, /-schema.json$/, '')
-        schemas[schemaName] = JSON.parse fs.readFileSync(filepath, 'utf8')
 
   _isImplemented: (jobType) =>
     _.isFunction @messageHandlers[jobType]
