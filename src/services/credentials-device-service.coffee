@@ -2,6 +2,7 @@ _ = require 'lodash'
 MeshbluHTTP = require 'meshblu-http'
 CredentialsDevice = require '../models/credentials-device'
 credentialsDeviceCreateGenerator = require '../config-generators/credentials-device-create-config-generator'
+Encryption = require 'meshblu-encryption'
 
 class CredentialsDeviceService
   constructor: ({@deviceType, @imageUrl, @meshbluConfig, @serviceUrl}) ->
@@ -31,7 +32,9 @@ class CredentialsDeviceService
 
   _findOrCreate: (resourceOwnerID, callback) =>
     return callback new Error('resourceOwnerID is required') unless resourceOwnerID?
-    @meshblu.search 'endo.resourceOwnerID': resourceOwnerID, {}, (error, devices) =>
+    encryption = Encryption.fromJustGuess @meshbluConfig.privateKey
+    endoKey = encryption.sign(resourceOwnerID).toString 'base64'
+    @meshblu.search 'endo.key': endoKey, {}, (error, devices) =>
       return callback error if error?
       return callback null, _.first devices unless _.isEmpty devices
       record = credentialsDeviceCreateGenerator {resourceOwnerID: resourceOwnerID, serviceUuid: @uuid}
@@ -40,7 +43,7 @@ class CredentialsDeviceService
   _getCredentialsDevice: ({uuid, resourceOwnerName}, callback) =>
     @meshblu.generateAndStoreToken uuid, (error, {token}={}) =>
       return callback error if error?
-      meshbluConfig = _.defaults {uuid, token}, @meshbluConfig      
+      meshbluConfig = _.defaults {uuid, token}, @meshbluConfig
       return callback null, new CredentialsDevice {@deviceType, @imageUrl, meshbluConfig, resourceOwnerName, @serviceUrl}
 
   _userError: (message, code) =>

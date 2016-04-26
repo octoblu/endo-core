@@ -12,7 +12,7 @@ describe 'Sample Spec', ->
   beforeEach (done) ->
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
     encryption = Encryption.fromPem @privateKey
-
+    @resourceOwnerSignature = 'YoyINg0N8gpg9chWKRsFeO6UNP/8VotzMPozcn8ZdfqKYje7Eq7xgjYk5ZAVCLPnpJOr6R0AE2JSz7vZIb6bJQ=='
     decryptClientSecret = (req, res, next) =>
       return next() unless req.body?.$set?['endo.resourceOwnerSecrets']?
       req.body.$set['endo.resourceOwnerSecrets'] = encryption.decryptOptions req.body.$set['endo.resourceOwnerSecrets']
@@ -172,7 +172,7 @@ describe 'Sample Spec', ->
         @meshblu
           .post '/search/devices'
           .set 'Authorization', "Basic #{serviceAuth}"
-          .send 'endo.resourceOwnerID': 'resource owner id'
+          .send 'endo.key': @resourceOwnerSignature
           .reply 200, []
 
         @createCredentialsDevice = @meshblu
@@ -267,7 +267,7 @@ describe 'Sample Spec', ->
         @meshblu
           .post '/search/devices'
           .set 'Authorization', "Basic #{serviceAuth}"
-          .send 'endo.resourceOwnerID': 'resource owner id'
+          .send 'endo.key': @resourceOwnerSignature
           .reply 200, [{uuid: 'cred-uuid', token: 'cred-token'}]
 
         @meshblu
