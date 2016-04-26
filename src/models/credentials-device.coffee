@@ -29,6 +29,7 @@ class CredentialsDevice
         return callback null, userDevice
 
   deleteUserDeviceSubscription: ({userDeviceUuid}, callback) =>
+    return callback @_userError 'Cannot remove the credentials subscription to itself', 403 if userDeviceUuid == @uuid
     subscription =
       emitterUuid: userDeviceUuid
       subscriberUuid: @uuid
@@ -63,7 +64,13 @@ class CredentialsDevice
   _userDevicesFromSubscriptions: (subscriptions) =>
     _(subscriptions)
       .filter type: 'message.received'
+      .reject emitterUuid: @uuid
       .map ({emitterUuid}) => {uuid: emitterUuid}
       .value()
+
+  _userError: (message, code) =>
+    error = new Error message
+    error.code = code if code?
+    return error
 
 module.exports = CredentialsDevice

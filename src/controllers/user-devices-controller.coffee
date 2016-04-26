@@ -1,3 +1,5 @@
+_ = require 'lodash'
+
 class UserDevicesController
   constructor: ({@credentialsDeviceService}) ->
     throw new Error 'credentialsDeviceService is required' unless @credentialsDeviceService?
@@ -27,6 +29,7 @@ class UserDevicesController
   list: (req, res) =>
     req.credentialsDevice.getUserDevices (error, userDevices) =>
       return res.sendError error if error?
+
       res.send userDevices
 
 

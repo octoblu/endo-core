@@ -85,6 +85,7 @@ describe 'Sample Spec', ->
             {emitterUuid: 'first-user-uuid', type: 'message.received'}
             {emitterUuid: 'second-user-uuid',type: 'message.received'}
             {emitterUuid: 'whatever-user-uuid', type: 'message.sent'}
+            {emitterUuid: 'cred_uuid', type: 'message.received'}
           ]
 
         options =
@@ -275,3 +276,38 @@ describe 'Sample Spec', ->
 
       it 'should return nothing', ->
         expect(@body).to.be.empty
+
+  describe 'On DELETE /cred_uuid/user-devices/cred_uuid', ->
+    describe 'when authorized', ->
+      beforeEach (done) ->
+        userAuth = new Buffer('some-uuid:some-token').toString 'base64'
+        serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
+        credentialsDeviceAuth = new Buffer('cred_uuid:cred-token2').toString 'base64'
+
+        @meshblu
+          .get '/v2/whoami'
+          .set 'Authorization', "Basic #{userAuth}"
+          .reply 200, uuid: 'some-uuid', token: 'some-token'
+
+        @meshblu
+          .post '/search/devices'
+          .send uuid: 'cred_uuid', 'endo.authorizedUuid': 'some-uuid'
+          .set 'Authorization', "Basic #{serviceAuth}"
+          .reply 200, uuid: 'cred_uuid', endo: {authorizedUuid: 'some-uuid'}
+
+        @meshblu
+          .post '/devices/cred_uuid/tokens'
+          .set 'Authorization', "Basic #{serviceAuth}"
+          .reply 200, uuid: 'cred_uuid', token: 'cred-token2'
+
+        options =
+          baseUrl: "http://localhost:#{@serverPort}"
+          json: true
+          headers:
+            Authorization: "Bearer #{userAuth}"
+
+        request.delete '/cred_uuid/user-devices/cred_uuid', options, (error, @response, @body) =>
+          done error
+
+      it 'should return a 403', ->
+        expect(@response.statusCode).to.equal 403, JSON.stringify @body
