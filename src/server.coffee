@@ -9,23 +9,24 @@ meshbluHealthcheck = require 'express-meshblu-healthcheck'
 sendError          = require 'express-send-error'
 MeshbluConfig      = require 'meshblu-config'
 MeshbluHTTP        = require 'meshblu-http'
-OctobluStrategy    = require './strategies/octoblu-strategy'
 passport           = require 'passport'
 debug              = require('debug')('endo:server')
 Router             = require './router'
+OctobluStrategy    = require './strategies/octoblu-strategy'
 CredentialsDeviceService = require './services/credentials-device-service'
 MessagesService = require './services/messages-service'
 
 
 class Server
   constructor: (options)->
-    {@apiStrategy, @deviceType, @meshbluConfig, @messageHandlers, @serviceUrl, @schemaDir} = options
+    {@apiStrategy, @deviceType, @meshbluConfig, @messageHandlers, @octobluStrategy, @serviceUrl, @schemaDir} = options
     {@disableLogging, @logFn, @port} = options
 
     throw new Error('apiStrategy is required') unless @apiStrategy?
     throw new Error('deviceType is required') unless @deviceType?
     throw new Error('meshbluConfig is required') unless @meshbluConfig?
     throw new Error('messageHandlers are required') unless @messageHandlers?
+    throw new Error('octobluStrategy is required') unless @octobluStrategy?
     throw new Error('serviceUrl is required') unless @serviceUrl?
 
 
@@ -36,7 +37,7 @@ class Server
     passport.serializeUser   (user, done) => done null, user
     passport.deserializeUser (user, done) => done null, user
 
-    passport.use 'octoblu', new OctobluStrategy process.env
+    passport.use 'octoblu', @octobluStrategy
     passport.use 'api', @apiStrategy
 
     app = express()

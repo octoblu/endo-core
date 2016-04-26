@@ -35,10 +35,9 @@ run_yo(){
 }
 
 remove_generated_files() {
-  rm -rf src
-  rm -rf test
-  rm endo-message-schema.json
+  rm -rf src test endo-message-schema.json
 }
+
 remove_non_lib_files() {
   rm command.*
   rm -rf schemas
