@@ -20,6 +20,7 @@ describe 'Sample Spec', ->
       port: undefined,
       disableLogging: true
       apiStrategy: @apiStrategy
+      apiName: 'github'
       deviceType: 'endo-lib'
       octobluStrategy: @octobluStrategy
       serviceUrl: 'http://octoblu.xxx'
@@ -40,6 +41,7 @@ describe 'Sample Spec', ->
       .reply 200, {
         options:
           imageUrl: "http://this-is-an-image.exe"
+          resourceOwnerName: 'resource owner name'
       }
 
     @server = new Server serverOptions
@@ -71,7 +73,12 @@ describe 'Sample Spec', ->
           .post '/search/devices'
           .send uuid: 'cred_uuid', 'endo.authorizedUuid': 'some-uuid'
           .set 'Authorization', "Basic #{serviceAuth}"
-          .reply 200, uuid: 'cred_uuid', endo: {authorizedUuid: 'some-uuid'}
+          .reply 200, [
+            uuid: 'cred_uuid'
+            endo:
+              authorizedUuid: 'some-uuid'
+              resourceOwnerName: 'resource owner name'
+          ]
 
         @meshblu
           .post '/devices/cred_uuid/tokens'
@@ -167,7 +174,12 @@ describe 'Sample Spec', ->
           .post '/search/devices'
           .send uuid: 'cred_uuid', 'endo.authorizedUuid': 'some-uuid'
           .set 'Authorization', "Basic #{serviceAuth}"
-          .reply 200, uuid: 'cred_uuid', endo: {authorizedUuid: 'some-uuid'}
+          .reply 200, [
+            uuid: 'cred_uuid'
+            endo:
+              authorizedUuid: 'some-uuid'
+              resourceOwnerName: 'resource owner name'
+          ]
 
         @meshblu
           .post '/devices/cred_uuid/tokens'
@@ -178,6 +190,7 @@ describe 'Sample Spec', ->
         @createUserDevice = @meshblu
           .post '/devices'
           .send
+            name: "resource owner name"
             type: "endo-lib"
             imageUrl: "http://this-is-an-image.exe"
             octoblu:
@@ -247,7 +260,12 @@ describe 'Sample Spec', ->
           .post '/search/devices'
           .send uuid: 'cred_uuid', 'endo.authorizedUuid': 'some-uuid'
           .set 'Authorization', "Basic #{serviceAuth}"
-          .reply 200, uuid: 'cred_uuid', endo: {authorizedUuid: 'some-uuid'}
+          .reply 200, [
+            uuid: 'cred_uuid'
+            endo:
+              authorizedUuid: 'some-uuid'
+              resourceOwnerName: 'resource owner name'
+          ]
 
         @meshblu
           .post '/devices/cred_uuid/tokens'
@@ -293,7 +311,12 @@ describe 'Sample Spec', ->
           .post '/search/devices'
           .send uuid: 'cred_uuid', 'endo.authorizedUuid': 'some-uuid'
           .set 'Authorization', "Basic #{serviceAuth}"
-          .reply 200, uuid: 'cred_uuid', endo: {authorizedUuid: 'some-uuid'}
+          .reply 200, [
+            uuid: 'cred_uuid'
+            endo:
+              authorizedUuid: 'some-uuid'
+              resourceOwnerName: 'resource owner name'
+          ]
 
         @meshblu
           .post '/devices/cred_uuid/tokens'

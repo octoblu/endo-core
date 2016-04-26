@@ -153,7 +153,8 @@ describe 'Sample Spec', ->
     describe 'when the credentials device does not exist', ->
       beforeEach (done) ->
         @apiStub.yields null, {
-          resourceOwnerID: 'resource owner id'
+          resourceOwnerID:   'resource owner id'
+          resourceOwnerName: 'resource owner name'
           resourceOwnerSecrets:
             secret:       'resource owner secret'
             refreshToken: 'resource owner refresh token'
@@ -199,7 +200,8 @@ describe 'Sample Spec', ->
           .set 'Authorization', "Basic #{credentialsDeviceAuth}"
           .send
             '$set':
-              'endo.authorizedUuid':            'some-uuid'
+              'endo.authorizedUuid': 'some-uuid'
+              'endo.resourceOwnerName': 'resource owner name'
               'endo.resourceOwnerSecrets':
                 secret:       "resource owner secret"
                 refreshToken: "resource owner refresh token"

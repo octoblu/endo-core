@@ -1,4 +1,5 @@
-module.exports = ({authorizedUuid, credentialsUuid, deviceType, imageUrl}) ->
+module.exports = ({authorizedUuid, credentialsUuid, deviceType, imageUrl, resourceOwnerName}) ->
+  name: resourceOwnerName
   type: deviceType
   imageUrl: imageUrl
   octoblu:

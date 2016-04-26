@@ -13,7 +13,11 @@ class CredentialsDeviceService
     @meshblu.search {uuid: credentialsDeviceUuid, 'endo.authorizedUuid': authorizedUuid}, {}, (error, devices) =>
       return callback(error) if error?
       return callback @_userError('credentials device not found', 403) if _.isEmpty devices
-      return @_getCredentialsDevice {uuid: credentialsDeviceUuid}, callback
+      options =
+        uuid: credentialsDeviceUuid
+        resourceOwnerName: _.first(devices).endo.resourceOwnerName
+
+      return @_getCredentialsDevice options, callback
 
   getEndoByUuid: (uuid, callback) =>
     @meshblu.device uuid, (error, {endo}={}) =>
@@ -33,11 +37,11 @@ class CredentialsDeviceService
       record = credentialsDeviceCreateGenerator {resourceOwnerID: resourceOwnerID, serviceUuid: @uuid}
       @meshblu.register record, callback
 
-  _getCredentialsDevice: ({uuid}, callback) =>
+  _getCredentialsDevice: ({uuid, resourceOwnerName}, callback) =>
     @meshblu.generateAndStoreToken uuid, (error, {token}={}) =>
       return callback error if error?
-      meshbluConfig = _.defaults {uuid, token}, @meshbluConfig
-      return callback null, new CredentialsDevice {@deviceType, @imageUrl, meshbluConfig, @serviceUrl}
+      meshbluConfig = _.defaults {uuid, token}, @meshbluConfig      
+      return callback null, new CredentialsDevice {@deviceType, @imageUrl, meshbluConfig, resourceOwnerName, @serviceUrl}
 
   _userError: (message, code) =>
     error = new Error message
