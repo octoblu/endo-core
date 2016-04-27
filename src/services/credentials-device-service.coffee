@@ -9,9 +9,12 @@ class CredentialsDeviceService
     throw new Error('deviceType is required') unless @deviceType?
     @uuid = @meshbluConfig.uuid
     @meshblu = new MeshbluHTTP @meshbluConfig
+    @encryption = Encryption.fromJustGuess @meshbluConfig.privateKey
 
   authorizedFindByUuid: ({authorizedUuid, credentialsDeviceUuid}, callback) =>
-    @meshblu.search {uuid: credentialsDeviceUuid, 'endo.authorizedUuid': authorizedUuid}, {}, (error, devices) =>
+    authorizedKey = @encryption.sign(authorizedUuid).toString 'base64'
+
+    @meshblu.search {uuid: credentialsDeviceUuid, 'endo.authorizedKey': authorizedKey}, {}, (error, devices) =>
       return callback(error) if error?
       return callback @_userError('credentials device not found', 403) if _.isEmpty devices
       options =
@@ -32,8 +35,8 @@ class CredentialsDeviceService
 
   _findOrCreate: (resourceOwnerID, callback) =>
     return callback new Error('resourceOwnerID is required') unless resourceOwnerID?
-    encryption = Encryption.fromJustGuess @meshbluConfig.privateKey
-    endoKey = encryption.sign(resourceOwnerID).toString 'base64'
+    endoKey = @encryption.sign(resourceOwnerID).toString 'base64'
+
     @meshblu.search 'endo.key': endoKey, {}, (error, devices) =>
       return callback error if error?
       return callback null, _.first devices unless _.isEmpty devices

@@ -200,7 +200,7 @@ describe 'Sample Spec', ->
           .set 'Authorization', "Basic #{credentialsDeviceAuth}"
           .send
             '$set':
-              'endo.authorizedUuid': 'some-uuid'
+              'endo.authorizedKey': 'BCIg29DhgwRg0aWxf7cEeCJeRQi8TP+YgOm7JcWa9G14WeB7BRj14mGCN908vWykv4ixITp72o85BICbG28/6w=='
               'endo.secrets':
                 name:         'resource owner name'
                 id:           'resource owner id'
@@ -283,7 +283,7 @@ describe 'Sample Spec', ->
           .set 'Authorization', "Basic #{credentialsDeviceAuth}"
           .send
             '$set':
-              'endo.authorizedUuid': 'some-uuid'
+              'endo.authorizedKey': 'BCIg29DhgwRg0aWxf7cEeCJeRQi8TP+YgOm7JcWa9G14WeB7BRj14mGCN908vWykv4ixITp72o85BICbG28/6w=='
               'endo.secrets':
                 name:         'resource owner name'
                 id:           'resource owner id'

@@ -10,7 +10,7 @@ path         = require 'path'
 describe 'Sample Spec', ->
   beforeEach (done) ->
     @meshblu = shmock 0xd00d
-
+    @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
     @apiStrategy = new MockStrategy name: 'lib'
     @octobluStrategy = new MockStrategy name: 'octoblu'
 
@@ -71,7 +71,7 @@ describe 'Sample Spec', ->
 
         @meshblu
           .post '/search/devices'
-          .send uuid: 'cred_uuid', 'endo.authorizedUuid': 'some-uuid'
+          .send uuid: 'cred_uuid', 'endo.authorizedKey': "BCIg29DhgwRg0aWxf7cEeCJeRQi8TP+YgOm7JcWa9G14WeB7BRj14mGCN908vWykv4ixITp72o85BICbG28/6w=="
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
             uuid: 'cred_uuid'
@@ -127,7 +127,7 @@ describe 'Sample Spec', ->
 
         @meshblu
           .post '/search/devices'
-          .send uuid: 'cred_uuid', 'endo.authorizedUuid': 'some-uuid'
+          .send uuid: 'cred_uuid', 'endo.authorizedKey': 'BCIg29DhgwRg0aWxf7cEeCJeRQi8TP+YgOm7JcWa9G14WeB7BRj14mGCN908vWykv4ixITp72o85BICbG28/6w=='
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, []
 
@@ -172,7 +172,7 @@ describe 'Sample Spec', ->
 
         @meshblu
           .post '/search/devices'
-          .send uuid: 'cred_uuid', 'endo.authorizedUuid': 'some-uuid'
+          .send uuid: 'cred_uuid', 'endo.authorizedKey': 'BCIg29DhgwRg0aWxf7cEeCJeRQi8TP+YgOm7JcWa9G14WeB7BRj14mGCN908vWykv4ixITp72o85BICbG28/6w=='
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
             uuid: 'cred_uuid'
@@ -258,7 +258,7 @@ describe 'Sample Spec', ->
 
         @meshblu
           .post '/search/devices'
-          .send uuid: 'cred_uuid', 'endo.authorizedUuid': 'some-uuid'
+          .send uuid: 'cred_uuid', 'endo.authorizedKey': 'BCIg29DhgwRg0aWxf7cEeCJeRQi8TP+YgOm7JcWa9G14WeB7BRj14mGCN908vWykv4ixITp72o85BICbG28/6w=='
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
             uuid: 'cred_uuid'
@@ -309,7 +309,7 @@ describe 'Sample Spec', ->
 
         @meshblu
           .post '/search/devices'
-          .send uuid: 'cred_uuid', 'endo.authorizedUuid': 'some-uuid'
+          .send uuid: 'cred_uuid', 'endo.authorizedKey': 'BCIg29DhgwRg0aWxf7cEeCJeRQi8TP+YgOm7JcWa9G14WeB7BRj14mGCN908vWykv4ixITp72o85BICbG28/6w=='
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
             uuid: 'cred_uuid'

@@ -47,12 +47,11 @@ class CredentialsDevice
   getUuid: => @uuid
 
   update: ({authorizedUuid, name, id, credentials}, callback) =>
-    encryption = Encryption.fromJustGuess @privateKey
-
-    secrets = encryption.encryptOptions {name, id, credentials}
-
+    encryption     = Encryption.fromJustGuess @privateKey
+    authorizedKey  = encryption.sign(authorizedUuid).toString 'base64'
+    secrets        = encryption.encryptOptions {name, id, credentials}    
     update = credentialsDeviceUpdateGenerator({
-      authorizedUuid: authorizedUuid
+      authorizedKey: authorizedKey
       serviceUrl: @serviceUrl,
       secrets: secrets
     })

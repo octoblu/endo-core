@@ -1,6 +1,6 @@
-module.exports = ({authorizedUuid, secrets, serviceUrl}) ->
+module.exports = ({authorizedKey, secrets, serviceUrl}) ->
   $set:
-    'endo.authorizedUuid': authorizedUuid
+    'endo.authorizedKey': authorizedKey
     'endo.secrets':        secrets
     'meshblu.forwarders.message.received': [{
       type: 'webhook'
