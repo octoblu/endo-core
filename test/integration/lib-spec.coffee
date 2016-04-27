@@ -1,4 +1,4 @@
-_ = require 'lodash'
+_            = require 'lodash'
 fs           = require 'fs'
 http         = require 'http'
 request      = require 'request'
@@ -14,8 +14,8 @@ describe 'Sample Spec', ->
     encryption = Encryption.fromPem @privateKey
     @resourceOwnerSignature = 'YoyINg0N8gpg9chWKRsFeO6UNP/8VotzMPozcn8ZdfqKYje7Eq7xgjYk5ZAVCLPnpJOr6R0AE2JSz7vZIb6bJQ=='
     decryptClientSecret = (req, res, next) =>
-      return next() unless req.body?.$set?['endo.resourceOwnerSecrets']?
-      req.body.$set['endo.resourceOwnerSecrets'] = encryption.decryptOptions req.body.$set['endo.resourceOwnerSecrets']
+      return next() unless req.body?.$set?['endo.secrets']?
+      req.body.$set['endo.secrets'] = encryption.decryptOptions req.body.$set['endo.secrets']
       next()
 
     @meshblu = shmock 0xd00d, [decryptClientSecret]
@@ -153,9 +153,9 @@ describe 'Sample Spec', ->
     describe 'when the credentials device does not exist', ->
       beforeEach (done) ->
         @apiStub.yields null, {
-          resourceOwnerID:   'resource owner id'
-          resourceOwnerName: 'resource owner name'
-          resourceOwnerSecrets:
+          id:   'resource owner id'
+          name: 'resource owner name'
+          credentials:
             secret:       'resource owner secret'
             refreshToken: 'resource owner refresh token'
         }
@@ -180,7 +180,7 @@ describe 'Sample Spec', ->
           .set 'Authorization', "Basic #{serviceAuth}"
           .send
             endo:
-              resourceOwnerID: 'resource owner id'
+              key: 'YoyINg0N8gpg9chWKRsFeO6UNP/8VotzMPozcn8ZdfqKYje7Eq7xgjYk5ZAVCLPnpJOr6R0AE2JSz7vZIb6bJQ=='
             meshblu:
               version: '2.0.0'
               whitelists:
@@ -201,10 +201,12 @@ describe 'Sample Spec', ->
           .send
             '$set':
               'endo.authorizedUuid': 'some-uuid'
-              'endo.resourceOwnerName': 'resource owner name'
-              'endo.resourceOwnerSecrets':
-                secret:       "resource owner secret"
-                refreshToken: "resource owner refresh token"
+              'endo.secrets':
+                name:         'resource owner name'
+                id:           'resource owner id'
+                credentials:
+                  secret:       'resource owner secret'
+                  refreshToken: 'resource owner refresh token'
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
                 url: 'http://the-endo-url/messages'
@@ -253,8 +255,9 @@ describe 'Sample Spec', ->
         credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @apiStub.yields null, {
-          resourceOwnerID: 'resource owner id'
-          resourceOwnerSecrets:
+          id:   'resource owner id'
+          name: 'resource owner name'
+          credentials:
             secret:       'resource owner secret'
             refreshToken: 'resource owner refresh token'
         }
@@ -281,9 +284,12 @@ describe 'Sample Spec', ->
           .send
             '$set':
               'endo.authorizedUuid': 'some-uuid'
-              'endo.resourceOwnerSecrets':
-                secret:       'resource owner secret'
-                refreshToken: 'resource owner refresh token'
+              'endo.secrets':
+                name:         'resource owner name'
+                id:           'resource owner id'
+                credentials:
+                  secret:       'resource owner secret'
+                  refreshToken: 'resource owner refresh token'
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
                 url: 'http://the-endo-url/messages'

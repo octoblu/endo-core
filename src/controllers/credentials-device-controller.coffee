@@ -8,13 +8,13 @@ class CredentialsDeviceController
     throw new Error 'userDeviceManagerUrl is required' unless @userDeviceManagerUrl?
 
   upsert: (req, res) =>
-    {resourceOwnerID, resourceOwnerName, resourceOwnerSecrets} = req.user
+    {id, name, credentials} = req.user
     authorizedUuid = req.meshbluAuth.uuid
 
-    @credentialsDeviceService.findOrCreate resourceOwnerID, (error, credentialsDevice) =>
+    @credentialsDeviceService.findOrCreate id, (error, credentialsDevice) =>
       return res.sendError error if error?
 
-      credentialsDevice.update {authorizedUuid, resourceOwnerName, resourceOwnerSecrets}, (error) =>
+      credentialsDevice.update {authorizedUuid, id, name, credentials}, (error) =>
         return res.sendError error if error?
 
         serviceUrl = url.parse @serviceUrl

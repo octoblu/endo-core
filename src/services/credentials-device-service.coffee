@@ -37,7 +37,7 @@ class CredentialsDeviceService
     @meshblu.search 'endo.key': endoKey, {}, (error, devices) =>
       return callback error if error?
       return callback null, _.first devices unless _.isEmpty devices
-      record = credentialsDeviceCreateGenerator {resourceOwnerID: resourceOwnerID, serviceUuid: @uuid}
+      record = credentialsDeviceCreateGenerator {endoKey: endoKey, serviceUuid: @uuid}
       @meshblu.register record, callback
 
   _getCredentialsDevice: ({uuid, resourceOwnerName}, callback) =>
