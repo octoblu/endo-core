@@ -204,6 +204,7 @@ describe 'Sample Spec', ->
               'endo.secrets':
                 name:         'resource owner name'
                 id:           'resource owner id'
+                credentialsDeviceUuid: 'cred-uuid'
                 credentials:
                   secret:       'resource owner secret'
                   refreshToken: 'resource owner refresh token'
@@ -287,6 +288,7 @@ describe 'Sample Spec', ->
               'endo.secrets':
                 name:         'resource owner name'
                 id:           'resource owner id'
+                credentialsDeviceUuid: 'cred-uuid'
                 credentials:
                   secret:       'resource owner secret'
                   refreshToken: 'resource owner refresh token'

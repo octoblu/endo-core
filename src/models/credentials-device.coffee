@@ -49,11 +49,16 @@ class CredentialsDevice
   update: ({authorizedUuid, name, id, credentials}, callback) =>
     encryption     = Encryption.fromJustGuess @privateKey
     authorizedKey  = encryption.sign(authorizedUuid).toString 'base64'
-    secrets        = encryption.encryptOptions {name, id, credentials}    
+    secrets =
+      credentialsDeviceUuid: @uuid
+      name: name
+      id: id
+      credentials: credentials
+
     update = credentialsDeviceUpdateGenerator({
       authorizedKey: authorizedKey
       serviceUrl: @serviceUrl,
-      secrets: secrets
+      secrets: encryption.encryptOptions secrets
     })
 
     @meshblu.updateDangerously @uuid, update, (error) =>
