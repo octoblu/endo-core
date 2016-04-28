@@ -16,7 +16,7 @@ class CredentialsDeviceService
 
     @meshblu.search {uuid: credentialsDeviceUuid, 'endo.authorizedKey': authorizedKey}, {}, (error, devices) =>
       return callback(error) if error?
-      return callback @_userError('credentials device not found', 403) if _.isEmpty devices
+      return callback @_userError('credentials device not found', 404) if _.isEmpty devices
       options =
         uuid: credentialsDeviceUuid
         resourceOwnerName: _.first(devices).endo.resourceOwnerName

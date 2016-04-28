@@ -155,8 +155,8 @@ describe 'Sample Spec', ->
         request.get '/cred_uuid/user-devices', options, (error, @response, @body) =>
           done error
 
-      it 'should return a 403', ->
-        expect(@response.statusCode).to.equal 403
+      it 'should return a 404', ->
+        expect(@response.statusCode).to.equal 404
 
   describe 'On POST /cred_uuid/user-devices', ->
     describe 'when authorized', ->
