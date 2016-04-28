@@ -1,7 +1,5 @@
 
-module.exports = ({endoKey, serviceUuid}) ->
-  endo:
-    key: endoKey
+module.exports = ({serviceUuid}) ->
   meshblu:
     version: '2.0.0'
     whitelists:

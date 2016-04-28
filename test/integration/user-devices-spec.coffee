@@ -7,7 +7,7 @@ MockStrategy = require '../mock-strategy'
 Server       = require '../../src/server'
 path         = require 'path'
 
-describe 'Sample Spec', ->
+describe 'User Devices Spec', ->
   beforeEach (done) ->
     @meshblu = shmock 0xd00d
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
@@ -176,16 +176,18 @@ describe 'Sample Spec', ->
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
             uuid: 'cred_uuid'
+            endoSignature: 'some-signature'
             endo:
               authorizedKey: 'some-uuid'
-              resourceOwnerName: 'resource owner name'
+              credentialsDeviceUuid: 'cred_uuid'
+              secrets:
+                name: 'resource owner name'
           ]
 
         @meshblu
           .post '/devices/cred_uuid/tokens'
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, uuid: 'cred_uuid', token: 'cred-token2'
-
 
         @createUserDevice = @meshblu
           .post '/devices'

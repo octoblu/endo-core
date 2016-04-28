@@ -35,12 +35,13 @@ class CredentialsDeviceService
 
   _findOrCreate: (resourceOwnerID, callback) =>
     return callback new Error('resourceOwnerID is required') unless resourceOwnerID?
-    endoKey = @encryption.sign(resourceOwnerID)
+    authorizedKey = @encryption.sign(resourceOwnerID)
 
-    @meshblu.search 'endo.key': endoKey, {}, (error, devices) =>
+    @meshblu.search 'endo.authorizedKey': authorizedKey, {}, (error, devices) =>
       return callback error if error?
+      devices = _.filter devices, @_isSignedCorrectly
       return callback null, _.first devices unless _.isEmpty devices
-      record = credentialsDeviceCreateGenerator {endoKey: endoKey, serviceUuid: @uuid}
+      record = credentialsDeviceCreateGenerator {serviceUuid: @uuid}
       @meshblu.register record, callback
 
   _getCredentialsDevice: ({uuid, resourceOwnerName}, callback) =>
@@ -48,6 +49,18 @@ class CredentialsDeviceService
       return callback error if error?
       meshbluConfig = _.defaults {uuid, token}, @meshbluConfig
       return callback null, new CredentialsDevice {@deviceType, @imageUrl, meshbluConfig, resourceOwnerName, @serviceUrl}
+
+  _isSignedCorrectly: ({endo, endoSignature}={}) =>
+    return false unless endo?.secrets?
+    endo = _.cloneDeep endo
+
+    try
+      endo.secrets = @encryption.decrypt endo.secrets
+    catch error
+      console.error error.stack
+      return false
+
+    return @encryption.verify endo, endoSignature
 
   _userError: (message, code) =>
     error = new Error message
