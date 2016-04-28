@@ -50,8 +50,9 @@ class CredentialsDeviceService
       meshbluConfig = _.defaults {uuid, token}, @meshbluConfig
       return callback null, new CredentialsDevice {@deviceType, @imageUrl, meshbluConfig, resourceOwnerName, @serviceUrl}
 
-  _isSignedCorrectly: ({endo, endoSignature}={}) =>
+  _isSignedCorrectly: ({endo, endoSignature, uuid}={}) =>
     return false unless endo?.secrets?
+    return false unless endo.credentialsDeviceUuid == uuid
     endo = _.cloneDeep endo
 
     try
