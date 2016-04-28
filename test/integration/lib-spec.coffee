@@ -208,6 +208,7 @@ describe 'Sample Spec', ->
                 credentials:
                   secret:       'resource owner secret'
                   refreshToken: 'resource owner refresh token'
+              'endo.secretsSignature': 'jaSuWUjeNFXeabgZd2VYNS6Kew94UeOdaZD68AHZ0nMqr42mqZTOPe5CHOR0DCxwB/ff1Z056xvhK1aiDjKpAQ=='
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
                 url: 'http://the-endo-url/messages'
@@ -292,6 +293,7 @@ describe 'Sample Spec', ->
                 credentials:
                   secret:       'resource owner secret'
                   refreshToken: 'resource owner refresh token'
+              'endo.secretsSignature': 'jaSuWUjeNFXeabgZd2VYNS6Kew94UeOdaZD68AHZ0nMqr42mqZTOPe5CHOR0DCxwB/ff1Z056xvhK1aiDjKpAQ=='
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
                 url: 'http://the-endo-url/messages'

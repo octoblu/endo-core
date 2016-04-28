@@ -59,6 +59,7 @@ class CredentialsDevice
       authorizedKey: authorizedKey
       serviceUrl: @serviceUrl,
       secrets: encryption.encryptOptions secrets
+      secretsSignature: encryption.sign(JSON.stringify(secrets)).toString('base64')
     })
 
     @meshblu.updateDangerously @uuid, update, (error) =>
