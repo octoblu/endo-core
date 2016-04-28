@@ -11,7 +11,9 @@ class CredentialsDevice
   constructor: ({@deviceType, @imageUrl, @resourceOwnerName, @serviceUrl, meshbluConfig}) ->
     throw new Error('deviceType is required') unless @deviceType?
     {@uuid, @privateKey} = meshbluConfig
-    @meshblu = new MeshbluHTTP meshbluConfig
+
+    @encryption = Encryption.fromJustGuess @privateKey
+    @meshblu    = new MeshbluHTTP meshbluConfig
 
   createUserDevice: ({authorizedUuid}, callback) =>
     userDeviceConfig = userDeviceConfigGenerator
@@ -47,27 +49,34 @@ class CredentialsDevice
   getUuid: => @uuid
 
   update: ({authorizedUuid, name, id, credentials}, callback) =>
-    encryption     = Encryption.fromJustGuess @privateKey
-    authorizedKey  = encryption.sign(authorizedUuid).toString 'base64'
-    secrets =
-      credentialsDeviceUuid: @uuid
-      name: name
-      id: id
-      credentials: credentials
+    credentialsDeviceUuid = @uuid
 
-    update = credentialsDeviceUpdateGenerator({
-      authorizedKey: authorizedKey
-      serviceUrl: @serviceUrl,
-      secrets: encryption.encryptOptions secrets
-      secretsSignature: encryption.sign(JSON.stringify(secrets)).toString('base64')
-    })
+    {endo, endoSignature} = @_getSignedUpdate {authorizedUuid, id, name, credentials, credentialsDeviceUuid}
+    endo.secrets = @encryption.encrypt endo.secrets
 
+    update = credentialsDeviceUpdateGenerator {endo, endoSignature, @serviceUrl}
     @meshblu.updateDangerously @uuid, update, (error) =>
       return callback error if error?
-      subscription = {subscriberUuid: @uuid, emitterUuid: @uuid, type: 'message.received'}
-      @meshblu.createSubscription subscription, (error) =>
-        return callback error if error?
-        return callback()
+      @_subscribeToOwnMessagesReceived callback
+
+  _getSignedUpdate: ({authorizedUuid, id, name, credentials, credentialsDeviceUuid}) =>
+    endo = {
+      authorizedKey: @encryption.sign(authorizedUuid).toString 'base64'
+      credentialsDeviceUuid: @uuid
+      version: '1.0.0'
+      secrets:
+        id: id
+        name: name
+        credentials: credentials
+    }
+    endoSignature = @encryption.sign endo
+    return {endo, endoSignature}
+
+  _subscribeToOwnMessagesReceived: (callback) =>
+    subscription = {subscriberUuid: @uuid, emitterUuid: @uuid, type: 'message.received'}
+    @meshblu.createSubscription subscription, (error, ignored) =>
+      return callback error if error?
+      return callback()
 
   _userDevicesFromSubscriptions: (subscriptions) =>
     _(subscriptions)

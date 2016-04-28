@@ -71,7 +71,7 @@ describe 'messages', ->
           .reply 200,
             uuid: 'cred-uuid'
             endo:
-              secrets: @encryption.encryptOptions
+              secrets: @encryption.encrypt
                 credentials:
                   secret: 'decryptedClientSecret'
 
@@ -81,7 +81,7 @@ describe 'messages', ->
           .reply 200,
             uuid: 'cred-uuid'
             endo:
-              secrets: @encryption.encryptOptions
+              secrets: @encryption.encrypt
                 credentials:
                   secret: 'decryptedClientSecret'
 
@@ -219,6 +219,55 @@ describe 'messages', ->
           }
 
       describe 'when called with a valid message, but theres an error', ->
+        beforeEach (done) ->
+          @messageHandlers.hello.yields new Error 'Something very bad happened'
+          @responseHandler = @meshblu
+            .post '/messages'
+            .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
+            .set 'x-meshblu-as', 'user-device'
+            .send
+              devices: ['flow-uuid']
+              metadata:
+                code: 500
+                error:
+                  message: 'Something very bad happened'
+            .reply 201
+
+          options =
+            baseUrl: "http://localhost:#{@serverPort}"
+            headers:
+              'x-meshblu-route': JSON.stringify [
+                {"from": "flow-uuid", "to": "user-device", "type": "message.sent"}
+                {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
+              ]
+            json:
+              metadata:
+                jobType: 'hello'
+              data:
+                greeting: 'hola'
+            auth:
+              username: 'cred-uuid'
+              password: 'cred-token'
+
+          request.post '/messages', options, (error, @response, @body) =>
+            done error
+
+        it 'should call the hello messageHandler with the message and auth', ->
+          expect(@messageHandlers.hello).to.have.been.calledWith sinon.match {
+            data:
+              greeting: 'hola'
+            secrets:
+              credentials:
+                secret: 'decryptedClientSecret'
+          }
+
+        it 'should return a 500', ->
+          expect(@response.statusCode).to.equal 500, JSON.stringify @body
+
+        it 'should respond to the message with the error via meshblu', ->
+          @responseHandler.done()
+
+      describe 'when called with a valid message, but theres the endo is invalid', ->
         beforeEach (done) ->
           @messageHandlers.hello.yields new Error 'Something very bad happened'
           @responseHandler = @meshblu

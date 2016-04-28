@@ -12,7 +12,7 @@ class CredentialsDeviceService
     @encryption = Encryption.fromJustGuess @meshbluConfig.privateKey
 
   authorizedFindByUuid: ({authorizedUuid, credentialsDeviceUuid}, callback) =>
-    authorizedKey = @encryption.sign(authorizedUuid).toString 'base64'
+    authorizedKey = @encryption.sign(authorizedUuid)
 
     @meshblu.search {uuid: credentialsDeviceUuid, 'endo.authorizedKey': authorizedKey}, {}, (error, devices) =>
       return callback(error) if error?
@@ -35,7 +35,7 @@ class CredentialsDeviceService
 
   _findOrCreate: (resourceOwnerID, callback) =>
     return callback new Error('resourceOwnerID is required') unless resourceOwnerID?
-    endoKey = @encryption.sign(resourceOwnerID).toString 'base64'
+    endoKey = @encryption.sign(resourceOwnerID)
 
     @meshblu.search 'endo.key': endoKey, {}, (error, devices) =>
       return callback error if error?

@@ -12,10 +12,10 @@ describe 'Sample Spec', ->
   beforeEach (done) ->
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
     encryption = Encryption.fromPem @privateKey
-    @resourceOwnerSignature = 'YoyINg0N8gpg9chWKRsFeO6UNP/8VotzMPozcn8ZdfqKYje7Eq7xgjYk5ZAVCLPnpJOr6R0AE2JSz7vZIb6bJQ=='
+    @resourceOwnerSignature = 'Ula5075pW5J6pbIzhez3Be78UsyVApbXMXEPXmMwBAtVdtxdHoXNx+fI9nLV/pHZzlOI0RjhJmO+qQ3zAnKviw=='
     decryptClientSecret = (req, res, next) =>
-      return next() unless req.body?.$set?['endo.secrets']?
-      req.body.$set['endo.secrets'] = encryption.decryptOptions req.body.$set['endo.secrets']
+      return next() unless req.body?.$set?['endo']?['secrets']?
+      req.body.$set['endo']['secrets'] = encryption.decrypt req.body.$set['endo']['secrets']
       next()
 
     @meshblu = shmock 0xd00d, [decryptClientSecret]
@@ -33,7 +33,7 @@ describe 'Sample Spec', ->
       }
 
     serverOptions =
-      logFn: ->
+      logFn: -> console.log arguments...
       messageHandlers: {}
       deviceType: 'endo-app'
       apiStrategy: @apiStrategy
@@ -180,7 +180,7 @@ describe 'Sample Spec', ->
           .set 'Authorization', "Basic #{serviceAuth}"
           .send
             endo:
-              key: 'YoyINg0N8gpg9chWKRsFeO6UNP/8VotzMPozcn8ZdfqKYje7Eq7xgjYk5ZAVCLPnpJOr6R0AE2JSz7vZIb6bJQ=='
+              key: 'Ula5075pW5J6pbIzhez3Be78UsyVApbXMXEPXmMwBAtVdtxdHoXNx+fI9nLV/pHZzlOI0RjhJmO+qQ3zAnKviw=='
             meshblu:
               version: '2.0.0'
               whitelists:
@@ -199,16 +199,19 @@ describe 'Sample Spec', ->
           .put '/v2/devices/cred-uuid'
           .set 'Authorization', "Basic #{credentialsDeviceAuth}"
           .send
-            '$set':
-              'endo.authorizedKey': 'BCIg29DhgwRg0aWxf7cEeCJeRQi8TP+YgOm7JcWa9G14WeB7BRj14mGCN908vWykv4ixITp72o85BICbG28/6w=='
-              'endo.secrets':
-                name:         'resource owner name'
-                id:           'resource owner id'
+            $set:
+              endo:
+                authorizedKey: 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
                 credentialsDeviceUuid: 'cred-uuid'
-                credentials:
-                  secret:       'resource owner secret'
-                  refreshToken: 'resource owner refresh token'
-              'endo.secretsSignature': 'jaSuWUjeNFXeabgZd2VYNS6Kew94UeOdaZD68AHZ0nMqr42mqZTOPe5CHOR0DCxwB/ff1Z056xvhK1aiDjKpAQ=='
+                version: '1.0.0'
+                secrets:
+                  name:         'resource owner name'
+                  id:           'resource owner id'
+                  credentials:
+                    secret:       'resource owner secret'
+                    refreshToken: 'resource owner refresh token'
+              endoSignature: 'YofeJ+pJHyVnVB/rhHBQBp1xp8/Uwhezkb6Wgc1Bw03wJinUp+w9wqqogwzgYmy5b5t334Bs1a2+7VTBgKyozQ=='
+
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
                 url: 'http://the-endo-url/messages'
@@ -284,16 +287,18 @@ describe 'Sample Spec', ->
           .put '/v2/devices/cred-uuid'
           .set 'Authorization', "Basic #{credentialsDeviceAuth}"
           .send
-            '$set':
-              'endo.authorizedKey': 'BCIg29DhgwRg0aWxf7cEeCJeRQi8TP+YgOm7JcWa9G14WeB7BRj14mGCN908vWykv4ixITp72o85BICbG28/6w=='
-              'endo.secrets':
-                name:         'resource owner name'
-                id:           'resource owner id'
+            $set:
+              endo:
+                authorizedKey: 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
                 credentialsDeviceUuid: 'cred-uuid'
-                credentials:
-                  secret:       'resource owner secret'
-                  refreshToken: 'resource owner refresh token'
-              'endo.secretsSignature': 'jaSuWUjeNFXeabgZd2VYNS6Kew94UeOdaZD68AHZ0nMqr42mqZTOPe5CHOR0DCxwB/ff1Z056xvhK1aiDjKpAQ=='
+                version: '1.0.0'
+                secrets:
+                  name:         'resource owner name'
+                  id:           'resource owner id'
+                  credentials:
+                    secret:       'resource owner secret'
+                    refreshToken: 'resource owner refresh token'
+              endoSignature: 'YofeJ+pJHyVnVB/rhHBQBp1xp8/Uwhezkb6Wgc1Bw03wJinUp+w9wqqogwzgYmy5b5t334Bs1a2+7VTBgKyozQ=='
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
                 url: 'http://the-endo-url/messages'

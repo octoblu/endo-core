@@ -60,7 +60,7 @@ class MessagesService
     return callback @_userError(JOB_TYPE_UNIMPLEMENTED, 501) unless @_isImplemented    jobType
 
     encryption = Encryption.fromJustGuess auth.privateKey
-    secrets = encryption.decryptOptions endo.secrets
+    secrets = encryption.decrypt endo.secrets
 
     @messageHandlers[jobType] {data, secrets}, callback
 

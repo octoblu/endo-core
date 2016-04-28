@@ -71,12 +71,12 @@ describe 'Sample Spec', ->
 
         @meshblu
           .post '/search/devices'
-          .send uuid: 'cred_uuid', 'endo.authorizedKey': "BCIg29DhgwRg0aWxf7cEeCJeRQi8TP+YgOm7JcWa9G14WeB7BRj14mGCN908vWykv4ixITp72o85BICbG28/6w=="
+          .send uuid: 'cred_uuid', 'endo.authorizedKey': "pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=="
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
             uuid: 'cred_uuid'
             endo:
-              authorizedUuid: 'some-uuid'
+              authorizedKey: 'some-uuid'
               resourceOwnerName: 'resource owner name'
           ]
 
@@ -127,7 +127,7 @@ describe 'Sample Spec', ->
 
         @meshblu
           .post '/search/devices'
-          .send uuid: 'cred_uuid', 'endo.authorizedKey': 'BCIg29DhgwRg0aWxf7cEeCJeRQi8TP+YgOm7JcWa9G14WeB7BRj14mGCN908vWykv4ixITp72o85BICbG28/6w=='
+          .send uuid: 'cred_uuid', 'endo.authorizedKey': 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, []
 
@@ -172,12 +172,12 @@ describe 'Sample Spec', ->
 
         @meshblu
           .post '/search/devices'
-          .send uuid: 'cred_uuid', 'endo.authorizedKey': 'BCIg29DhgwRg0aWxf7cEeCJeRQi8TP+YgOm7JcWa9G14WeB7BRj14mGCN908vWykv4ixITp72o85BICbG28/6w=='
+          .send uuid: 'cred_uuid', 'endo.authorizedKey': 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
             uuid: 'cred_uuid'
             endo:
-              authorizedUuid: 'some-uuid'
+              authorizedKey: 'some-uuid'
               resourceOwnerName: 'resource owner name'
           ]
 
@@ -258,12 +258,12 @@ describe 'Sample Spec', ->
 
         @meshblu
           .post '/search/devices'
-          .send uuid: 'cred_uuid', 'endo.authorizedKey': 'BCIg29DhgwRg0aWxf7cEeCJeRQi8TP+YgOm7JcWa9G14WeB7BRj14mGCN908vWykv4ixITp72o85BICbG28/6w=='
+          .send uuid: 'cred_uuid', 'endo.authorizedKey': 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
             uuid: 'cred_uuid'
             endo:
-              authorizedUuid: 'some-uuid'
+              authorizedKey: 'some-uuid'
               resourceOwnerName: 'resource owner name'
           ]
 
@@ -309,12 +309,12 @@ describe 'Sample Spec', ->
 
         @meshblu
           .post '/search/devices'
-          .send uuid: 'cred_uuid', 'endo.authorizedKey': 'BCIg29DhgwRg0aWxf7cEeCJeRQi8TP+YgOm7JcWa9G14WeB7BRj14mGCN908vWykv4ixITp72o85BICbG28/6w=='
+          .send uuid: 'cred_uuid', 'endo.authorizedKey': 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
             uuid: 'cred_uuid'
             endo:
-              authorizedUuid: 'some-uuid'
+              authorizedKey: 'some-uuid'
               resourceOwnerName: 'resource owner name'
           ]
 

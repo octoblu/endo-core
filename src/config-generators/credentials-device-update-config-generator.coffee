@@ -1,8 +1,7 @@
-module.exports = ({authorizedKey, secrets, secretsSignature, serviceUrl}) ->
+module.exports = ({endo, endoSignature, serviceUrl}) ->
   $set:
-    'endo.authorizedKey': authorizedKey
-    'endo.secrets':        secrets
-    'endo.secretsSignature': secretsSignature
+    'endo':               endo
+    'endoSignature':      endoSignature
     'meshblu.forwarders.message.received': [{
       type: 'webhook'
       url:  "#{serviceUrl}/messages",
