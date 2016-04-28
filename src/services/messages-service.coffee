@@ -60,10 +60,9 @@ class MessagesService
     return callback @_userError(JOB_TYPE_UNIMPLEMENTED, 501) unless @_isImplemented    jobType
 
     encryption = Encryption.fromJustGuess auth.privateKey
-    decryptedClientSecrets = encryption.decryptOptions endo.resourceOwnerSecrets
+    secrets = encryption.decryptOptions endo.secrets
 
-    endo = _.defaults {resourceOwnerSecrets: decryptedClientSecrets}, endo
-    @messageHandlers[jobType] {auth, data, endo}, callback
+    @messageHandlers[jobType] {data, secrets}, callback
 
   _getEndoMessageSchemaSync: =>
     filepath = path.join __dirname, '../../endo-message-schema.json'

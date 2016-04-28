@@ -71,7 +71,9 @@ describe 'messages', ->
           .reply 200,
             uuid: 'cred-uuid'
             endo:
-              resourceOwnerSecrets: @encryption.encryptOptions secret: 'decryptedClientSecret'
+              secrets: @encryption.encryptOptions
+                credentials:
+                  secret: 'decryptedClientSecret'
 
         @meshblu
           .get '/v2/devices/cred-uuid'
@@ -79,7 +81,9 @@ describe 'messages', ->
           .reply 200,
             uuid: 'cred-uuid'
             endo:
-              resourceOwnerSecrets: @encryption.encryptOptions secret: 'decryptedClientSecret'
+              secrets: @encryption.encryptOptions
+                credentials:
+                  secret: 'decryptedClientSecret'
 
       describe 'when called with a message without metadata', ->
         beforeEach (done) ->
@@ -207,13 +211,10 @@ describe 'messages', ->
 
         it 'should call the hello messageHandler with the message and auth', ->
           expect(@messageHandlers.hello).to.have.been.calledWith sinon.match {
-            auth:
-              uuid: 'cred-uuid'
-              token: 'cred-token'
             data:
               greeting: 'hola'
-            endo:
-              resourceOwnerSecrets:
+            secrets:
+              credentials:
                 secret: 'decryptedClientSecret'
           }
 
@@ -253,13 +254,10 @@ describe 'messages', ->
 
         it 'should call the hello messageHandler with the message and auth', ->
           expect(@messageHandlers.hello).to.have.been.calledWith sinon.match {
-            auth:
-              uuid: 'cred-uuid'
-              token: 'cred-token'
             data:
               greeting: 'hola'
-            endo:
-              resourceOwnerSecrets:
+            secrets:
+              credentials:
                 secret: 'decryptedClientSecret'
           }
 
