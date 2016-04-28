@@ -6,11 +6,16 @@ shmock       = require '@octoblu/shmock'
 MockStrategy = require '../mock-strategy'
 Server       = require '../../src/server'
 path         = require 'path'
+Encryption   = require 'meshblu-encryption'
 
 describe 'User Devices Spec', ->
   beforeEach (done) ->
     @meshblu = shmock 0xd00d
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
+
+    encryption = Encryption.fromPem @privateKey
+    @encryptedSecrets = encryption.encrypt 'this is secret'
+
     @apiStrategy = new MockStrategy name: 'lib'
     @octobluStrategy = new MockStrategy name: 'octoblu'
 
@@ -57,12 +62,12 @@ describe 'User Devices Spec', ->
   afterEach (done) ->
     @meshblu.close done
 
-  describe 'On GET /cred_uuid/user-devices', ->
+  describe 'On GET /cred-uuid/user-devices', ->
     describe 'when authorized', ->
       beforeEach (done) ->
         userAuth = new Buffer('some-uuid:some-token').toString 'base64'
         serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
-        credentialsDeviceAuth = new Buffer('cred_uuid:cred-token2').toString 'base64'
+        credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @meshblu
           .get '/v2/whoami'
@@ -71,28 +76,30 @@ describe 'User Devices Spec', ->
 
         @meshblu
           .post '/search/devices'
-          .send uuid: 'cred_uuid', 'endo.authorizedKey': "pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=="
+          .send uuid: 'cred-uuid', 'endo.authorizedKey': "pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=="
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
-            uuid: 'cred_uuid'
+            uuid: 'cred-uuid'
+            endoSignature: 'Mj7Tm10Ml/Sg5YTSOlqgsWZbkg3ELZg0ivY0mkRdgSz5tB0IXFJR2cYIBq0PnV3ke6h4HxNtK6HCseXVB7khMw=='
             endo:
               authorizedKey: 'some-uuid'
-              resourceOwnerName: 'resource owner name'
+              credentialsDeviceUuid: 'cred-uuid'
+              secrets: @encryptedSecrets
           ]
 
         @meshblu
-          .post '/devices/cred_uuid/tokens'
+          .post '/devices/cred-uuid/tokens'
           .set 'Authorization', "Basic #{serviceAuth}"
-          .reply 200, uuid: 'cred_uuid', token: 'cred-token2'
+          .reply 200, uuid: 'cred-uuid', token: 'cred-token2'
 
         @meshblu
-          .get '/v2/devices/cred_uuid/subscriptions'
+          .get '/v2/devices/cred-uuid/subscriptions'
           .set 'Authorization', "Basic #{credentialsDeviceAuth}"
           .reply 200, [
             {emitterUuid: 'first-user-uuid', type: 'message.received'}
             {emitterUuid: 'second-user-uuid',type: 'message.received'}
             {emitterUuid: 'whatever-user-uuid', type: 'message.sent'}
-            {emitterUuid: 'cred_uuid', type: 'message.received'}
+            {emitterUuid: 'cred-uuid', type: 'message.received'}
           ]
 
         options =
@@ -102,7 +109,7 @@ describe 'User Devices Spec', ->
             username: 'some-uuid'
             password: 'some-token'
 
-        request.get '/cred_uuid/user-devices', options, (error, @response, @body) =>
+        request.get '/cred-uuid/user-devices', options, (error, @response, @body) =>
           done error
 
       it 'should return a 200', ->
@@ -118,7 +125,7 @@ describe 'User Devices Spec', ->
       beforeEach (done) ->
         userAuth = new Buffer('some-uuid:some-token').toString 'base64'
         serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
-        credentialsDeviceAuth = new Buffer('cred_uuid:cred-token2').toString 'base64'
+        credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @meshblu
           .get '/v2/whoami'
@@ -127,17 +134,17 @@ describe 'User Devices Spec', ->
 
         @meshblu
           .post '/search/devices'
-          .send uuid: 'cred_uuid', 'endo.authorizedKey': 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
+          .send uuid: 'cred-uuid', 'endo.authorizedKey': 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, []
 
         @meshblu
-          .post '/devices/cred_uuid/tokens'
+          .post '/devices/cred-uuid/tokens'
           .set 'Authorization', "Basic #{serviceAuth}"
-          .reply 200, uuid: 'cred_uuid', token: 'cred-token2'
+          .reply 200, uuid: 'cred-uuid', token: 'cred-token2'
 
         @meshblu
-          .get '/v2/devices/cred_uuid/subscriptions'
+          .get '/v2/devices/cred-uuid/subscriptions'
           .set 'Authorization', "Basic #{credentialsDeviceAuth}"
           .reply 200, [
             {uuid: 'first-user-uuid', type: 'message.received'}
@@ -152,18 +159,16 @@ describe 'User Devices Spec', ->
             username: 'some-uuid'
             password: 'some-token'
 
-        request.get '/cred_uuid/user-devices', options, (error, @response, @body) =>
+        request.get '/cred-uuid/user-devices', options, (error, @response, @body) =>
           done error
 
       it 'should return a 404', ->
         expect(@response.statusCode).to.equal 404
 
-  describe 'On POST /cred_uuid/user-devices', ->
-    describe 'when authorized', ->
+    describe 'when authorized, but with a bad credentials device', ->
       beforeEach (done) ->
         userAuth = new Buffer('some-uuid:some-token').toString 'base64'
         serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
-        credentialsDeviceAuth = new Buffer('cred_uuid:cred-token2').toString 'base64'
 
         @meshblu
           .get '/v2/whoami'
@@ -172,27 +177,61 @@ describe 'User Devices Spec', ->
 
         @meshblu
           .post '/search/devices'
-          .send uuid: 'cred_uuid', 'endo.authorizedKey': 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
+          .send uuid: 'bad-cred-uuid', 'endo.authorizedKey': "pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=="
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
-            uuid: 'cred_uuid'
-            endoSignature: 'some-signature'
+            uuid: 'bad-cred-uuid'
             endo:
               authorizedKey: 'some-uuid'
-              credentialsDeviceUuid: 'cred_uuid'
-              secrets:
-                name: 'resource owner name'
+              credentialsDeviceUuid: 'cred-uuid'
+              secrets: @encryptedSecrets
+          ]
+
+        options =
+          baseUrl: "http://localhost:#{@serverPort}"
+          json: true
+          auth:
+            username: 'some-uuid'
+            password: 'some-token'
+
+        request.get '/bad-cred-uuid/user-devices', options, (error, @response, @body) =>
+          done error
+
+      it 'should return a 404', ->
+        expect(@response.statusCode).to.equal 404, JSON.stringify @body
+
+  describe 'On POST /cred-uuid/user-devices', ->
+    describe 'when authorized', ->
+      beforeEach (done) ->
+        userAuth = new Buffer('some-uuid:some-token').toString 'base64'
+        serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
+        credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
+
+        @meshblu
+          .get '/v2/whoami'
+          .set 'Authorization', "Basic #{userAuth}"
+          .reply 200, uuid: 'some-uuid', token: 'some-token'
+
+        @meshblu
+          .post '/search/devices'
+          .send uuid: 'cred-uuid', 'endo.authorizedKey': 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
+          .set 'Authorization', "Basic #{serviceAuth}"
+          .reply 200, [
+            uuid: 'cred-uuid'
+            endoSignature: 'dm8MT1FARvJ1RInXlqDtLCylCDIc3YD6fgWewwccaCCmoijuctJY2sGIf6MFmszjUDx2PXGMygU6rlwdwcapxw='
+            endo:
+              credentialsDeviceUuid: 'cred-uuid'
+              secrets: @encryptedSecrets
           ]
 
         @meshblu
-          .post '/devices/cred_uuid/tokens'
+          .post '/devices/cred-uuid/tokens'
           .set 'Authorization', "Basic #{serviceAuth}"
-          .reply 200, uuid: 'cred_uuid', token: 'cred-token2'
+          .reply 200, uuid: 'cred-uuid', token: 'cred-token2'
 
         @createUserDevice = @meshblu
           .post '/devices'
           .send
-            name: "resource owner name"
             type: "endo-lib"
             imageUrl: "http://this-is-an-image.exe"
             octoblu:
@@ -214,14 +253,14 @@ describe 'User Devices Spec', ->
                   view: [{uuid: 'some-uuid'}]
                   as: [{uuid: 'some-uuid'}]
                 message:
-                  as: [{uuid: 'some-uuid'}, {uuid: 'cred_uuid'}]
-                  received: [{uuid: 'some-uuid'}, {uuid: 'cred_uuid'}]
+                  as: [{uuid: 'some-uuid'}, {uuid: 'cred-uuid'}]
+                  received: [{uuid: 'some-uuid'}, {uuid: 'cred-uuid'}]
                   sent: [{uuid: 'some-uuid'}]
                   from: [{uuid: 'some-uuid'}]
           .reply 201, uuid: 'user_device_uuid', token: 'user_device_token'
 
         @createMessageReceivedSubscription = @meshblu
-          .post '/v2/devices/cred_uuid/subscriptions/user_device_uuid/message.received'
+          .post '/v2/devices/cred-uuid/subscriptions/user_device_uuid/message.received'
           .set 'Authorization', "Basic #{credentialsDeviceAuth}"
           .reply 201
 
@@ -231,7 +270,7 @@ describe 'User Devices Spec', ->
           headers:
             Authorization: "Bearer #{userAuth}"
 
-        request.post '/cred_uuid/user-devices', options, (error, @response, @body) =>
+        request.post '/cred-uuid/user-devices', options, (error, @response, @body) =>
           done error
 
       it 'should create the user device', ->
@@ -246,12 +285,12 @@ describe 'User Devices Spec', ->
       it 'should return the user device', ->
         expect(@body).to.deep.equal uuid: 'user_device_uuid', token: 'user_device_token'
 
-  describe 'On DELETE /cred_uuid/user-devices/user_device_uuid', ->
+  describe 'On DELETE /cred-uuid/user-devices/user_device_uuid', ->
     describe 'when authorized', ->
       beforeEach (done) ->
         userAuth = new Buffer('some-uuid:some-token').toString 'base64'
         serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
-        credentialsDeviceAuth = new Buffer('cred_uuid:cred-token2').toString 'base64'
+        credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @meshblu
           .get '/v2/whoami'
@@ -260,22 +299,23 @@ describe 'User Devices Spec', ->
 
         @meshblu
           .post '/search/devices'
-          .send uuid: 'cred_uuid', 'endo.authorizedKey': 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
+          .send uuid: 'cred-uuid', 'endo.authorizedKey': 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
-            uuid: 'cred_uuid'
+            uuid: 'cred-uuid'
+            endoSignature: 'dm8MT1FARvJ1RInXlqDtLCylCDIc3YD6fgWewwccaCCmoijuctJY2sGIf6MFmszjUDx2PXGMygU6rlwdwcapxw='
             endo:
-              authorizedKey: 'some-uuid'
-              resourceOwnerName: 'resource owner name'
+              credentialsDeviceUuid: 'cred-uuid'
+              secrets: @encryptedSecrets
           ]
 
         @meshblu
-          .post '/devices/cred_uuid/tokens'
+          .post '/devices/cred-uuid/tokens'
           .set 'Authorization', "Basic #{serviceAuth}"
-          .reply 200, uuid: 'cred_uuid', token: 'cred-token2'
+          .reply 200, uuid: 'cred-uuid', token: 'cred-token2'
 
         @deleteMessageReceivedSubscription = @meshblu
-          .delete '/v2/devices/cred_uuid/subscriptions/user_device_uuid/message.received'
+          .delete '/v2/devices/cred-uuid/subscriptions/user_device_uuid/message.received'
           .set 'Authorization', "Basic #{credentialsDeviceAuth}"
           .reply 201
 
@@ -285,7 +325,7 @@ describe 'User Devices Spec', ->
           headers:
             Authorization: "Bearer #{userAuth}"
 
-        request.delete '/cred_uuid/user-devices/user_device_uuid', options, (error, @response, @body) =>
+        request.delete '/cred-uuid/user-devices/user_device_uuid', options, (error, @response, @body) =>
           done error
 
       it "should delete the subscription from the credentials-device to the user device's received messages", ->
@@ -297,12 +337,12 @@ describe 'User Devices Spec', ->
       it 'should return nothing', ->
         expect(@body).to.be.empty
 
-  describe 'On DELETE /cred_uuid/user-devices/cred_uuid', ->
+  describe 'On DELETE /cred-uuid/user-devices/cred-uuid', ->
     describe 'when authorized', ->
       beforeEach (done) ->
         userAuth = new Buffer('some-uuid:some-token').toString 'base64'
         serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
-        credentialsDeviceAuth = new Buffer('cred_uuid:cred-token2').toString 'base64'
+        credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @meshblu
           .get '/v2/whoami'
@@ -311,19 +351,20 @@ describe 'User Devices Spec', ->
 
         @meshblu
           .post '/search/devices'
-          .send uuid: 'cred_uuid', 'endo.authorizedKey': 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
+          .send uuid: 'cred-uuid', 'endo.authorizedKey': 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
-            uuid: 'cred_uuid'
+            uuid: 'cred-uuid'
+            endoSignature: 'dm8MT1FARvJ1RInXlqDtLCylCDIc3YD6fgWewwccaCCmoijuctJY2sGIf6MFmszjUDx2PXGMygU6rlwdwcapxw='
             endo:
-              authorizedKey: 'some-uuid'
-              resourceOwnerName: 'resource owner name'
+              credentialsDeviceUuid: 'cred-uuid'
+              secrets: @encryptedSecrets
           ]
 
         @meshblu
-          .post '/devices/cred_uuid/tokens'
+          .post '/devices/cred-uuid/tokens'
           .set 'Authorization', "Basic #{serviceAuth}"
-          .reply 200, uuid: 'cred_uuid', token: 'cred-token2'
+          .reply 200, uuid: 'cred-uuid', token: 'cred-token2'
 
         options =
           baseUrl: "http://localhost:#{@serverPort}"
@@ -331,7 +372,7 @@ describe 'User Devices Spec', ->
           headers:
             Authorization: "Bearer #{userAuth}"
 
-        request.delete '/cred_uuid/user-devices/cred_uuid', options, (error, @response, @body) =>
+        request.delete '/cred-uuid/user-devices/cred-uuid', options, (error, @response, @body) =>
           done error
 
       it 'should return a 403', ->

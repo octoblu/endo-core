@@ -8,7 +8,7 @@ Server       = require '../../src/server'
 Encryption   = require 'meshblu-encryption'
 path         = require 'path'
 
-describe 'Lib Spec', ->
+describe 'Credentials Device Spec', ->
   beforeEach (done) ->
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
     encryption = Encryption.fromPem @privateKey
@@ -470,14 +470,12 @@ describe 'Lib Spec', ->
           .send 'endo.authorizedKey': @resourceOwnerSignature
           .reply 200, [{
             uuid: 'bad-cred-uuid'
-            token: 'bad-cred-token'
             endoSignature: 'dm8MT1FARvJ1RInXlqDtLCylCDIc3YD6fgWewwccaCCmoijuctJY2sGIf6MFmszjUDx2PXGMygU6rlwdwcapxw=='
             endo:
               credentialsDeviceUuid: 'cred-uuid'
               secrets: @encryptedSecrets
           }, {
             uuid: 'cred-uuid'
-            token: 'cred-token'
             endoSignature: 'dm8MT1FARvJ1RInXlqDtLCylCDIc3YD6fgWewwccaCCmoijuctJY2sGIf6MFmszjUDx2PXGMygU6rlwdwcapxw=='
             endo:
               credentialsDeviceUuid: 'cred-uuid'
