@@ -61,7 +61,6 @@ class MessagesService
 
     encryption = Encryption.fromJustGuess auth.privateKey
     secrets = encryption.decrypt endo.secrets
-
     @messageHandlers[jobType] {data, secrets}, callback
 
   _getEndoMessageSchemaSync: =>
