@@ -11,7 +11,7 @@ class CredentialsDeviceService
     @meshblu = new MeshbluHTTP @meshbluConfig
     @encryption = Encryption.fromJustGuess @meshbluConfig.privateKey
 
-  authorizedFindByUuid: ({authorizedUuid, credentialsDeviceUuid}, callback) =>
+  authorizedFind: ({authorizedUuid, credentialsDeviceUuid}, callback) =>
     authorizedKey = @encryption.sign(authorizedUuid)
     @meshblu.search {uuid: credentialsDeviceUuid, 'endo.authorizedKey': authorizedKey}, {}, (error, devices) =>
       return callback(error) if error?
@@ -52,7 +52,15 @@ class CredentialsDeviceService
     @meshblu.generateAndStoreToken uuid, (error, {token}={}) =>
       return callback new Error("Failed to access credentials device") if error?
       meshbluConfig = _.defaults {uuid, token}, @meshbluConfig
-      return callback null, new CredentialsDevice {@deviceType, @imageUrl, meshbluConfig, resourceOwnerName, @serviceUrl}
+      serviceUuid = @uuid
+      return callback null, new CredentialsDevice {
+        @deviceType
+        @imageUrl
+        meshbluConfig
+        resourceOwnerName
+        @serviceUrl
+        serviceUuid
+      }
 
   _isSignedCorrectly: ({endo, endoSignature, uuid}={}) =>
     return false unless endo?.secrets?

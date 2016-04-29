@@ -7,6 +7,20 @@ class CredentialsDeviceController
     throw new Error 'serviceUrl is required' unless @serviceUrl?
     throw new Error 'userDeviceManagerUrl is required' unless @userDeviceManagerUrl?
 
+  getCredentialsDevice: (req, res, next) =>
+    {credentialsDeviceUuid} = req.params
+    authorizedUuid = req.meshbluAuth.uuid
+
+    @credentialsDeviceService.authorizedFind {authorizedUuid, credentialsDeviceUuid}, (error, credentialsDevice) =>
+      return res.sendError error if error?
+      req.credentialsDevice = credentialsDevice
+      next()
+
+  get: (req, res) =>
+    req.credentialsDevice.getPublicDevice (error, publicDevice) =>
+      return res.sendError error if error?
+      res.send publicDevice
+
   upsert: (req, res) =>
     {id, name, credentials} = req.user
     authorizedUuid = req.meshbluAuth.uuid

@@ -1,18 +1,6 @@
 _ = require 'lodash'
 
 class UserDevicesController
-  constructor: ({@credentialsDeviceService}) ->
-    throw new Error 'credentialsDeviceService is required' unless @credentialsDeviceService?
-
-  getCredentialsDevice: (req, res, next) =>
-    {credentialsDeviceUuid} = req.params
-    authorizedUuid = req.meshbluAuth.uuid
-
-    @credentialsDeviceService.authorizedFindByUuid {authorizedUuid, credentialsDeviceUuid}, (error, credentialsDevice) =>
-      return res.sendError error if error?
-      req.credentialsDevice = credentialsDevice
-      next()
-
   create: (req, res) =>
     authorizedUuid = req.meshbluAuth.uuid
     req.credentialsDevice.createUserDevice {authorizedUuid}, (error, userDevice) =>

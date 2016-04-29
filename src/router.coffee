@@ -33,7 +33,8 @@ class Router
 
     app.post '/messages', @messagesController.create
 
-    app.all  '/:credentialsDeviceUuid/user-devices*', @userDevicesController.getCredentialsDevice
+    app.all  '/:credentialsDeviceUuid*', @credentialsDeviceController.getCredentialsDevice
+    app.get  '/:credentialsDeviceUuid', @credentialsDeviceController.get
     app.get  '/:credentialsDeviceUuid/user-devices', @userDevicesController.list
     app.post '/:credentialsDeviceUuid/user-devices', @userDevicesController.create
     app.delete  '/:credentialsDeviceUuid/user-devices/:userDeviceUuid', @userDevicesController.delete

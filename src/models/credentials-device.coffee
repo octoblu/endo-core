@@ -8,8 +8,9 @@ credentialsDeviceUpdateGenerator = require '../config-generators/credentials-dev
 userDeviceConfigGenerator = require '../config-generators/user-device-config-generator'
 
 class CredentialsDevice
-  constructor: ({@deviceType, @imageUrl, @resourceOwnerName, @serviceUrl, meshbluConfig}) ->
+  constructor: ({@deviceType, @imageUrl, meshbluConfig, @resourceOwnerName, @serviceUrl, @serviceUuid}) ->
     throw new Error('deviceType is required') unless @deviceType?
+    throw new Error('serviceUuid is required') unless @serviceUuid?
     {@uuid, @privateKey} = meshbluConfig
 
     @encryption = Encryption.fromJustGuess @privateKey
@@ -40,6 +41,11 @@ class CredentialsDevice
 
     @meshblu.deleteSubscription subscription, (error, ignored) =>
       callback error
+
+  getPublicDevice: (callback) =>
+    @meshblu.device @serviceUuid, (error, device) =>
+      return callback error if error?
+      return callback null, device.options
 
   getUserDevices: (callback) =>
     @meshblu.subscriptions @uuid, (error, subscriptions) =>

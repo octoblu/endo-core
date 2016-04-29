@@ -1,57 +1,54 @@
-_            = require 'lodash'
+_ = require 'lodash'
 fs           = require 'fs'
 http         = require 'http'
 request      = require 'request'
 shmock       = require '@octoblu/shmock'
 MockStrategy = require '../mock-strategy'
 Server       = require '../../src/server'
-Encryption   = require 'meshblu-encryption'
 path         = require 'path'
+Encryption   = require 'meshblu-encryption'
 
 describe 'Credentials Device Spec', ->
   beforeEach (done) ->
+    @meshblu = shmock 0xd00d
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
+
     encryption = Encryption.fromPem @privateKey
     @encryptedSecrets = encryption.encrypt 'this is secret'
-    @resourceOwnerSignature = 'Ula5075pW5J6pbIzhez3Be78UsyVApbXMXEPXmMwBAtVdtxdHoXNx+fI9nLV/pHZzlOI0RjhJmO+qQ3zAnKviw=='
-    decryptClientSecret = (req, res, next) =>
-      return next() unless req.body?.$set?['endo']?['secrets']?
-      req.body.$set['endo']['secrets'] = encryption.decrypt req.body.$set['endo']['secrets']
-      next()
 
-    @meshblu = shmock 0xd00d, [decryptClientSecret]
-
-    @apiStub = sinon.stub().yields(new Error('Unauthorized'))
-    @apiStrategy = new MockStrategy name: 'api', @apiStub
-    @octobluStub = sinon.stub().yields(new Error('Unauthorized'))
-    @octobluStrategy = new MockStrategy name: 'octoblu', @octobluStub
-    @meshblu
-      .get '/v2/whoami'
-      .set 'Authorization', "Basic cGV0ZXI6aS1jb3VsZC1lYXQ="
-      .reply 200, {
-        options:
-          imageUrl: "http://this-is-an-image.exe"
-      }
+    @apiStrategy = new MockStrategy name: 'lib'
+    @octobluStrategy = new MockStrategy name: 'octoblu'
 
     serverOptions =
-      logFn: -> console.log arguments...
+      logFn: ->
       messageHandlers: {}
-      deviceType: 'endo-app'
-      apiStrategy: @apiStrategy
-      octobluStrategy: @octobluStrategy
+      port: undefined,
       disableLogging: true
+      apiStrategy: @apiStrategy
+      apiName: 'github'
+      deviceType: 'endo-lib'
+      octobluStrategy: @octobluStrategy
+      serviceUrl: 'http://octoblu.xxx'
       meshbluConfig:
         server: 'localhost'
         port: 0xd00d
-        uuid: 'peter'
-        token: 'i-could-eat'
+        uuid: 'service-uuid'
+        token: 'service-token'
         privateKey: @privateKey
-      port: undefined,
       schemas:
         hello:   require '../data/schemas/hello-schema.json'
         namaste: require '../data/schemas/namaste-schema.json'
-      serviceUrl: "http://the-endo-url"
       userDeviceManagerUrl: 'http://manage-my.endo'
+
+    serviceAuth = new Buffer('service-uuid:service-token').toString 'base64'
+    @meshblu
+      .get '/v2/whoami'
+      .set 'Authorization', "Basic #{serviceAuth}"
+      .reply 200, {
+        options:
+          imageUrl: "http://this-is-an-image.exe"
+          resourceOwnerName: 'resource owner name'
+      }
 
     @server = new Server serverOptions
 
@@ -66,479 +63,132 @@ describe 'Credentials Device Spec', ->
   afterEach (done) ->
     @meshblu.close done
 
-  describe 'When inauthenticated', ->
-    describe 'On GET /', ->
+  describe 'On GET /cred-uuid', ->
+    describe 'when authorized', ->
       beforeEach (done) ->
-        options =
-          baseUrl: "http://localhost:#{@serverPort}"
-          followRedirect: false
-
-        request.get '/', options, (error, @response, @body) =>
-          done error
-
-      it 'should return a 302', ->
-        expect(@response.statusCode).to.equal 302, @body
-
-      it 'should redirect to /auth/octoblu', ->
-        expect(@response.headers.location).to.equal '/auth/octoblu'
-
-    describe 'On GET /auth/octoblu', ->
-      beforeEach (done) ->
-        options =
-          baseUrl: "http://localhost:#{@serverPort}"
-          followRedirect: false
-
-        request.get '/auth/octoblu', options, (error, @response, @body) =>
-          done error
-
-      it 'should return a 302', ->
-        expect(@response.statusCode).to.equal 302, @body
-
-    describe 'On GET /auth/octoblu/callback with a valid code', ->
-      beforeEach (done) ->
-        @octobluStub.yields null, {
-          uuid: 'u'
-          bearerToken: 'grizzly'
-        }
-
-        @meshblu
-          .get '/v2/whoami'
-          .set 'Authorization', "Bearer grizzly"
-          .reply 200, {}
-
-        options =
-          baseUrl: "http://localhost:#{@serverPort}"
-          followRedirect: false
-          qs:
-            code: new Buffer('client-id:u:t1').toString 'base64'
-
-        request.get '/auth/octoblu/callback', options, (error, @response, @body) =>
-          done error
-
-      it 'should return a 302', ->
-        expect(@response.statusCode).to.equal 302
-
-      it 'should redirect to /auth/api', ->
-        expect(@response.headers.location).to.equal '/auth/api'
-
-      it 'should set the meshblu auth cookies', ->
-        expect(@response.headers['set-cookie']).to.contain 'meshblu_auth_bearer=grizzly; Path=/'
-
-  describe 'On GET /auth/api', ->
-    beforeEach (done) ->
-      userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-
-      @authDevice = @meshblu
-        .get '/v2/whoami'
-        .set 'Authorization', "Basic #{userAuth}"
-        .reply 200, uuid: 'some-uuid', token: 'some-token'
-
-      options =
-        uri: '/auth/api'
-        baseUrl: "http://localhost:#{@serverPort}"
-        followRedirect: false
-        auth:
-          username: 'some-uuid'
-          password: 'some-token'
-
-      request.get options, (error, @response, @body) =>
-        done error
-
-    it 'should auth the octoblu device', ->
-      @authDevice.done()
-
-    it 'should return a 302', ->
-      expect(@response.statusCode).to.equal 302
-
-  describe 'On GET /auth/api/callback', ->
-    describe 'when the credentials device does not exist', ->
-      beforeEach (done) ->
-        @apiStub.yields null, {
-          id:   'resource owner id'
-          name: 'resource owner name'
-          credentials:
-            secret:       'resource owner secret'
-            refreshToken: 'resource owner refresh token'
-        }
-
-        userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-        serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
+        userAuth = new Buffer('user-uuid:user-token').toString 'base64'
+        serviceAuth = new Buffer('service-uuid:service-token').toString 'base64'
         credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @meshblu
           .get '/v2/whoami'
           .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, uuid: 'some-uuid', token: 'some-token'
+          .reply 200, uuid: 'user-uuid', token: 'user-token'
 
         @meshblu
           .post '/search/devices'
+          .send uuid: 'cred-uuid', 'endo.authorizedKey': "LF0GppVttGA+pNVhaRQ9zUOVQBP+e0jJCu3MDA0hQrbDQ3+lDWui1SQ2cpTyA0KtZ1hyFGtAi5AoL39knIxtaQ=="
           .set 'Authorization', "Basic #{serviceAuth}"
-          .send 'endo.authorizedKey': @resourceOwnerSignature
+          .reply 200, [
+            uuid: 'cred-uuid'
+            endoSignature: 'eYHE4xmb0sIGcO9ecQjn0FGT4fPpw1fdk/7jj8D0ID/OLrjkBK6Qi2r98FD+r2V1d88w2rQGvIS9L69WZ2af0w=='
+            endo:
+              authorizedKey: 'user-uuid'
+              credentialsDeviceUuid: 'cred-uuid'
+              secrets: @encryptedSecrets
+          ]
+
+        @meshblu
+          .post '/devices/cred-uuid/tokens'
+          .set 'Authorization', "Basic #{serviceAuth}"
+          .reply 200, uuid: 'cred-uuid', token: 'cred-token2'
+
+        @meshblu
+          .get '/v2/devices/service-uuid'
+          .set 'Authorization', "Basic #{credentialsDeviceAuth}"
+          .reply 200, {
+            uuid: 'service-uuid'
+            options:
+              name: 'API Name'
+              imageUrl: 'http://bit.ly/1SDctTa'
+          }
+
+        options =
+          baseUrl: "http://localhost:#{@serverPort}"
+          followRedirect: false
+          json: true
+          auth:
+            username: 'user-uuid'
+            password: 'user-token'
+
+        request.get '/cred-uuid', options, (error, @response, @body) =>
+          done error
+
+      it 'should return a 200', ->
+        expect(@response.statusCode).to.equal 200
+
+      it 'should return a public version of the credentials device', ->
+        expect(@body).to.deep.equal {
+          name: 'API Name'
+          imageUrl: 'http://bit.ly/1SDctTa'
+        }
+
+    describe 'when inauthentic', ->
+      beforeEach (done) ->
+        userAuth = new Buffer('user-uuid:user-token').toString 'base64'
+        serviceAuth = new Buffer('service-uuid:service-token').toString 'base64'
+        credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
+
+        @meshblu
+          .get '/v2/whoami'
+          .set 'Authorization', "Basic #{userAuth}"
+          .reply 200, uuid: 'user-uuid', token: 'user-token'
+
+        @meshblu
+          .post '/search/devices'
+          .send uuid: 'cred-uuid', 'endo.authorizedKey': 'LF0GppVttGA+pNVhaRQ9zUOVQBP+e0jJCu3MDA0hQrbDQ3+lDWui1SQ2cpTyA0KtZ1hyFGtAi5AoL39knIxtaQ=='
+          .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, []
 
-        @createCredentialsDevice = @meshblu
-          .post '/devices'
-          .set 'Authorization', "Basic #{serviceAuth}"
-          .send
-            meshblu:
-              version: '2.0.0'
-              whitelists:
-                discover:
-                  view: [{uuid: 'peter'}]
-                configure:
-                  update: [{uuid: 'peter'}]
-          .reply 200, uuid: 'cred-uuid', token: 'cred-token'
-
         @meshblu
           .post '/devices/cred-uuid/tokens'
           .set 'Authorization', "Basic #{serviceAuth}"
-          .reply 201, '{"uuid": "cred-uuid", "token": "cred-token2"}'
-
-        @updateCredentialsDevice = @meshblu
-          .put '/v2/devices/cred-uuid'
-          .set 'Authorization', "Basic #{credentialsDeviceAuth}"
-          .send
-            $set:
-              endo:
-                authorizedKey: 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
-                credentialsDeviceUuid: 'cred-uuid'
-                version: '1.0.0'
-                secrets:
-                  name:         'resource owner name'
-                  id:           'resource owner id'
-                  credentials:
-                    secret:       'resource owner secret'
-                    refreshToken: 'resource owner refresh token'
-              endoSignature: 'YofeJ+pJHyVnVB/rhHBQBp1xp8/Uwhezkb6Wgc1Bw03wJinUp+w9wqqogwzgYmy5b5t334Bs1a2+7VTBgKyozQ=='
-
-              'meshblu.forwarders.message.received': [{
-                type: 'webhook'
-                url: 'http://the-endo-url/messages'
-                method: 'POST'
-                generateAndForwardMeshbluCredentials: true
-              }]
-
-          .reply 204
-
-        @createMessageReceivedSubscription = @meshblu
-          .post '/v2/devices/cred-uuid/subscriptions/cred-uuid/message.received'
-          .set 'Authorization', "Basic #{credentialsDeviceAuth}"
-          .reply 201
+          .reply 200, uuid: 'cred-uuid', token: 'cred-token2'
 
         options =
-          uri: '/auth/api/callback'
           baseUrl: "http://localhost:#{@serverPort}"
-          followRedirect: false
+          json: true
           auth:
-            username: 'some-uuid'
-            password: 'some-token'
+            username: 'user-uuid'
+            password: 'user-token'
 
-        request.get options, (error, @response, @body) =>
+        request.get '/cred-uuid/user-devices', options, (error, @response, @body) =>
           done error
 
-      it 'should return a 302', ->
-        expect(@response.statusCode).to.equal 302, @body
+      it 'should return a 404', ->
+        expect(@response.statusCode).to.equal 404
 
-      it 'should create a credentials device', ->
-        @createCredentialsDevice.done()
-
-      it 'should update the credentials device with the new resourceOwnerSecret and authorizedUuid', ->
-        @updateCredentialsDevice.done()
-
-      it 'should subscribe to its own received messages', ->
-        @createMessageReceivedSubscription.done()
-
-      it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
-        EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid'
-        expect(@response.headers.location).to.equal EXPECTED
-
-    describe 'when the credentials device does exist', ->
+    describe 'when authorized, but with a bad credentials device', ->
       beforeEach (done) ->
-        userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-        serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
-        credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
-
-        @apiStub.yields null, {
-          id:   'resource owner id'
-          name: 'resource owner name'
-          credentials:
-            secret:       'resource owner secret'
-            refreshToken: 'resource owner refresh token'
-        }
+        userAuth = new Buffer('user-uuid:user-token').toString 'base64'
+        serviceAuth = new Buffer('service-uuid:service-token').toString 'base64'
 
         @meshblu
           .get '/v2/whoami'
           .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, uuid: 'some-uuid', token: 'some-token'
+          .reply 200, uuid: 'user-uuid', token: 'user-token'
 
         @meshblu
           .post '/search/devices'
+          .send uuid: 'bad-cred-uuid', 'endo.authorizedKey': "LF0GppVttGA+pNVhaRQ9zUOVQBP+e0jJCu3MDA0hQrbDQ3+lDWui1SQ2cpTyA0KtZ1hyFGtAi5AoL39knIxtaQ=="
           .set 'Authorization', "Basic #{serviceAuth}"
-          .send 'endo.authorizedKey': @resourceOwnerSignature
-          .reply 200, [{
-            uuid: 'cred-uuid'
-            token: 'cred-token'
-            endoSignature: 'dm8MT1FARvJ1RInXlqDtLCylCDIc3YD6fgWewwccaCCmoijuctJY2sGIf6MFmszjUDx2PXGMygU6rlwdwcapxw=='
-            endo:
-              credentialsDeviceUuid: 'cred-uuid'
-              secrets: @encryptedSecrets
-          }]
-
-        @meshblu
-          .post '/devices/cred-uuid/tokens'
-          .set 'Authorization', "Basic #{serviceAuth}"
-          .reply 201, '{"uuid": "cred-uuid", "token": "cred-token2"}'
-
-        @updateCredentialsDevice = @meshblu
-          .put '/v2/devices/cred-uuid'
-          .set 'Authorization', "Basic #{credentialsDeviceAuth}"
-          .send
-            $set:
-              endo:
-                authorizedKey: 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
-                credentialsDeviceUuid: 'cred-uuid'
-                version: '1.0.0'
-                secrets:
-                  name:         'resource owner name'
-                  id:           'resource owner id'
-                  credentials:
-                    secret:       'resource owner secret'
-                    refreshToken: 'resource owner refresh token'
-              endoSignature: 'YofeJ+pJHyVnVB/rhHBQBp1xp8/Uwhezkb6Wgc1Bw03wJinUp+w9wqqogwzgYmy5b5t334Bs1a2+7VTBgKyozQ=='
-              'meshblu.forwarders.message.received': [{
-                type: 'webhook'
-                url: 'http://the-endo-url/messages'
-                method: 'POST'
-                generateAndForwardMeshbluCredentials: true
-              }]
-          .reply 204
-
-        @createMessageReceivedSubscription = @meshblu
-          .post '/v2/devices/cred-uuid/subscriptions/cred-uuid/message.received'
-          .set 'Authorization', "Basic #{credentialsDeviceAuth}"
-          .reply 201
-
-        options =
-          uri: '/auth/api/callback'
-          baseUrl: "http://localhost:#{@serverPort}"
-          followRedirect: false
-          auth:
-            username: 'some-uuid'
-            password: 'some-token'
-          qs:
-            oauth_token: 'oauth_token'
-            oauth_verifier: 'oauth_verifier'
-
-        request.get options, (error, @response, @body) =>
-          done error
-
-      it 'should update the credentials device with the new resourceOwnerSecret and authorizedUuid', ->
-        @updateCredentialsDevice.done()
-
-      it 'should subscribe to its own received messages', ->
-        @createMessageReceivedSubscription.done()
-
-      it 'should return a 302', ->
-        expect(@response.statusCode).to.equal 302
-
-      it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
-        EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid'
-        expect(@response.headers.location).to.equal EXPECTED
-
-    describe 'when two credentials devices exist, but only one has an valid endoSignature', ->
-      beforeEach (done) ->
-        userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-        serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
-        credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
-
-        @apiStub.yields null, {
-          id:   'resource owner id'
-          name: 'resource owner name'
-          credentials:
-            secret:       'resource owner secret'
-            refreshToken: 'resource owner refresh token'
-        }
-
-        @meshblu
-          .get '/v2/whoami'
-          .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, uuid: 'some-uuid', token: 'some-token'
-
-        @meshblu
-          .post '/search/devices'
-          .set 'Authorization', "Basic #{serviceAuth}"
-          .send 'endo.authorizedKey': @resourceOwnerSignature
-          .reply 200, [{
+          .reply 200, [
             uuid: 'bad-cred-uuid'
-            token: 'bad-cred-token'
-            endoSignature: 'whatever'
             endo:
-              credentialsDeviceUuid: 'bad-cred-uuid'
-              secrets: @encryptedSecrets
-          }, {
-            uuid: 'cred-uuid'
-            token: 'cred-token'
-            endoSignature: 'dm8MT1FARvJ1RInXlqDtLCylCDIc3YD6fgWewwccaCCmoijuctJY2sGIf6MFmszjUDx2PXGMygU6rlwdwcapxw=='
-            endo:
+              authorizedKey: 'user-uuid'
               credentialsDeviceUuid: 'cred-uuid'
               secrets: @encryptedSecrets
-          }]
-
-        @meshblu
-          .post '/devices/cred-uuid/tokens'
-          .set 'Authorization', "Basic #{serviceAuth}"
-          .reply 201, '{"uuid": "cred-uuid", "token": "cred-token2"}'
-
-        @updateCredentialsDevice = @meshblu
-          .put '/v2/devices/cred-uuid'
-          .set 'Authorization', "Basic #{credentialsDeviceAuth}"
-          .send
-            $set:
-              endo:
-                authorizedKey: 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
-                credentialsDeviceUuid: 'cred-uuid'
-                version: '1.0.0'
-                secrets:
-                  name:         'resource owner name'
-                  id:           'resource owner id'
-                  credentials:
-                    secret:       'resource owner secret'
-                    refreshToken: 'resource owner refresh token'
-              endoSignature: 'YofeJ+pJHyVnVB/rhHBQBp1xp8/Uwhezkb6Wgc1Bw03wJinUp+w9wqqogwzgYmy5b5t334Bs1a2+7VTBgKyozQ=='
-              'meshblu.forwarders.message.received': [{
-                type: 'webhook'
-                url: 'http://the-endo-url/messages'
-                method: 'POST'
-                generateAndForwardMeshbluCredentials: true
-              }]
-          .reply 204
-
-        @createMessageReceivedSubscription = @meshblu
-          .post '/v2/devices/cred-uuid/subscriptions/cred-uuid/message.received'
-          .set 'Authorization', "Basic #{credentialsDeviceAuth}"
-          .reply 201
+          ]
 
         options =
-          uri: '/auth/api/callback'
           baseUrl: "http://localhost:#{@serverPort}"
-          followRedirect: false
+          json: true
           auth:
-            username: 'some-uuid'
-            password: 'some-token'
-          qs:
-            oauth_token: 'oauth_token'
-            oauth_verifier: 'oauth_verifier'
+            username: 'user-uuid'
+            password: 'user-token'
 
-        request.get options, (error, @response, @body) =>
+        request.get '/bad-cred-uuid/user-devices', options, (error, @response, @body) =>
           done error
 
-      it 'should update the credentials device with the new resourceOwnerSecret and authorizedUuid', ->
-        @updateCredentialsDevice.done()
-
-      it 'should subscribe to its own received messages', ->
-        @createMessageReceivedSubscription.done()
-
-      it 'should return a 302', ->
-        expect(@response.statusCode).to.equal 302
-
-      it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
-        EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid'
-        expect(@response.headers.location).to.equal EXPECTED
-
-    describe 'when two credentials devices exist with valid endoSignature, but one has a bad credentialsDeviceUrl', ->
-      beforeEach (done) ->
-        userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-        serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
-        credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
-
-        @apiStub.yields null, {
-          id:   'resource owner id'
-          name: 'resource owner name'
-          credentials:
-            secret:       'resource owner secret'
-            refreshToken: 'resource owner refresh token'
-        }
-
-        @meshblu
-          .get '/v2/whoami'
-          .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, uuid: 'some-uuid', token: 'some-token'
-
-        @meshblu
-          .post '/search/devices'
-          .set 'Authorization', "Basic #{serviceAuth}"
-          .send 'endo.authorizedKey': @resourceOwnerSignature
-          .reply 200, [{
-            uuid: 'bad-cred-uuid'
-            endoSignature: 'dm8MT1FARvJ1RInXlqDtLCylCDIc3YD6fgWewwccaCCmoijuctJY2sGIf6MFmszjUDx2PXGMygU6rlwdwcapxw=='
-            endo:
-              credentialsDeviceUuid: 'cred-uuid'
-              secrets: @encryptedSecrets
-          }, {
-            uuid: 'cred-uuid'
-            endoSignature: 'dm8MT1FARvJ1RInXlqDtLCylCDIc3YD6fgWewwccaCCmoijuctJY2sGIf6MFmszjUDx2PXGMygU6rlwdwcapxw=='
-            endo:
-              credentialsDeviceUuid: 'cred-uuid'
-              secrets: @encryptedSecrets
-          }]
-
-        @meshblu
-          .post '/devices/cred-uuid/tokens'
-          .set 'Authorization', "Basic #{serviceAuth}"
-          .reply 201, '{"uuid": "cred-uuid", "token": "cred-token2"}'
-
-        @updateCredentialsDevice = @meshblu
-          .put '/v2/devices/cred-uuid'
-          .set 'Authorization', "Basic #{credentialsDeviceAuth}"
-          .send
-            $set:
-              endo:
-                authorizedKey: 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
-                credentialsDeviceUuid: 'cred-uuid'
-                version: '1.0.0'
-                secrets:
-                  name:         'resource owner name'
-                  id:           'resource owner id'
-                  credentials:
-                    secret:       'resource owner secret'
-                    refreshToken: 'resource owner refresh token'
-              endoSignature: 'YofeJ+pJHyVnVB/rhHBQBp1xp8/Uwhezkb6Wgc1Bw03wJinUp+w9wqqogwzgYmy5b5t334Bs1a2+7VTBgKyozQ=='
-              'meshblu.forwarders.message.received': [{
-                type: 'webhook'
-                url: 'http://the-endo-url/messages'
-                method: 'POST'
-                generateAndForwardMeshbluCredentials: true
-              }]
-          .reply 204
-
-        @createMessageReceivedSubscription = @meshblu
-          .post '/v2/devices/cred-uuid/subscriptions/cred-uuid/message.received'
-          .set 'Authorization', "Basic #{credentialsDeviceAuth}"
-          .reply 201
-
-        options =
-          uri: '/auth/api/callback'
-          baseUrl: "http://localhost:#{@serverPort}"
-          followRedirect: false
-          auth:
-            username: 'some-uuid'
-            password: 'some-token'
-          qs:
-            oauth_token: 'oauth_token'
-            oauth_verifier: 'oauth_verifier'
-
-        request.get options, (error, @response, @body) =>
-          done error
-
-      it 'should update the credentials device with the new resourceOwnerSecret and authorizedUuid', ->
-        @updateCredentialsDevice.done()
-
-      it 'should subscribe to its own received messages', ->
-        @createMessageReceivedSubscription.done()
-
-      it 'should return a 302', ->
-        expect(@response.statusCode).to.equal 302
-
-      it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
-        EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid'
-        expect(@response.headers.location).to.equal EXPECTED
+      it 'should return a 404', ->
+        expect(@response.statusCode).to.equal 404, JSON.stringify @body
