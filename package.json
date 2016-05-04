@@ -1,10 +1,10 @@
 {
-  "name": "endo-lib",
+  "name": "endo-core",
   "version": "4.2.0",
   "description": "Put some description here",
   "keywords": [],
-  "homepage": "https://github.com/octoblu/lib",
-  "bugs": "https://github.com/octoblu/lib/issues",
+  "homepage": "https://github.com/octoblu/endo-core",
+  "bugs": "https://github.com/octoblu/endo-core/issues",
   "author": {
     "name": "Octoblu",
     "url": "https://github.com/octoblu"
@@ -12,7 +12,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/octoblu/lib.git"
+    "url": "https://github.com/octoblu/endo-core.git"
   },
   "scripts": {
     "start": "node command.js",

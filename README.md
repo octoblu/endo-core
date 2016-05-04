@@ -1,15 +1,15 @@
-# endo-lib
+# endo-core
 
-[![Dependency status](http://img.shields.io/david/octoblu/endo-lib.svg?style=flat)](https://david-dm.org/octoblu/endo-lib)
-[![devDependency Status](http://img.shields.io/david/dev/octoblu/endo-lib.svg?style=flat)](https://david-dm.org/octoblu/endo-lib#info=devDependencies)
-[![Build Status](http://img.shields.io/travis/octoblu/endo-lib.svg?style=flat&branch=master)](https://travis-ci.org/octoblu/endo-lib)
+[![Dependency status](http://img.shields.io/david/octoblu/endo-core.svg?style=flat)](https://david-dm.org/octoblu/endo-core)
+[![devDependency Status](http://img.shields.io/david/dev/octoblu/endo-core.svg?style=flat)](https://david-dm.org/octoblu/endo-core#info=devDependencies)
+[![Build Status](http://img.shields.io/travis/octoblu/endo-core.svg?style=flat&branch=master)](https://travis-ci.org/octoblu/endo-core)
 
-[![NPM](https://nodei.co/npm/endo-lib.svg?style=flat)](https://npmjs.org/package/endo-lib)
+[![NPM](https://nodei.co/npm/endo-core.svg?style=flat)](https://npmjs.org/package/endo-core)
 
 ## Installing
 
 ```bash
-$ npm install endo-lib
+$ npm install endo-core
 ```
 
 ### Usage

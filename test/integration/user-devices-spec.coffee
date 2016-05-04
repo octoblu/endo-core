@@ -26,7 +26,7 @@ describe 'User Devices Spec', ->
       disableLogging: true
       apiStrategy: @apiStrategy
       apiName: 'github'
-      deviceType: 'endo-lib'
+      deviceType: 'endo-core'
       octobluStrategy: @octobluStrategy
       serviceUrl: 'http://octoblu.xxx'
       meshbluConfig:
@@ -232,7 +232,7 @@ describe 'User Devices Spec', ->
         @createUserDevice = @meshblu
           .post '/devices'
           .send
-            type: "endo-lib"
+            type: "endo-core"
             imageUrl: "http://this-is-an-image.exe"
             octoblu:
               flow:
