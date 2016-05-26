@@ -14,7 +14,7 @@ describe 'Credentials Device Spec', ->
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
 
     encryption = Encryption.fromPem @privateKey
-    @encrypted = encryption.encrypt 'this is secret'
+    @encrypted = encryption.encrypt name: 'sqrtofsaturn', secrets: {}
 
     @apiStrategy = new MockStrategy name: 'lib'
     @octobluStrategy = new MockStrategy name: 'octoblu'
@@ -47,7 +47,6 @@ describe 'Credentials Device Spec', ->
       .reply 200, {
         options:
           imageUrl: "http://this-is-an-image.exe"
-          resourceOwnerName: 'resource owner name'
       }
 
     @server = new Server serverOptions
@@ -81,7 +80,7 @@ describe 'Credentials Device Spec', ->
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
             uuid: 'cred-uuid'
-            endoSignature: 'Nya170K+QGLq0uCYc04SQYJePq/pY4F2v6lkJ0OLL9j+J1fuG4dY4xnRBODMuCZ4nIM3a8FvmJWpLoWuf80FDQ=='
+            endoSignature: 'R+SxMjogNJx6KjuxcYjfjoU6HebPN8Jvpq4Eo8tqV9jvVlRMafvQyKqTHLeh/gBUtGWBexKtrxLYh2mx7s3ccg=='
             endo:
               authorizedKey: 'user-uuid'
               credentialsDeviceUuid: 'cred-uuid'
@@ -115,12 +114,14 @@ describe 'Credentials Device Spec', ->
           done error
 
       it 'should return a 200', ->
-        expect(@response.statusCode).to.equal 200
+        expect(@response.statusCode).to.equal 200, JSON.stringify(@body)
 
       it 'should return a public version of the credentials device', ->
         expect(@body).to.deep.equal {
           name: 'API Name'
           imageUrl: 'http://bit.ly/1SDctTa'
+          encrypted:
+            name: 'sqrtofsaturn'
         }
 
     describe 'when inauthentic', ->

@@ -17,12 +17,12 @@ class CredentialsDeviceService
       return callback(error) if error?
       device = _.first devices
 
-      return callback @_userError('credentials device not found', 404) unless device?
+      return callback @_userError('credentials device not found', 404) unless device?.endo?.encrypted?
       return callback @_userError('credentials device not found', 404) unless @_isSignedCorrectly device
 
       options =
         uuid: credentialsDeviceUuid
-        resourceOwnerName: device.endo.resourceOwnerName
+        encrypted: device.endo.encrypted
 
       return @_getCredentialsDevice options, callback
 
@@ -48,7 +48,7 @@ class CredentialsDeviceService
       record = credentialsDeviceCreateGenerator {serviceUuid: @uuid}
       @meshblu.register record, callback
 
-  _getCredentialsDevice: ({uuid, resourceOwnerName}, callback) =>
+  _getCredentialsDevice: ({uuid, encrypted}, callback) =>
     @meshblu.generateAndStoreToken uuid, (error, {token}={}) =>
       return callback new Error("Failed to access credentials device") if error?
       meshbluConfig = _.defaults {uuid, token}, @meshbluConfig
@@ -57,7 +57,7 @@ class CredentialsDeviceService
         @deviceType
         @imageUrl
         meshbluConfig
-        resourceOwnerName
+        encrypted
         @serviceUrl
         serviceUuid
       }
@@ -72,6 +72,8 @@ class CredentialsDeviceService
       console.error error.stack
       return false
 
+    # correctSig___ = @encryption.sign endo
+    # console.log JSON.stringify({correctSig___, endoSignature}, null, 2)
     return @encryption.verify endo, endoSignature
 
   _userError: (message, code) =>
