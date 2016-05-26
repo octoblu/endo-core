@@ -1,11 +1,11 @@
-_ = require 'lodash'
+{afterEach, beforeEach, describe, it} = global
+{expect} = require 'chai'
+
 fs           = require 'fs'
-http         = require 'http'
 request      = require 'request'
 shmock       = require '@octoblu/shmock'
 MockStrategy = require '../mock-strategy'
 Server       = require '../../src/server'
-path         = require 'path'
 Encryption   = require 'meshblu-encryption'
 
 describe 'User Devices Spec', ->
@@ -342,7 +342,6 @@ describe 'User Devices Spec', ->
       beforeEach (done) ->
         userAuth = new Buffer('some-uuid:some-token').toString 'base64'
         serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
-        credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @meshblu
           .post '/authenticate'
