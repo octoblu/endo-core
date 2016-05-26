@@ -1,8 +1,6 @@
-fs          = require 'fs'
 _           = require 'lodash'
 MeshbluHTTP = require 'meshblu-http'
 Encryption  = require 'meshblu-encryption'
-path        = require 'path'
 
 credentialsDeviceUpdateGenerator = require '../config-generators/credentials-device-update-config-generator'
 userDeviceConfigGenerator = require '../config-generators/user-device-config-generator'
@@ -58,22 +56,23 @@ class CredentialsDevice
     credentialsDeviceUuid = @uuid
 
     {endo, endoSignature} = @_getSignedUpdate {authorizedUuid, id, name, credentials, credentialsDeviceUuid}
-    endo.secrets = @encryption.encrypt endo.secrets
+    endo.encrypted = @encryption.encrypt endo.encrypted
 
     update = credentialsDeviceUpdateGenerator {endo, endoSignature, @serviceUrl}
     @meshblu.updateDangerously @uuid, update, (error) =>
       return callback error if error?
       @_subscribeToOwnMessagesReceived callback
 
-  _getSignedUpdate: ({authorizedUuid, id, name, credentials, credentialsDeviceUuid}) =>
+  _getSignedUpdate: ({authorizedUuid, id, name, credentials}) =>
     endo = {
       authorizedKey: @encryption.sign(authorizedUuid).toString 'base64'
       credentialsDeviceUuid: @uuid
       version: '1.0.0'
-      secrets:
+      encrypted:
         id: id
         name: name
-        credentials: credentials
+        secrets:
+          credentials: credentials
     }
     endoSignature = @encryption.sign endo
     return {endo, endoSignature}

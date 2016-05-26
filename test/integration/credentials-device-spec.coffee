@@ -1,11 +1,11 @@
-_ = require 'lodash'
+{afterEach, beforeEach, describe, it} = global
+{expect} = require 'chai'
+
 fs           = require 'fs'
-http         = require 'http'
 request      = require 'request'
 shmock       = require '@octoblu/shmock'
 MockStrategy = require '../mock-strategy'
 Server       = require '../../src/server'
-path         = require 'path'
 Encryption   = require 'meshblu-encryption'
 
 describe 'Credentials Device Spec', ->
@@ -14,7 +14,7 @@ describe 'Credentials Device Spec', ->
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
 
     encryption = Encryption.fromPem @privateKey
-    @encryptedSecrets = encryption.encrypt 'this is secret'
+    @encrypted = encryption.encrypt 'this is secret'
 
     @apiStrategy = new MockStrategy name: 'lib'
     @octobluStrategy = new MockStrategy name: 'octoblu'
@@ -81,11 +81,11 @@ describe 'Credentials Device Spec', ->
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
             uuid: 'cred-uuid'
-            endoSignature: 'eYHE4xmb0sIGcO9ecQjn0FGT4fPpw1fdk/7jj8D0ID/OLrjkBK6Qi2r98FD+r2V1d88w2rQGvIS9L69WZ2af0w=='
+            endoSignature: 'Nya170K+QGLq0uCYc04SQYJePq/pY4F2v6lkJ0OLL9j+J1fuG4dY4xnRBODMuCZ4nIM3a8FvmJWpLoWuf80FDQ=='
             endo:
               authorizedKey: 'user-uuid'
               credentialsDeviceUuid: 'cred-uuid'
-              secrets: @encryptedSecrets
+              encrypted: @encrypted
           ]
 
         @meshblu
@@ -127,7 +127,6 @@ describe 'Credentials Device Spec', ->
       beforeEach (done) ->
         userAuth = new Buffer('user-uuid:user-token').toString 'base64'
         serviceAuth = new Buffer('service-uuid:service-token').toString 'base64'
-        credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @meshblu
           .get '/v2/whoami'
@@ -177,7 +176,7 @@ describe 'Credentials Device Spec', ->
             endo:
               authorizedKey: 'user-uuid'
               credentialsDeviceUuid: 'cred-uuid'
-              secrets: @encryptedSecrets
+              encrypted: @encrypted
           ]
 
         options =

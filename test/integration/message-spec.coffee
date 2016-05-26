@@ -1,7 +1,8 @@
-_            = require 'lodash'
+{afterEach, beforeEach, describe, it} = global
+{expect} = require 'chai'
+sinon    = require 'sinon'
+
 fs           = require 'fs'
-path         = require 'path'
-http         = require 'http'
 request      = require 'request'
 shmock       = require '@octoblu/shmock'
 MockStrategy = require '../mock-strategy'
@@ -12,10 +13,11 @@ describe 'messages', ->
   beforeEach (done) ->
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
     @encryption = Encryption.fromPem @privateKey
-    secrets =
-      credentials:
-        secret: 'this is secret'
-    @encryptedSecrets = @encryption.encrypt secrets
+    encrypted =
+      secrets:
+        credentials:
+          secret: 'this is secret'
+    @encrypted = @encryption.encrypt encrypted
 
     @meshblu = shmock 0xd00d
     @apiStrategy = new MockStrategy name: 'api'
@@ -66,7 +68,6 @@ describe 'messages', ->
   describe 'On POST /messages', ->
     describe 'when authorized', ->
       beforeEach ->
-        userAuth = new Buffer('some-uuid:some-token').toString 'base64'
         @credentialsDeviceAuth = new Buffer('cred-uuid:cred-token').toString 'base64'
         @meshblu
           .get '/v2/whoami'
@@ -120,7 +121,7 @@ describe 'messages', ->
                 endoSignature: 'John Hancock. Definitely, definitely John Hancock'
                 endo:
                   credentialsDeviceUuid: 'cred-uuid'
-                  secrets: @encryptedSecrets
+                  encrypted: @encrypted
 
         describe 'when called with a valid message', ->
           beforeEach (done) ->
@@ -155,11 +156,11 @@ describe 'messages', ->
             .set 'Authorization', "Basic #{serviceAuth}"
             .reply 200,
                 uuid: 'cred-uuid'
-                endoSignature: 'iuV90hYkhmTrdMVrUxIWYVpXW7XYZs/Bp6+RTn4NTbnddEdI09M8JIbEeJV4lRrO61bsA28On1BKcJfYvVt/jQ=='
+                endoSignature: 'LebOB6aPRQJC7HuLqVqwBeZOFITW+S+jTExlXKrnhvcbzgn6b82fwyh0Qin8ccMym9y4ymIWcKunfa9bZj2YsA=='
                 endo:
                   authorizedKey: 'some-uuid'
                   credentialsDeviceUuid: 'cred-uuid'
-                  secrets: @encryptedSecrets
+                  encrypted: @encrypted
 
         describe 'when called with a message without metadata', ->
           beforeEach (done) ->

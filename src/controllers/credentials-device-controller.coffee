@@ -1,4 +1,3 @@
-_ = require 'lodash'
 url = require 'url'
 
 class CredentialsDeviceController

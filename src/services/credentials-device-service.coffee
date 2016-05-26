@@ -63,11 +63,11 @@ class CredentialsDeviceService
       }
 
   _isSignedCorrectly: ({endo, endoSignature, uuid}={}) =>
-    return false unless endo?.secrets?
+    return false unless endo?.encrypted?
     return false unless endo.credentialsDeviceUuid == uuid
     endo = _.cloneDeep endo
     try
-      endo.secrets = @encryption.decrypt endo.secrets
+      endo.encrypted = @encryption.decrypt endo.encrypted
     catch error
       console.error error.stack
       return false

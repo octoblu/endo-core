@@ -14,7 +14,7 @@ describe 'User Devices Spec', ->
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
 
     encryption = Encryption.fromPem @privateKey
-    @encryptedSecrets = encryption.encrypt 'this is secret'
+    @encrypted = encryption.encrypt 'this is secret'
 
     @apiStrategy = new MockStrategy name: 'lib'
     @octobluStrategy = new MockStrategy name: 'octoblu'
@@ -80,11 +80,11 @@ describe 'User Devices Spec', ->
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
             uuid: 'cred-uuid'
-            endoSignature: 'Mj7Tm10Ml/Sg5YTSOlqgsWZbkg3ELZg0ivY0mkRdgSz5tB0IXFJR2cYIBq0PnV3ke6h4HxNtK6HCseXVB7khMw=='
+            endoSignature: 'nu4y/MUxq7LsRTWhgnRKdsqG83jNJvXaY5ztVy22lmU0He984NDq8I3O/SudG1EVyhGwAv00nGxrwmFqq9QnyQ=='
             endo:
               authorizedKey: 'some-uuid'
               credentialsDeviceUuid: 'cred-uuid'
-              secrets: @encryptedSecrets
+              encrypted: @encrypted
           ]
 
         @meshblu
@@ -184,7 +184,7 @@ describe 'User Devices Spec', ->
             endo:
               authorizedKey: 'some-uuid'
               credentialsDeviceUuid: 'cred-uuid'
-              secrets: @encryptedSecrets
+              encrypted: @encrypted
           ]
 
         options =
@@ -218,10 +218,10 @@ describe 'User Devices Spec', ->
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
             uuid: 'cred-uuid'
-            endoSignature: 'dm8MT1FARvJ1RInXlqDtLCylCDIc3YD6fgWewwccaCCmoijuctJY2sGIf6MFmszjUDx2PXGMygU6rlwdwcapxw='
+            endoSignature: 'OLE06dTcCpQni4qWRxRnRwtzm1XBrkflhQeAdbHCeJgwzjXvvTv6kKcWrV+0zkPaQavWANNKg/EZsnY7kq7TmQ=='
             endo:
               credentialsDeviceUuid: 'cred-uuid'
-              secrets: @encryptedSecrets
+              encrypted: @encrypted
           ]
 
         @meshblu
@@ -303,10 +303,10 @@ describe 'User Devices Spec', ->
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
             uuid: 'cred-uuid'
-            endoSignature: 'dm8MT1FARvJ1RInXlqDtLCylCDIc3YD6fgWewwccaCCmoijuctJY2sGIf6MFmszjUDx2PXGMygU6rlwdwcapxw='
+            endoSignature: 'OLE06dTcCpQni4qWRxRnRwtzm1XBrkflhQeAdbHCeJgwzjXvvTv6kKcWrV+0zkPaQavWANNKg/EZsnY7kq7TmQ=='
             endo:
               credentialsDeviceUuid: 'cred-uuid'
-              secrets: @encryptedSecrets
+              encrypted: @encrypted
           ]
 
         @meshblu
@@ -355,10 +355,10 @@ describe 'User Devices Spec', ->
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
             uuid: 'cred-uuid'
-            endoSignature: 'dm8MT1FARvJ1RInXlqDtLCylCDIc3YD6fgWewwccaCCmoijuctJY2sGIf6MFmszjUDx2PXGMygU6rlwdwcapxw='
+            endoSignature: 'OLE06dTcCpQni4qWRxRnRwtzm1XBrkflhQeAdbHCeJgwzjXvvTv6kKcWrV+0zkPaQavWANNKg/EZsnY7kq7TmQ=='
             endo:
               credentialsDeviceUuid: 'cred-uuid'
-              secrets: @encryptedSecrets
+              encrypted: @encrypted
           ]
 
         @meshblu

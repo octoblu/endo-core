@@ -1,12 +1,13 @@
-_            = require 'lodash'
+{afterEach, beforeEach, describe, it} = global
+{expect}                   = require 'chai'
+sinon                      = require 'sinon'
+
 fs           = require 'fs'
-http         = require 'http'
 request      = require 'request'
 shmock       = require '@octoblu/shmock'
 MockStrategy = require '../mock-strategy'
 Server       = require '../../src/server'
 Encryption   = require 'meshblu-encryption'
-path         = require 'path'
 
 describe 'Auth Spec', ->
   beforeEach (done) ->
@@ -15,8 +16,8 @@ describe 'Auth Spec', ->
     @encryptedSecrets = encryption.encrypt 'this is secret'
     @resourceOwnerSignature = 'Ula5075pW5J6pbIzhez3Be78UsyVApbXMXEPXmMwBAtVdtxdHoXNx+fI9nLV/pHZzlOI0RjhJmO+qQ3zAnKviw=='
     decryptClientSecret = (req, res, next) =>
-      return next() unless req.body?.$set?['endo']?['secrets']?
-      req.body.$set['endo']['secrets'] = encryption.decrypt req.body.$set['endo']['secrets']
+      return next() unless req.body?.$set?['endo']?['encrypted']?
+      req.body.$set['endo']['encrypted'] = encryption.decrypt req.body.$set['endo']['encrypted']
       next()
 
     @meshblu = shmock 0xd00d, [decryptClientSecret]
@@ -203,13 +204,14 @@ describe 'Auth Spec', ->
                 authorizedKey: 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
                 credentialsDeviceUuid: 'cred-uuid'
                 version: '1.0.0'
-                secrets:
+                encrypted:
                   name:         'resource owner name'
                   id:           'resource owner id'
-                  credentials:
-                    secret:       'resource owner secret'
-                    refreshToken: 'resource owner refresh token'
-              endoSignature: 'YofeJ+pJHyVnVB/rhHBQBp1xp8/Uwhezkb6Wgc1Bw03wJinUp+w9wqqogwzgYmy5b5t334Bs1a2+7VTBgKyozQ=='
+                  secrets:
+                    credentials:
+                      secret:       'resource owner secret'
+                      refreshToken: 'resource owner refresh token'
+              endoSignature: 'D+1Dya9nwGt1iJeoTrPcOm+PNGQegccSKEk2HUfC63VFeZBV25J5uO6+gCucloTfG8sshSenwqJKf5O6cTfIOA=='
 
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
@@ -278,10 +280,10 @@ describe 'Auth Spec', ->
           .reply 200, [{
             uuid: 'cred-uuid'
             token: 'cred-token'
-            endoSignature: 'dm8MT1FARvJ1RInXlqDtLCylCDIc3YD6fgWewwccaCCmoijuctJY2sGIf6MFmszjUDx2PXGMygU6rlwdwcapxw=='
+            endoSignature: 'OLE06dTcCpQni4qWRxRnRwtzm1XBrkflhQeAdbHCeJgwzjXvvTv6kKcWrV+0zkPaQavWANNKg/EZsnY7kq7TmQ=='
             endo:
               credentialsDeviceUuid: 'cred-uuid'
-              secrets: @encryptedSecrets
+              encrypted: @encryptedSecrets
           }]
 
         @meshblu
@@ -298,13 +300,14 @@ describe 'Auth Spec', ->
                 authorizedKey: 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
                 credentialsDeviceUuid: 'cred-uuid'
                 version: '1.0.0'
-                secrets:
+                encrypted:
                   name:         'resource owner name'
                   id:           'resource owner id'
-                  credentials:
-                    secret:       'resource owner secret'
-                    refreshToken: 'resource owner refresh token'
-              endoSignature: 'YofeJ+pJHyVnVB/rhHBQBp1xp8/Uwhezkb6Wgc1Bw03wJinUp+w9wqqogwzgYmy5b5t334Bs1a2+7VTBgKyozQ=='
+                  secrets:
+                    credentials:
+                      secret:       'resource owner secret'
+                      refreshToken: 'resource owner refresh token'
+              endoSignature: 'D+1Dya9nwGt1iJeoTrPcOm+PNGQegccSKEk2HUfC63VFeZBV25J5uO6+gCucloTfG8sshSenwqJKf5O6cTfIOA=='
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
                 url: 'http://the-endo-url/messages'
@@ -374,14 +377,14 @@ describe 'Auth Spec', ->
             endoSignature: 'whatever'
             endo:
               credentialsDeviceUuid: 'bad-cred-uuid'
-              secrets: @encryptedSecrets
+              encrypted: @encryptedSecrets
           }, {
             uuid: 'cred-uuid'
             token: 'cred-token'
-            endoSignature: 'dm8MT1FARvJ1RInXlqDtLCylCDIc3YD6fgWewwccaCCmoijuctJY2sGIf6MFmszjUDx2PXGMygU6rlwdwcapxw=='
+            endoSignature: 'OLE06dTcCpQni4qWRxRnRwtzm1XBrkflhQeAdbHCeJgwzjXvvTv6kKcWrV+0zkPaQavWANNKg/EZsnY7kq7TmQ=='
             endo:
               credentialsDeviceUuid: 'cred-uuid'
-              secrets: @encryptedSecrets
+              encrypted: @encryptedSecrets
           }]
 
         @meshblu
@@ -398,13 +401,14 @@ describe 'Auth Spec', ->
                 authorizedKey: 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
                 credentialsDeviceUuid: 'cred-uuid'
                 version: '1.0.0'
-                secrets:
+                encrypted:
                   name:         'resource owner name'
                   id:           'resource owner id'
-                  credentials:
-                    secret:       'resource owner secret'
-                    refreshToken: 'resource owner refresh token'
-              endoSignature: 'YofeJ+pJHyVnVB/rhHBQBp1xp8/Uwhezkb6Wgc1Bw03wJinUp+w9wqqogwzgYmy5b5t334Bs1a2+7VTBgKyozQ=='
+                  secrets:
+                    credentials:
+                      secret:       'resource owner secret'
+                      refreshToken: 'resource owner refresh token'
+              endoSignature: 'D+1Dya9nwGt1iJeoTrPcOm+PNGQegccSKEk2HUfC63VFeZBV25J5uO6+gCucloTfG8sshSenwqJKf5O6cTfIOA=='
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
                 url: 'http://the-endo-url/messages'
@@ -470,16 +474,16 @@ describe 'Auth Spec', ->
           .send 'endo.authorizedKey': @resourceOwnerSignature
           .reply 200, [{
             uuid: 'bad-cred-uuid'
-            endoSignature: 'dm8MT1FARvJ1RInXlqDtLCylCDIc3YD6fgWewwccaCCmoijuctJY2sGIf6MFmszjUDx2PXGMygU6rlwdwcapxw=='
+            endoSignature: 'OLE06dTcCpQni4qWRxRnRwtzm1XBrkflhQeAdbHCeJgwzjXvvTv6kKcWrV+0zkPaQavWANNKg/EZsnY7kq7TmQ=='
             endo:
               credentialsDeviceUuid: 'cred-uuid'
-              secrets: @encryptedSecrets
+              encrypted: @encryptedSecrets
           }, {
             uuid: 'cred-uuid'
-            endoSignature: 'dm8MT1FARvJ1RInXlqDtLCylCDIc3YD6fgWewwccaCCmoijuctJY2sGIf6MFmszjUDx2PXGMygU6rlwdwcapxw=='
+            endoSignature: 'OLE06dTcCpQni4qWRxRnRwtzm1XBrkflhQeAdbHCeJgwzjXvvTv6kKcWrV+0zkPaQavWANNKg/EZsnY7kq7TmQ=='
             endo:
               credentialsDeviceUuid: 'cred-uuid'
-              secrets: @encryptedSecrets
+              encrypted: @encryptedSecrets
           }]
 
         @meshblu
@@ -496,13 +500,14 @@ describe 'Auth Spec', ->
                 authorizedKey: 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
                 credentialsDeviceUuid: 'cred-uuid'
                 version: '1.0.0'
-                secrets:
+                encrypted:
                   name:         'resource owner name'
                   id:           'resource owner id'
-                  credentials:
-                    secret:       'resource owner secret'
-                    refreshToken: 'resource owner refresh token'
-              endoSignature: 'YofeJ+pJHyVnVB/rhHBQBp1xp8/Uwhezkb6Wgc1Bw03wJinUp+w9wqqogwzgYmy5b5t334Bs1a2+7VTBgKyozQ=='
+                  secrets:
+                    credentials:
+                      secret:       'resource owner secret'
+                      refreshToken: 'resource owner refresh token'
+              endoSignature: 'D+1Dya9nwGt1iJeoTrPcOm+PNGQegccSKEk2HUfC63VFeZBV25J5uO6+gCucloTfG8sshSenwqJKf5O6cTfIOA=='
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
                 url: 'http://the-endo-url/messages'
