@@ -130,9 +130,9 @@ describe 'Auth Spec', ->
       userAuth = new Buffer('some-uuid:some-token').toString 'base64'
 
       @authDevice = @meshblu
-        .get '/v2/whoami'
+        .post '/authenticate'
         .set 'Authorization', "Basic #{userAuth}"
-        .reply 200, uuid: 'some-uuid', token: 'some-token'
+        .reply 204
 
       options =
         uri: '/auth/api'
@@ -167,9 +167,9 @@ describe 'Auth Spec', ->
         credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @meshblu
-          .get '/v2/whoami'
+          .post '/authenticate'
           .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, uuid: 'some-uuid', token: 'some-token'
+          .reply 204
 
         @meshblu
           .post '/search/devices'
@@ -269,9 +269,9 @@ describe 'Auth Spec', ->
         }
 
         @meshblu
-          .get '/v2/whoami'
+          .post '/authenticate'
           .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, uuid: 'some-uuid', token: 'some-token'
+          .reply 204
 
         @meshblu
           .post '/search/devices'
@@ -363,9 +363,9 @@ describe 'Auth Spec', ->
         }
 
         @meshblu
-          .get '/v2/whoami'
+          .post '/authenticate'
           .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, uuid: 'some-uuid', token: 'some-token'
+          .reply 204
 
         @meshblu
           .post '/search/devices'
@@ -464,9 +464,9 @@ describe 'Auth Spec', ->
         }
 
         @meshblu
-          .get '/v2/whoami'
+          .post '/authenticate'
           .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, uuid: 'some-uuid', token: 'some-token'
+          .reply 204
 
         @meshblu
           .post '/search/devices'

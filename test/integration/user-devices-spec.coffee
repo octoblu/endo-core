@@ -70,9 +70,9 @@ describe 'User Devices Spec', ->
         credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @meshblu
-          .get '/v2/whoami'
+          .post '/authenticate'
           .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, uuid: 'some-uuid', token: 'some-token'
+          .reply 204
 
         @meshblu
           .post '/search/devices'
@@ -128,9 +128,9 @@ describe 'User Devices Spec', ->
         credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @meshblu
-          .get '/v2/whoami'
+          .post '/authenticate'
           .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, uuid: 'some-uuid', token: 'some-token'
+          .reply 204
 
         @meshblu
           .post '/search/devices'
@@ -171,9 +171,9 @@ describe 'User Devices Spec', ->
         serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
 
         @meshblu
-          .get '/v2/whoami'
+          .post '/authenticate'
           .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, uuid: 'some-uuid', token: 'some-token'
+          .reply 204
 
         @meshblu
           .post '/search/devices'
@@ -208,7 +208,7 @@ describe 'User Devices Spec', ->
         credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @meshblu
-          .get '/v2/whoami'
+          .post '/authenticate'
           .set 'Authorization', "Basic #{userAuth}"
           .reply 200, uuid: 'some-uuid', token: 'some-token'
 
@@ -293,9 +293,9 @@ describe 'User Devices Spec', ->
         credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @meshblu
-          .get '/v2/whoami'
+          .post '/authenticate'
           .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, uuid: 'some-uuid', token: 'some-token'
+          .reply 204
 
         @meshblu
           .post '/search/devices'
@@ -345,9 +345,9 @@ describe 'User Devices Spec', ->
         credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @meshblu
-          .get '/v2/whoami'
+          .post '/authenticate'
           .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, uuid: 'some-uuid', token: 'some-token'
+          .reply 204
 
         @meshblu
           .post '/search/devices'

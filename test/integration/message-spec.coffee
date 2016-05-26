@@ -70,9 +70,9 @@ describe 'messages', ->
       beforeEach ->
         @credentialsDeviceAuth = new Buffer('cred-uuid:cred-token').toString 'base64'
         @meshblu
-          .get '/v2/whoami'
+          .post '/authenticate'
           .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
-          .reply 200, uuid: 'cred-uuid'
+          .reply 204
 
       describe 'when we get some weird device instead of a credentials device', ->
         beforeEach ->

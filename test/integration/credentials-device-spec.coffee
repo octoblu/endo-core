@@ -16,8 +16,8 @@ describe 'Credentials Device Spec', ->
     encryption = Encryption.fromPem @privateKey
     @encrypted = encryption.encrypt name: 'sqrtofsaturn', secrets: {}
 
-    @apiStrategy = new MockStrategy name: 'lib'
-    @octobluStrategy = new MockStrategy name: 'octoblu'
+    @apiStrategy = new MockStrategy {name: 'lib'}
+    @octobluStrategy = new MockStrategy {name: 'octoblu'}
 
     serverOptions =
       logFn: ->
@@ -70,9 +70,9 @@ describe 'Credentials Device Spec', ->
         credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @meshblu
-          .get '/v2/whoami'
+          .post '/authenticate'
           .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, uuid: 'user-uuid', token: 'user-token'
+          .reply 204
 
         @meshblu
           .post '/search/devices'
@@ -130,9 +130,9 @@ describe 'Credentials Device Spec', ->
         serviceAuth = new Buffer('service-uuid:service-token').toString 'base64'
 
         @meshblu
-          .get '/v2/whoami'
+          .post '/authenticate'
           .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, uuid: 'user-uuid', token: 'user-token'
+          .reply 204
 
         @meshblu
           .post '/search/devices'
@@ -164,9 +164,9 @@ describe 'Credentials Device Spec', ->
         serviceAuth = new Buffer('service-uuid:service-token').toString 'base64'
 
         @meshblu
-          .get '/v2/whoami'
+          .post '/authenticate'
           .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, uuid: 'user-uuid', token: 'user-token'
+          .reply 204
 
         @meshblu
           .post '/search/devices'
