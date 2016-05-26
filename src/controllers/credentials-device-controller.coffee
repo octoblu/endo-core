@@ -21,13 +21,15 @@ class CredentialsDeviceController
       res.send publicDevice
 
   upsert: (req, res) =>
-    {id, name, credentials} = req.user
+    encrypted = req.user
+    {id} = req.user
+
     authorizedUuid = req.meshbluAuth.uuid
 
     @credentialsDeviceService.findOrCreate id, (error, credentialsDevice) =>
       return res.sendError error if error?
 
-      credentialsDevice.update {authorizedUuid, id, name, credentials}, (error) =>
+      credentialsDevice.update {authorizedUuid, id, encrypted}, (error) =>
         return res.sendError error if error?
 
         serviceUrl = url.parse @serviceUrl

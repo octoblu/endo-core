@@ -155,11 +155,12 @@ describe 'Auth Spec', ->
     describe 'when the credentials device does not exist', ->
       beforeEach (done) ->
         @apiStub.yields null, {
-          id:   'resource owner id'
-          name: 'resource owner name'
-          credentials:
-            secret:       'resource owner secret'
-            refreshToken: 'resource owner refresh token'
+          id:       'resource owner id'
+          username: 'resource owner username'
+          secrets:
+            credentials:
+              secret:       'resource owner secret'
+              refreshToken: 'resource owner refresh token'
         }
 
         userAuth = new Buffer('some-uuid:some-token').toString 'base64'
@@ -205,13 +206,13 @@ describe 'Auth Spec', ->
                 credentialsDeviceUuid: 'cred-uuid'
                 version: '1.0.0'
                 encrypted:
-                  name:         'resource owner name'
                   id:           'resource owner id'
+                  username:     'resource owner username'
                   secrets:
                     credentials:
                       secret:       'resource owner secret'
                       refreshToken: 'resource owner refresh token'
-              endoSignature: 'D+1Dya9nwGt1iJeoTrPcOm+PNGQegccSKEk2HUfC63VFeZBV25J5uO6+gCucloTfG8sshSenwqJKf5O6cTfIOA=='
+              endoSignature: 'Lmy5bid36E+lpiZOMPA6VE8tWyMIxc2p3pLwRz7BRA50uxK0x5q7qYmMjjFl1PKTt5sAFDZkST1uEpw28hk93w=='
 
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
@@ -261,11 +262,12 @@ describe 'Auth Spec', ->
         credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @apiStub.yields null, {
-          id:   'resource owner id'
-          name: 'resource owner name'
-          credentials:
-            secret:       'resource owner secret'
-            refreshToken: 'resource owner refresh token'
+          id:       'resource owner id'
+          username: 'resource owner username'
+          secrets:
+            credentials:
+              secret:       'resource owner secret'
+              refreshToken: 'resource owner refresh token'
         }
 
         @meshblu
@@ -301,13 +303,13 @@ describe 'Auth Spec', ->
                 credentialsDeviceUuid: 'cred-uuid'
                 version: '1.0.0'
                 encrypted:
-                  name:         'resource owner name'
                   id:           'resource owner id'
+                  username:     'resource owner username'
                   secrets:
                     credentials:
                       secret:       'resource owner secret'
                       refreshToken: 'resource owner refresh token'
-              endoSignature: 'D+1Dya9nwGt1iJeoTrPcOm+PNGQegccSKEk2HUfC63VFeZBV25J5uO6+gCucloTfG8sshSenwqJKf5O6cTfIOA=='
+              endoSignature: 'Lmy5bid36E+lpiZOMPA6VE8tWyMIxc2p3pLwRz7BRA50uxK0x5q7qYmMjjFl1PKTt5sAFDZkST1uEpw28hk93w=='
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
                 url: 'http://the-endo-url/messages'
@@ -355,11 +357,12 @@ describe 'Auth Spec', ->
         credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @apiStub.yields null, {
-          id:   'resource owner id'
-          name: 'resource owner name'
-          credentials:
-            secret:       'resource owner secret'
-            refreshToken: 'resource owner refresh token'
+          id:       'resource owner id'
+          username: 'resource owner username'
+          secrets:
+            credentials:
+              secret:       'resource owner secret'
+              refreshToken: 'resource owner refresh token'
         }
 
         @meshblu
@@ -402,13 +405,13 @@ describe 'Auth Spec', ->
                 credentialsDeviceUuid: 'cred-uuid'
                 version: '1.0.0'
                 encrypted:
-                  name:         'resource owner name'
-                  id:           'resource owner id'
+                  id:       'resource owner id'
+                  username: 'resource owner username'
                   secrets:
                     credentials:
                       secret:       'resource owner secret'
                       refreshToken: 'resource owner refresh token'
-              endoSignature: 'D+1Dya9nwGt1iJeoTrPcOm+PNGQegccSKEk2HUfC63VFeZBV25J5uO6+gCucloTfG8sshSenwqJKf5O6cTfIOA=='
+              endoSignature: 'Lmy5bid36E+lpiZOMPA6VE8tWyMIxc2p3pLwRz7BRA50uxK0x5q7qYmMjjFl1PKTt5sAFDZkST1uEpw28hk93w=='
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
                 url: 'http://the-endo-url/messages'
@@ -456,11 +459,12 @@ describe 'Auth Spec', ->
         credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
 
         @apiStub.yields null, {
-          id:   'resource owner id'
-          name: 'resource owner name'
-          credentials:
-            secret:       'resource owner secret'
-            refreshToken: 'resource owner refresh token'
+          id:       'resource owner id'
+          username: 'resource owner username'
+          secrets:
+            credentials:
+              secret:       'resource owner secret'
+              refreshToken: 'resource owner refresh token'
         }
 
         @meshblu
@@ -501,13 +505,13 @@ describe 'Auth Spec', ->
                 credentialsDeviceUuid: 'cred-uuid'
                 version: '1.0.0'
                 encrypted:
-                  name:         'resource owner name'
-                  id:           'resource owner id'
+                  id:       'resource owner id'
+                  username: 'resource owner username'
                   secrets:
                     credentials:
                       secret:       'resource owner secret'
                       refreshToken: 'resource owner refresh token'
-              endoSignature: 'D+1Dya9nwGt1iJeoTrPcOm+PNGQegccSKEk2HUfC63VFeZBV25J5uO6+gCucloTfG8sshSenwqJKf5O6cTfIOA=='
+              endoSignature: 'Lmy5bid36E+lpiZOMPA6VE8tWyMIxc2p3pLwRz7BRA50uxK0x5q7qYmMjjFl1PKTt5sAFDZkST1uEpw28hk93w=='
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
                 url: 'http://the-endo-url/messages'

@@ -14,7 +14,7 @@ describe 'Credentials Device Spec', ->
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
 
     encryption = Encryption.fromPem @privateKey
-    @encrypted = encryption.encrypt name: 'sqrtofsaturn', secrets: {}
+    @encrypted = encryption.encrypt username: 'sqrtofsaturn', secrets: {}
 
     @apiStrategy = new MockStrategy {name: 'lib'}
     @octobluStrategy = new MockStrategy {name: 'octoblu'}
@@ -80,7 +80,7 @@ describe 'Credentials Device Spec', ->
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 200, [
             uuid: 'cred-uuid'
-            endoSignature: 'R+SxMjogNJx6KjuxcYjfjoU6HebPN8Jvpq4Eo8tqV9jvVlRMafvQyKqTHLeh/gBUtGWBexKtrxLYh2mx7s3ccg=='
+            endoSignature: 'dg5gJq4J6mNvdwy3l6l6IgeeCzdi7gSnEUmGObyB+6YswwaqYqsYS1y1Y2aWXWZcT+gEzS5zW7iB4Ii0if5CKg=='
             endo:
               authorizedKey: 'user-uuid'
               credentialsDeviceUuid: 'cred-uuid'
@@ -120,8 +120,7 @@ describe 'Credentials Device Spec', ->
         expect(@body).to.deep.equal {
           name: 'API Name'
           imageUrl: 'http://bit.ly/1SDctTa'
-          encrypted:
-            name: 'sqrtofsaturn'
+          username: 'sqrtofsaturn'
         }
 
     describe 'when inauthentic', ->

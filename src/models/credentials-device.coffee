@@ -44,7 +44,7 @@ class CredentialsDevice
       return callback error if error?
       decrypted = @encryption.decrypt @encrypted
       decrypted = _.omit decrypted, 'secrets'
-      return callback null, _.defaults({encrypted: decrypted}, credentialsDevice.options)
+      return callback null, _.defaults({username: decrypted.username}, credentialsDevice.options)
 
   getUserDevices: (callback) =>
     @meshblu.subscriptions @uuid, (error, subscriptions) =>
@@ -53,10 +53,8 @@ class CredentialsDevice
 
   getUuid: => @uuid
 
-  update: ({authorizedUuid, name, id, credentials}, callback) =>
-    credentialsDeviceUuid = @uuid
-
-    {endo, endoSignature} = @_getSignedUpdate {authorizedUuid, id, name, credentials, credentialsDeviceUuid}
+  update: ({authorizedUuid, encrypted}, callback) =>
+    {endo, endoSignature} = @_getSignedUpdate {authorizedUuid, encrypted}
     endo.encrypted = @encryption.encrypt endo.encrypted
 
     update = credentialsDeviceUpdateGenerator {endo, endoSignature, @serviceUrl}
@@ -64,16 +62,12 @@ class CredentialsDevice
       return callback error if error?
       @_subscribeToOwnMessagesReceived callback
 
-  _getSignedUpdate: ({authorizedUuid, id, name, credentials}) =>
+  _getSignedUpdate: ({authorizedUuid, encrypted}) =>
     endo = {
       authorizedKey: @encryption.sign(authorizedUuid).toString 'base64'
       credentialsDeviceUuid: @uuid
       version: '1.0.0'
-      encrypted:
-        id: id
-        name: name
-        secrets:
-          credentials: credentials
+      encrypted: encrypted
     }
     endoSignature = @encryption.sign endo
     return {endo, endoSignature}
