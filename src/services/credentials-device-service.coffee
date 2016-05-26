@@ -39,9 +39,9 @@ class CredentialsDeviceService
 
   _findOrCreate: (resourceOwnerID, callback) =>
     return callback new Error('resourceOwnerID is required') unless resourceOwnerID?
-    authorizedKey = @encryption.sign(resourceOwnerID)
+    idKey = @encryption.sign(resourceOwnerID)
 
-    @meshblu.search 'endo.authorizedKey': authorizedKey, {}, (error, devices) =>
+    @meshblu.search 'endo.idKey': idKey, {}, (error, devices) =>
       return callback error if error?
       devices = _.filter devices, @_isSignedCorrectly
       return callback null, _.first devices unless _.isEmpty devices

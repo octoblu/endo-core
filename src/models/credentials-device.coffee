@@ -53,8 +53,8 @@ class CredentialsDevice
 
   getUuid: => @uuid
 
-  update: ({authorizedUuid, encrypted}, callback) =>
-    {endo, endoSignature} = @_getSignedUpdate {authorizedUuid, encrypted}
+  update: ({authorizedUuid, encrypted, id}, callback) =>
+    {endo, endoSignature} = @_getSignedUpdate {authorizedUuid, encrypted, id}
     endo.encrypted = @encryption.encrypt endo.encrypted
 
     update = credentialsDeviceUpdateGenerator {endo, endoSignature, @serviceUrl}
@@ -62,9 +62,10 @@ class CredentialsDevice
       return callback error if error?
       @_subscribeToOwnMessagesReceived callback
 
-  _getSignedUpdate: ({authorizedUuid, encrypted}) =>
+  _getSignedUpdate: ({authorizedUuid, encrypted, id}) =>
     endo = {
       authorizedKey: @encryption.sign(authorizedUuid).toString 'base64'
+      idKey:         @encryption.sign(id).toString 'base64'
       credentialsDeviceUuid: @uuid
       version: '1.0.0'
       encrypted: encrypted
