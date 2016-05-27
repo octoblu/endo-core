@@ -15,11 +15,14 @@ class CredentialsDevice
     @meshblu    = new MeshbluHTTP meshbluConfig
 
   createUserDevice: ({authorizedUuid}, callback) =>
+    resourceOwnerName = @encryption.decrypt(@encrypted).username
+
     userDeviceConfig = userDeviceConfigGenerator
       authorizedUuid: authorizedUuid
       credentialsUuid: @uuid
       deviceType: @deviceType
       imageUrl: @imageUrl
+      resourceOwnerName: resourceOwnerName
 
     @meshblu.register userDeviceConfig, (error, userDevice) =>
       return callback error if error?

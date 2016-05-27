@@ -1,7 +1,9 @@
 module.exports = ({authorizedUuid, credentialsUuid, deviceType, imageUrl, resourceOwnerName}) ->
   name: resourceOwnerName
   type: deviceType
-  imageUrl: imageUrl
+  logo: imageUrl
+  owner: authorizedUuid
+  online: true
   octoblu:
     flow:
       forwardMetadata: true
