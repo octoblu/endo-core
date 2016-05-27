@@ -21,7 +21,7 @@ describe 'Credentials Device Spec', ->
 
     serverOptions =
       logFn: ->
-      messageHandlers: {}
+      messageHandler: {}
       port: undefined,
       disableLogging: true
       apiStrategy: @apiStrategy

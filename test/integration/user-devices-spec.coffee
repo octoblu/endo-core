@@ -21,7 +21,7 @@ describe 'User Devices Spec', ->
 
     serverOptions =
       logFn: ->
-      messageHandlers: {}
+      messageHandler: {}
       port: undefined,
       disableLogging: true
       apiStrategy: @apiStrategy
@@ -233,7 +233,9 @@ describe 'User Devices Spec', ->
           .post '/devices'
           .send
             type: "endo-core"
-            imageUrl: "http://this-is-an-image.exe"
+            logo: "http://this-is-an-image.exe"
+            owner: 'some-uuid'
+            online: true
             octoblu:
               flow:
                 forwardMetadata: true

@@ -22,7 +22,7 @@ describe 'messages', ->
     @meshblu = shmock 0xd00d
     @apiStrategy = new MockStrategy name: 'api'
     @octobluStrategy = new MockStrategy name: 'octoblu'
-    @messageHandlers = hello: sinon.stub()
+    @messageHandler = onMessage: sinon.stub()
 
     @meshblu
       .get '/v2/whoami'
@@ -38,7 +38,7 @@ describe 'messages', ->
       disableLogging: true
       apiStrategy: @apiStrategy
       octobluStrategy: @octobluStrategy
-      messageHandlers: @messageHandlers
+      messageHandler: @messageHandler
       schemas:
         hello:   require '../data/schemas/hello-schema.json'
         namaste: require '../data/schemas/namaste-schema.json'
@@ -179,76 +179,9 @@ describe 'messages', ->
           it 'should return a 422', ->
             expect(@response.statusCode).to.equal 422, JSON.stringify(@body)
 
-        describe 'when called with valid metadata, but an invalid jobType', ->
-          beforeEach (done) ->
-            options =
-              baseUrl: "http://localhost:#{@serverPort}"
-              json:
-                metadata:
-                  jobType: 'goodbye'
-              auth:
-                username: 'cred-uuid'
-                password: 'cred-token'
-
-            request.post '/messages', options, (error, @response, @body) =>
-              done error
-
-          it 'should return a 422', ->
-            expect(@response.statusCode).to.equal 422, JSON.stringify(@body)
-
-        describe 'when called with valid metadata, valid jobType, but invalid data', ->
-          beforeEach (done) ->
-            options =
-              baseUrl: "http://localhost:#{@serverPort}"
-              auth:
-                username: 'cred-uuid'
-                password: 'cred-token'
-              headers:
-                'x-meshblu-route': JSON.stringify [
-                  {"from": "flow-uuid", "to": "user-device", "type": "message.sent"}
-                  {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
-                ]
-              json:
-                metadata:
-                  jobType: 'hello'
-                data:
-                  greeting: {
-                    salutation: 'hail fellow well met'
-                  }
-
-            request.post '/messages', options, (error, @response, @body) =>
-              done error
-
-          it 'should return a 422', ->
-            expect(@response.statusCode).to.equal 422, JSON.stringify @body
-
-        describe 'when called with a valid message, but the handler does not implement the method', ->
-          beforeEach (done) ->
-            options =
-              baseUrl: "http://localhost:#{@serverPort}"
-              headers:
-                'x-meshblu-route': JSON.stringify [
-                  {"from": "flow-uuid", "to": "user-device", "type": "message.sent"}
-                  {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
-                ]
-              json:
-                metadata:
-                  jobType: 'namaste'
-                data:
-                  greeting: 'hola'
-              auth:
-                username: 'cred-uuid'
-                password: 'cred-token'
-
-            request.post '/messages', options, (error, @response, @body) =>
-              done error
-
-          it 'should return a 501', ->
-            expect(@response.statusCode).to.equal 501, JSON.stringify(@body)
-
         describe 'when called with a valid message', ->
           beforeEach (done) ->
-            @messageHandlers.hello.yields null, 200, whatever: 'this is a response'
+            @messageHandler.onMessage.yields null, metadata: {code: 200}, data: {whatever: 'this is a response'}
             @responseHandler = @meshblu
               .post '/messages'
               .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
@@ -287,17 +220,20 @@ describe 'messages', ->
             @responseHandler.done()
 
           it 'should call the hello messageHandler with the message and auth', ->
-            expect(@messageHandlers.hello).to.have.been.calledWith sinon.match {
+            expect(@messageHandler.onMessage).to.have.been.calledWith sinon.match {
+              metadata:
+                jobType: 'hello'
               data:
                 greeting: 'hola'
-              secrets:
-                credentials:
-                  secret: 'this is secret'
+              encrypted:
+                secrets:
+                  credentials:
+                    secret: 'this is secret'
             }
 
         describe 'when called with a valid message, but theres an error', ->
           beforeEach (done) ->
-            @messageHandlers.hello.yields new Error 'Something very bad happened'
+            @messageHandler.onMessage.yields new Error 'Something very bad happened'
             @responseHandler = @meshblu
               .post '/messages'
               .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
@@ -329,13 +265,16 @@ describe 'messages', ->
             request.post '/messages', options, (error, @response, @body) =>
               done error
 
-          it 'should call the hello messageHandler with the message and auth', ->
-            expect(@messageHandlers.hello).to.have.been.calledWith sinon.match {
+          it 'should call the onMessage messageHandler with the message and auth', ->
+            expect(@messageHandler.onMessage).to.have.been.calledWith sinon.match {
+              metadata:
+                jobType: 'hello'
               data:
                 greeting: 'hola'
-              secrets:
-                credentials:
-                  secret: 'this is secret'
+              encrypted:
+                secrets:
+                  credentials:
+                    secret: 'this is secret'
             }
 
           it 'should return a 500', ->
@@ -346,7 +285,7 @@ describe 'messages', ->
 
         describe 'when called with a valid message, but the the endo is invalid', ->
           beforeEach (done) ->
-            @messageHandlers.hello.yields new Error 'Something very bad happened'
+            @messageHandler.onMessage.yields new Error 'Something very bad happened'
             @responseHandler = @meshblu
               .post '/messages'
               .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
@@ -379,12 +318,15 @@ describe 'messages', ->
               done error
 
           it 'should call the hello messageHandler with the message and auth', ->
-            expect(@messageHandlers.hello).to.have.been.calledWith sinon.match {
+            expect(@messageHandler.onMessage).to.have.been.calledWith sinon.match {
+              metadata:
+                jobType: 'hello'
               data:
                 greeting: 'hola'
-              secrets:
-                credentials:
-                  secret: 'this is secret'
+              encrypted:
+                secrets:
+                  credentials:
+                    secret: 'this is secret'
             }
 
           it 'should return a 500', ->

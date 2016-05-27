@@ -36,7 +36,7 @@ describe 'Auth Spec', ->
 
     serverOptions =
       logFn: -> console.log arguments...
-      messageHandlers: {}
+      messageHandler: {}
       deviceType: 'endo-app'
       apiStrategy: @apiStrategy
       octobluStrategy: @octobluStrategy
@@ -175,7 +175,8 @@ describe 'Auth Spec', ->
         @meshblu
           .post '/search/devices'
           .set 'Authorization', "Basic #{serviceAuth}"
-          .send 'endo.authorizedKey': @resourceOwnerSignature
+          .send
+            'endo.idKey': 'Ula5075pW5J6pbIzhez3Be78UsyVApbXMXEPXmMwBAtVdtxdHoXNx+fI9nLV/pHZzlOI0RjhJmO+qQ3zAnKviw=='
           .reply 200, []
 
         @createCredentialsDevice = @meshblu
@@ -203,6 +204,7 @@ describe 'Auth Spec', ->
             $set:
               endo:
                 authorizedKey: 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
+                idKey: 'Ula5075pW5J6pbIzhez3Be78UsyVApbXMXEPXmMwBAtVdtxdHoXNx+fI9nLV/pHZzlOI0RjhJmO+qQ3zAnKviw=='
                 credentialsDeviceUuid: 'cred-uuid'
                 version: '1.0.0'
                 encrypted:
@@ -212,7 +214,7 @@ describe 'Auth Spec', ->
                     credentials:
                       secret:       'resource owner secret'
                       refreshToken: 'resource owner refresh token'
-              endoSignature: 'Lmy5bid36E+lpiZOMPA6VE8tWyMIxc2p3pLwRz7BRA50uxK0x5q7qYmMjjFl1PKTt5sAFDZkST1uEpw28hk93w=='
+              endoSignature: 'a1aPDryhnkn7TSpGcRID5ah9FMdkb+uNvp+5w8tRybXvKt3JuWcBDI0JYGAnSPH3EYBqolPbGrsXJJnl19vJjw=='
 
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
@@ -278,7 +280,7 @@ describe 'Auth Spec', ->
         @meshblu
           .post '/search/devices'
           .set 'Authorization', "Basic #{serviceAuth}"
-          .send 'endo.authorizedKey': @resourceOwnerSignature
+          .send 'endo.idKey': 'Ula5075pW5J6pbIzhez3Be78UsyVApbXMXEPXmMwBAtVdtxdHoXNx+fI9nLV/pHZzlOI0RjhJmO+qQ3zAnKviw=='
           .reply 200, [{
             uuid: 'cred-uuid'
             token: 'cred-token'
@@ -300,6 +302,7 @@ describe 'Auth Spec', ->
             $set:
               endo:
                 authorizedKey: 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
+                idKey: 'Ula5075pW5J6pbIzhez3Be78UsyVApbXMXEPXmMwBAtVdtxdHoXNx+fI9nLV/pHZzlOI0RjhJmO+qQ3zAnKviw=='
                 credentialsDeviceUuid: 'cred-uuid'
                 version: '1.0.0'
                 encrypted:
@@ -309,7 +312,7 @@ describe 'Auth Spec', ->
                     credentials:
                       secret:       'resource owner secret'
                       refreshToken: 'resource owner refresh token'
-              endoSignature: 'Lmy5bid36E+lpiZOMPA6VE8tWyMIxc2p3pLwRz7BRA50uxK0x5q7qYmMjjFl1PKTt5sAFDZkST1uEpw28hk93w=='
+              endoSignature: 'a1aPDryhnkn7TSpGcRID5ah9FMdkb+uNvp+5w8tRybXvKt3JuWcBDI0JYGAnSPH3EYBqolPbGrsXJJnl19vJjw=='
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
                 url: 'http://the-endo-url/messages'
@@ -373,7 +376,7 @@ describe 'Auth Spec', ->
         @meshblu
           .post '/search/devices'
           .set 'Authorization', "Basic #{serviceAuth}"
-          .send 'endo.authorizedKey': @resourceOwnerSignature
+          .send 'endo.idKey': 'Ula5075pW5J6pbIzhez3Be78UsyVApbXMXEPXmMwBAtVdtxdHoXNx+fI9nLV/pHZzlOI0RjhJmO+qQ3zAnKviw=='
           .reply 200, [{
             uuid: 'bad-cred-uuid'
             token: 'bad-cred-token'
@@ -402,6 +405,7 @@ describe 'Auth Spec', ->
             $set:
               endo:
                 authorizedKey: 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
+                idKey: 'Ula5075pW5J6pbIzhez3Be78UsyVApbXMXEPXmMwBAtVdtxdHoXNx+fI9nLV/pHZzlOI0RjhJmO+qQ3zAnKviw=='
                 credentialsDeviceUuid: 'cred-uuid'
                 version: '1.0.0'
                 encrypted:
@@ -411,7 +415,7 @@ describe 'Auth Spec', ->
                     credentials:
                       secret:       'resource owner secret'
                       refreshToken: 'resource owner refresh token'
-              endoSignature: 'Lmy5bid36E+lpiZOMPA6VE8tWyMIxc2p3pLwRz7BRA50uxK0x5q7qYmMjjFl1PKTt5sAFDZkST1uEpw28hk93w=='
+              endoSignature: 'a1aPDryhnkn7TSpGcRID5ah9FMdkb+uNvp+5w8tRybXvKt3JuWcBDI0JYGAnSPH3EYBqolPbGrsXJJnl19vJjw=='
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
                 url: 'http://the-endo-url/messages'
@@ -475,7 +479,7 @@ describe 'Auth Spec', ->
         @meshblu
           .post '/search/devices'
           .set 'Authorization', "Basic #{serviceAuth}"
-          .send 'endo.authorizedKey': @resourceOwnerSignature
+          .send 'endo.idKey': 'Ula5075pW5J6pbIzhez3Be78UsyVApbXMXEPXmMwBAtVdtxdHoXNx+fI9nLV/pHZzlOI0RjhJmO+qQ3zAnKviw=='
           .reply 200, [{
             uuid: 'bad-cred-uuid'
             endoSignature: 'OLE06dTcCpQni4qWRxRnRwtzm1XBrkflhQeAdbHCeJgwzjXvvTv6kKcWrV+0zkPaQavWANNKg/EZsnY7kq7TmQ=='
@@ -502,6 +506,7 @@ describe 'Auth Spec', ->
             $set:
               endo:
                 authorizedKey: 'pG7eYd4TYZOX2R5S73jo9aexPzldiNo4pw1wViDpYrAAGRMT6dY0jlbXbfHMz9y+El6AcXMZJEOxaeO1lITsYg=='
+                idKey: 'Ula5075pW5J6pbIzhez3Be78UsyVApbXMXEPXmMwBAtVdtxdHoXNx+fI9nLV/pHZzlOI0RjhJmO+qQ3zAnKviw=='
                 credentialsDeviceUuid: 'cred-uuid'
                 version: '1.0.0'
                 encrypted:
@@ -511,7 +516,7 @@ describe 'Auth Spec', ->
                     credentials:
                       secret:       'resource owner secret'
                       refreshToken: 'resource owner refresh token'
-              endoSignature: 'Lmy5bid36E+lpiZOMPA6VE8tWyMIxc2p3pLwRz7BRA50uxK0x5q7qYmMjjFl1PKTt5sAFDZkST1uEpw28hk93w=='
+              endoSignature: 'a1aPDryhnkn7TSpGcRID5ah9FMdkb+uNvp+5w8tRybXvKt3JuWcBDI0JYGAnSPH3EYBqolPbGrsXJJnl19vJjw=='
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
                 url: 'http://the-endo-url/messages'

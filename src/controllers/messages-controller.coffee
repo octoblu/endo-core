@@ -1,5 +1,3 @@
-MessagesService = require '../services/messages-service'
-
 class MessagesController
   constructor: ({@credentialsDeviceService, @messagesService}) ->
 
@@ -10,9 +8,9 @@ class MessagesController
 
     @credentialsDeviceService.getEndoByUuid auth.uuid, (error, endo) =>
       return @respondWithError {auth, error, res, route} if error?
-      @messagesService.send {auth, endo, message}, (error, code, response) =>
+      @messagesService.send {auth, endo, message}, (error, response) =>
         return @respondWithError {auth, error, res, route} if error?
-        @messagesService.reply {auth, route, code, response}, (error) =>
+        @messagesService.reply {auth, route, response}, (error) =>
           return @respondWithError {auth, error, res, route} if error?
           res.sendStatus 201
 
