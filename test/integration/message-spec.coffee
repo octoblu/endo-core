@@ -62,7 +62,7 @@ describe 'messages', ->
   afterEach (done) ->
     @meshblu.close done
 
-  describe 'On POST /messages', ->
+  describe 'On POST /v1/messages', ->
     describe 'when authorized', ->
       beforeEach ->
         @credentialsDeviceAuth = new Buffer('cred-uuid:cred-token').toString 'base64'
@@ -100,7 +100,7 @@ describe 'messages', ->
                 username: 'cred-uuid'
                 password: 'cred-token'
 
-            request.post '/messages', options, (error, @response, @body) =>
+            request.post '/v1/messages', options, (error, @response, @body) =>
               done error
 
           it 'should return a 400', ->
@@ -138,7 +138,7 @@ describe 'messages', ->
                 username: 'cred-uuid'
                 password: 'cred-token'
 
-            request.post '/messages', options, (error, @response, @body) =>
+            request.post '/v1/messages', options, (error, @response, @body) =>
               done error
 
           it 'should return a 400', ->
@@ -170,7 +170,7 @@ describe 'messages', ->
                 username: 'cred-uuid'
                 password: 'cred-token'
 
-            request.post '/messages', options, (error, @response, @body) =>
+            request.post '/v1/messages', options, (error, @response, @body) =>
               done error
 
           it 'should return a 422', ->
@@ -207,7 +207,7 @@ describe 'messages', ->
                 username: 'cred-uuid'
                 password: 'cred-token'
 
-            request.post '/messages', options, (error, @response, @body) =>
+            request.post '/v1/messages', options, (error, @response, @body) =>
               done error
 
           it 'should return a 201', ->
@@ -259,7 +259,7 @@ describe 'messages', ->
                 username: 'cred-uuid'
                 password: 'cred-token'
 
-            request.post '/messages', options, (error, @response, @body) =>
+            request.post '/v1/messages', options, (error, @response, @body) =>
               done error
 
           it 'should call the onMessage messageHandler with the message and auth', ->
@@ -311,7 +311,7 @@ describe 'messages', ->
                 username: 'cred-uuid'
                 password: 'cred-token'
 
-            request.post '/messages', options, (error, @response, @body) =>
+            request.post '/v1/messages', options, (error, @response, @body) =>
               done error
 
           it 'should call the hello messageHandler with the message and auth', ->
