@@ -9,7 +9,6 @@ meshbluHealthcheck = require 'express-meshblu-healthcheck'
 sendError          = require 'express-send-error'
 MeshbluHTTP        = require 'meshblu-http'
 passport           = require 'passport'
-debug              = require('debug')('endo:server')
 
 Router                   = require './router'
 CredentialsDeviceService = require './services/credentials-device-service'

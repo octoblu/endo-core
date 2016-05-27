@@ -236,6 +236,10 @@ describe 'User Devices Spec', ->
             octoblu:
               flow:
                 forwardMetadata: true
+            schemas:
+              version: '1.0.0'
+              message:
+                $ref: 'http://octoblu.xxx/v1/message-schema'
             meshblu:
               version: '2.0.0'
               whitelists:

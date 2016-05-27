@@ -1,4 +1,4 @@
-module.exports = ({authorizedUuid, credentialsUuid, deviceType, imageUrl, resourceOwnerName}) ->
+module.exports = ({authorizedUuid, credentialsUuid, deviceType, imageUrl, messageSchemaUri, resourceOwnerName}) ->
   name: resourceOwnerName
   type: deviceType
   logo: imageUrl
@@ -7,6 +7,10 @@ module.exports = ({authorizedUuid, credentialsUuid, deviceType, imageUrl, resour
   octoblu:
     flow:
       forwardMetadata: true
+  schemas:
+    version: '1.0.0'
+    message:
+      $ref: messageSchemaUri
   meshblu:
     version: '2.0.0'
     whitelists:

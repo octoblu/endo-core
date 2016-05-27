@@ -16,10 +16,10 @@ class Router
     throw new Error 'userDeviceManagerUrl is required' unless @userDeviceManagerUrl?
 
     @credentialsDeviceController = new CredentialsDeviceController {@credentialsDeviceService, @serviceUrl, @userDeviceManagerUrl}
-    @messagesController       = new MessagesController {@credentialsDeviceService, @messagesService}
+    @messagesController      = new MessagesController {@credentialsDeviceService, @messagesService}
     @messageSchemaController = new MessageSchemaController {@messagesService}
-    @octobluAuthController    = new OctobluAuthController
-    @userDevicesController    = new UserDevicesController {@credentialsDeviceService}
+    @octobluAuthController   = new OctobluAuthController
+    @userDevicesController   = new UserDevicesController
 
   route: (app) =>
     meshbluAuth = new MeshbluAuth @meshbluConfig

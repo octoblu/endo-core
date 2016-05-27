@@ -1,6 +1,7 @@
 _           = require 'lodash'
 MeshbluHTTP = require 'meshblu-http'
 Encryption  = require 'meshblu-encryption'
+url         = require 'url'
 
 credentialsDeviceUpdateGenerator = require '../config-generators/credentials-device-update-config-generator'
 userDeviceConfigGenerator = require '../config-generators/user-device-config-generator'
@@ -23,6 +24,7 @@ class CredentialsDevice
       deviceType: @deviceType
       imageUrl: @imageUrl
       resourceOwnerName: resourceOwnerName
+      messageSchemaUri: @_getMessageSchemaUri()
 
     @meshblu.register userDeviceConfig, (error, userDevice) =>
       return callback error if error?
@@ -64,6 +66,11 @@ class CredentialsDevice
     @meshblu.updateDangerously @uuid, update, (error) =>
       return callback error if error?
       @_subscribeToOwnMessagesReceived callback
+
+  _getMessageSchemaUri: =>
+    uri = url.parse @serviceUrl
+    uri.pathname = "#{uri.pathname}v1/message-schema"
+    return url.format uri
 
   _getSignedUpdate: ({authorizedUuid, encrypted, id}) =>
     endo = {

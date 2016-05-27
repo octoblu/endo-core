@@ -1,6 +1,6 @@
-_ = require 'lodash'
-
 class UserDevicesController
+  constructor: ->
+
   create: (req, res) =>
     authorizedUuid = req.meshbluAuth.uuid
     req.credentialsDevice.createUserDevice {authorizedUuid}, (error, userDevice) =>
@@ -17,7 +17,6 @@ class UserDevicesController
   list: (req, res) =>
     req.credentialsDevice.getUserDevices (error, userDevices) =>
       return res.sendError error if error?
-
       res.send userDevices
 
 
