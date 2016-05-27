@@ -50,6 +50,9 @@ class MessagesService
     meshblu = new MeshbluHTTP auth
     meshblu.message message, as: userDeviceUuid, callback
 
+  schema: (callback) =>
+    @messageHandler.schema callback
+
   send: ({auth, endo, message}, callback) =>
     return callback @_userError(MISSING_METADATA, 422) unless message?.metadata?
     {data, metadata} = message

@@ -39,9 +39,6 @@ describe 'messages', ->
       apiStrategy: @apiStrategy
       octobluStrategy: @octobluStrategy
       messageHandler: @messageHandler
-      schemas:
-        hello:   require '../data/schemas/hello-schema.json'
-        namaste: require '../data/schemas/namaste-schema.json'
       serviceUrl: 'http://octoblu.xxx'
       deviceType: 'endo-endor'
       meshbluConfig:

@@ -35,9 +35,6 @@ describe 'User Devices Spec', ->
         uuid: 'peter'
         token: 'i-could-eat'
         privateKey: @privateKey
-      schemas:
-        hello:   require '../data/schemas/hello-schema.json'
-        namaste: require '../data/schemas/namaste-schema.json'
       userDeviceManagerUrl: 'http://manage-my.endo'
 
     @meshblu

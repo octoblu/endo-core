@@ -48,9 +48,6 @@ describe 'Auth Spec', ->
         token: 'i-could-eat'
         privateKey: @privateKey
       port: undefined,
-      schemas:
-        hello:   require '../data/schemas/hello-schema.json'
-        namaste: require '../data/schemas/namaste-schema.json'
       serviceUrl: "http://the-endo-url"
       userDeviceManagerUrl: 'http://manage-my.endo'
 

@@ -26,7 +26,7 @@ class Server
     throw new Error('meshbluConfig is required') unless @meshbluConfig?
     throw new Error('messageHandler is required') unless @messageHandler?
     throw new Error('octobluStrategy is required') unless @octobluStrategy?
-    throw new Error('schemas are required') unless @schemas?
+    throw new Error('schemas not allowed') if @schemas?
     throw new Error('serviceUrl is required') unless @serviceUrl?
     throw new Error('userDeviceManagerUrl is required') unless @userDeviceManagerUrl?
 

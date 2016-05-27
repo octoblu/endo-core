@@ -3,6 +3,7 @@ passport    = require 'passport'
 
 CredentialsDeviceController = require './controllers/credentials-device-controller'
 MessagesController          = require './controllers/messages-controller'
+MessageSchemaController     = require './controllers/message-schema-controller'
 OctobluAuthController       = require './controllers/octoblu-auth-controller'
 UserDevicesController       = require './controllers/user-devices-controller'
 
@@ -15,12 +16,15 @@ class Router
     throw new Error 'userDeviceManagerUrl is required' unless @userDeviceManagerUrl?
 
     @credentialsDeviceController = new CredentialsDeviceController {@credentialsDeviceService, @serviceUrl, @userDeviceManagerUrl}
-    @messagesController    = new MessagesController {@credentialsDeviceService, @messagesService}
-    @octobluAuthController = new OctobluAuthController
-    @userDevicesController = new UserDevicesController {@credentialsDeviceService}
+    @messagesController       = new MessagesController {@credentialsDeviceService, @messagesService}
+    @messageSchemaController = new MessageSchemaController {@messagesService}
+    @octobluAuthController    = new OctobluAuthController
+    @userDevicesController    = new UserDevicesController {@credentialsDeviceService}
 
   route: (app) =>
     meshbluAuth = new MeshbluAuth @meshbluConfig
+
+    app.get '/v1/schema', @messageSchemaController.list
 
     app.get '/auth/octoblu', passport.authenticate('octoblu')
     app.get '/auth/octoblu/callback', passport.authenticate('octoblu', failureRedirect: '/auth/octoblu'), @octobluAuthController.storeAuthAndRedirect

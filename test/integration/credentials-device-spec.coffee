@@ -35,9 +35,6 @@ describe 'Credentials Device Spec', ->
         uuid: 'service-uuid'
         token: 'service-token'
         privateKey: @privateKey
-      schemas:
-        hello:   require '../data/schemas/hello-schema.json'
-        namaste: require '../data/schemas/namaste-schema.json'
       userDeviceManagerUrl: 'http://manage-my.endo'
 
     serviceAuth = new Buffer('service-uuid:service-token').toString 'base64'
