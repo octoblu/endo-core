@@ -24,7 +24,7 @@ class Router
   route: (app) =>
     meshbluAuth = new MeshbluAuth @meshbluConfig
 
-    app.get '/v1/schema', @messageSchemaController.list
+    app.get '/v1/message-schema', @messageSchemaController.list
 
     app.get '/auth/octoblu', passport.authenticate('octoblu')
     app.get '/auth/octoblu/callback', passport.authenticate('octoblu', failureRedirect: '/auth/octoblu'), @octobluAuthController.storeAuthAndRedirect

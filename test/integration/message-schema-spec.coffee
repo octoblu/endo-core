@@ -62,7 +62,7 @@ describe 'message schema', ->
   afterEach (done) ->
     @meshblu.close done
 
-  describe 'On GET /v1/schema', ->
+  describe 'On GET /v1/message-schema', ->
     describe 'when the message-handler yields an empty object', ->
       beforeEach (done) ->
         @messageHandler.schema.yields null, {}
@@ -71,7 +71,7 @@ describe 'message schema', ->
           baseUrl: "http://localhost:#{@serverPort}"
           json: true
 
-        request.get '/v1/schema', options, (error, @response, @body) =>
+        request.get '/v1/message-schema', options, (error, @response, @body) =>
           done error
 
       it 'should return a 200', ->
@@ -97,7 +97,7 @@ describe 'message schema', ->
           baseUrl: "http://localhost:#{@serverPort}"
           json: true
 
-        request.get '/v1/schema', options, (error, @response, @body) =>
+        request.get '/v1/message-schema', options, (error, @response, @body) =>
           done error
 
       it 'should return a 200', ->
@@ -125,7 +125,7 @@ describe 'message schema', ->
           baseUrl: "http://localhost:#{@serverPort}"
           json: true
 
-        request.get '/v1/schema', options, (error, @response, @body) =>
+        request.get '/v1/message-schema', options, (error, @response, @body) =>
           done error
 
       it 'should return a 418', ->
