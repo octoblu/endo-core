@@ -2,6 +2,7 @@ MeshbluAuth = require 'express-meshblu-auth'
 passport    = require 'passport'
 
 CredentialsDeviceController = require './controllers/credentials-device-controller'
+FormSchemaController        = require './controllers/form-schema-controller'
 MessagesController          = require './controllers/messages-controller'
 MessageSchemaController     = require './controllers/message-schema-controller'
 OctobluAuthController       = require './controllers/octoblu-auth-controller'
@@ -16,6 +17,7 @@ class Router
     throw new Error 'userDeviceManagerUrl is required' unless @userDeviceManagerUrl?
 
     @credentialsDeviceController = new CredentialsDeviceController {@credentialsDeviceService, @serviceUrl, @userDeviceManagerUrl}
+    @formSchemaController    = new FormSchemaController {@messagesService}
     @messagesController      = new MessagesController {@credentialsDeviceService, @messagesService}
     @messageSchemaController = new MessageSchemaController {@messagesService}
     @octobluAuthController   = new OctobluAuthController
@@ -24,6 +26,7 @@ class Router
   route: (app) =>
     meshbluAuth = new MeshbluAuth @meshbluConfig
 
+    app.get '/v1/form-schema', @formSchemaController.list
     app.get '/v1/message-schema', @messageSchemaController.list
 
     app.get '/auth/octoblu', passport.authenticate('octoblu')

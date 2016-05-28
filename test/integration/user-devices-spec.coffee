@@ -238,6 +238,8 @@ describe 'User Devices Spec', ->
                 forwardMetadata: true
             schemas:
               version: '1.0.0'
+              form:
+                $ref: 'http://octoblu.xxx/v1/form-schema'
               message:
                 $ref: 'http://octoblu.xxx/v1/message-schema'
             meshblu:

@@ -9,7 +9,7 @@ MockStrategy = require '../mock-strategy'
 Server       = require '../../src/server'
 Encryption  = require 'meshblu-encryption'
 
-describe 'message schema', ->
+describe 'form schema', ->
   beforeEach (done) ->
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
     @encryption = Encryption.fromPem @privateKey
@@ -22,7 +22,7 @@ describe 'message schema', ->
     @meshblu = shmock 0xd00d
     @apiStrategy = new MockStrategy name: 'api'
     @octobluStrategy = new MockStrategy name: 'octoblu'
-    @messageHandler = messageSchema: sinon.stub()
+    @messageHandler = formSchema: sinon.stub()
 
     @meshblu
       .get '/v2/whoami'
@@ -62,16 +62,16 @@ describe 'message schema', ->
   afterEach (done) ->
     @meshblu.close done
 
-  describe 'On GET /v1/message-schema', ->
+  describe 'On GET /v1/form-schema', ->
     describe 'when the message-handler yields an empty object', ->
       beforeEach (done) ->
-        @messageHandler.messageSchema.yields null, {}
+        @messageHandler.formSchema.yields null, {}
 
         options =
           baseUrl: "http://localhost:#{@serverPort}"
           json: true
 
-        request.get '/v1/message-schema', options, (error, @response, @body) =>
+        request.get '/v1/form-schema', options, (error, @response, @body) =>
           done error
 
       it 'should return a 200', ->
@@ -82,7 +82,7 @@ describe 'message schema', ->
 
     describe 'when the message-handler yields a larger schema', ->
       beforeEach (done) ->
-        @messageHandler.messageSchema.yields null, {
+        @messageHandler.formSchema.yields null, {
           doSomething:
             type: 'object'
             required: ['name', 'color']
@@ -97,7 +97,7 @@ describe 'message schema', ->
           baseUrl: "http://localhost:#{@serverPort}"
           json: true
 
-        request.get '/v1/message-schema', options, (error, @response, @body) =>
+        request.get '/v1/form-schema', options, (error, @response, @body) =>
           done error
 
       it 'should return a 200', ->
@@ -119,13 +119,13 @@ describe 'message schema', ->
       beforeEach (done) ->
         error = new Error 'Something is awry'
         error.code = 418
-        @messageHandler.messageSchema.yields error
+        @messageHandler.formSchema.yields error
 
         options =
           baseUrl: "http://localhost:#{@serverPort}"
           json: true
 
-        request.get '/v1/message-schema', options, (error, @response, @body) =>
+        request.get '/v1/form-schema', options, (error, @response, @body) =>
           done error
 
       it 'should return a 418', ->

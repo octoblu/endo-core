@@ -1,4 +1,4 @@
-module.exports = ({authorizedUuid, credentialsUuid, deviceType, imageUrl, messageSchemaUri, resourceOwnerName}) ->
+module.exports = ({authorizedUuid, credentialsUuid, deviceType, formSchemaUrl, imageUrl, messageSchemaUrl, resourceOwnerName}) ->
   name: resourceOwnerName
   type: deviceType
   logo: imageUrl
@@ -9,8 +9,10 @@ module.exports = ({authorizedUuid, credentialsUuid, deviceType, imageUrl, messag
       forwardMetadata: true
   schemas:
     version: '1.0.0'
+    form:
+      $ref: formSchemaUrl
     message:
-      $ref: messageSchemaUri
+      $ref: messageSchemaUrl
   meshblu:
     version: '2.0.0'
     whitelists:

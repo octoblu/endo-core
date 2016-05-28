@@ -24,7 +24,8 @@ class CredentialsDevice
       deviceType: @deviceType
       imageUrl: @imageUrl
       resourceOwnerName: resourceOwnerName
-      messageSchemaUri: @_getMessageSchemaUri()
+      formSchemaUrl: @_getFormSchemaUrl()
+      messageSchemaUrl: @_getMessageSchemaUrl()
 
     @meshblu.register userDeviceConfig, (error, userDevice) =>
       return callback error if error?
@@ -67,7 +68,12 @@ class CredentialsDevice
       return callback error if error?
       @_subscribeToOwnMessagesReceived callback
 
-  _getMessageSchemaUri: =>
+  _getFormSchemaUrl: =>
+    uri = url.parse @serviceUrl
+    uri.pathname = "#{uri.pathname}v1/form-schema"
+    return url.format uri
+
+  _getMessageSchemaUrl: =>
     uri = url.parse @serviceUrl
     uri.pathname = "#{uri.pathname}v1/message-schema"
     return url.format uri
