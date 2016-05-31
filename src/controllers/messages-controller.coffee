@@ -1,3 +1,5 @@
+debug = require('debug')('endo-core:messages-controller')
+
 class MessagesController
   constructor: ({@credentialsDeviceService, @messagesService}) ->
 
@@ -6,12 +8,19 @@ class MessagesController
     auth    = req.meshbluAuth
     message = req.body
 
+    debug 'create', auth.uuid
     @credentialsDeviceService.getEndoByUuid auth.uuid, (error, endo) =>
+      debug 'credentialsDeviceService.getEndoByUuid', error
       return @respondWithError {auth, error, res, route} if error?
+
       @messagesService.send {auth, endo, message}, (error, response) =>
+        debug 'messagesService.send', error
         return @respondWithError {auth, error, res, route} if error?
+
         @messagesService.reply {auth, route, response}, (error) =>
+          debug 'messagesService.reply', error
           return @respondWithError {auth, error, res, route} if error?
+          
           res.sendStatus 201
 
   respondWithError: ({auth, error, res, route}) =>

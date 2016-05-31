@@ -4,7 +4,7 @@ module.exports = ({endo, endoSignature, serviceUrl}) ->
     'endoSignature':      endoSignature
     'meshblu.forwarders.message.received': [{
       type: 'webhook'
-      url:  "#{serviceUrl}/messages",
+      url:  "#{serviceUrl}/v1/messages",
       method: 'POST'
       generateAndForwardMeshbluCredentials: true
     }]

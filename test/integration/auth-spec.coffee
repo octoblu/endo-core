@@ -215,7 +215,7 @@ describe 'Auth Spec', ->
 
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
-                url: 'http://the-endo-url/messages'
+                url: 'http://the-endo-url/v1/messages'
                 method: 'POST'
                 generateAndForwardMeshbluCredentials: true
               }]
@@ -312,7 +312,7 @@ describe 'Auth Spec', ->
               endoSignature: 'a1aPDryhnkn7TSpGcRID5ah9FMdkb+uNvp+5w8tRybXvKt3JuWcBDI0JYGAnSPH3EYBqolPbGrsXJJnl19vJjw=='
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
-                url: 'http://the-endo-url/messages'
+                url: 'http://the-endo-url/v1/messages'
                 method: 'POST'
                 generateAndForwardMeshbluCredentials: true
               }]
@@ -415,7 +415,7 @@ describe 'Auth Spec', ->
               endoSignature: 'a1aPDryhnkn7TSpGcRID5ah9FMdkb+uNvp+5w8tRybXvKt3JuWcBDI0JYGAnSPH3EYBqolPbGrsXJJnl19vJjw=='
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
-                url: 'http://the-endo-url/messages'
+                url: 'http://the-endo-url/v1/messages'
                 method: 'POST'
                 generateAndForwardMeshbluCredentials: true
               }]
@@ -516,7 +516,7 @@ describe 'Auth Spec', ->
               endoSignature: 'a1aPDryhnkn7TSpGcRID5ah9FMdkb+uNvp+5w8tRybXvKt3JuWcBDI0JYGAnSPH3EYBqolPbGrsXJJnl19vJjw=='
               'meshblu.forwarders.message.received': [{
                 type: 'webhook'
-                url: 'http://the-endo-url/messages'
+                url: 'http://the-endo-url/v1/messages'
                 method: 'POST'
                 generateAndForwardMeshbluCredentials: true
               }]
@@ -541,14 +541,14 @@ describe 'Auth Spec', ->
         request.get options, (error, @response, @body) =>
           done error
 
+      it 'should return a 302', ->
+        expect(@response.statusCode).to.equal 302, JSON.stringify(@body)
+
       it 'should update the credentials device with the new resourceOwnerSecret and authorizedUuid', ->
         @updateCredentialsDevice.done()
 
       it 'should subscribe to its own received messages', ->
         @createMessageReceivedSubscription.done()
-
-      it 'should return a 302', ->
-        expect(@response.statusCode).to.equal 302
 
       it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
         EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid'

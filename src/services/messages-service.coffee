@@ -5,6 +5,8 @@ Encryption  = require 'meshblu-encryption'
 MeshbluHTTP = require 'meshblu-http'
 path        = require 'path'
 
+debug = require('debug')('endo-core:messages-service')
+
 # ENDO_MESSAGE_INVALID   = 'Message does not match endo schema'
 MISSING_METADATA         = 'Message is missing required property "metadata"'
 # JOB_TYPE_UNSUPPORTED   = 'That jobType is not supported'
@@ -18,6 +20,12 @@ class MessagesService
 
     @endoMessageSchema = @_getEndoMessageSchemaSync()
     @validator = new Validator
+
+  formSchema: (callback) =>
+    @messageHandler.formSchema callback
+
+  messageSchema: (callback) =>
+    @messageHandler.messageSchema callback
 
   reply: ({auth, route, response}, callback) =>
     return callback @_userError(MISSING_ROUTE_HEADER, 422) if _.isEmpty route
@@ -50,15 +58,10 @@ class MessagesService
     meshblu = new MeshbluHTTP auth
     meshblu.message message, as: userDeviceUuid, callback
 
-  formSchema: (callback) =>
-    @messageHandler.formSchema callback
-
-  messageSchema: (callback) =>
-    @messageHandler.messageSchema callback
-
   send: ({auth, endo, message}, callback) =>
-    return callback @_userError(MISSING_METADATA, 422) unless message?.metadata?
-    {data, metadata} = message
+    return callback @_userError(MISSING_METADATA, 422) unless message?.payload?.metadata?
+    {data, metadata} = message.payload
+    debug 'send', JSON.stringify({data,metadata})
 
     encryption = Encryption.fromJustGuess auth.privateKey
     encrypted  = encryption.decrypt endo.encrypted

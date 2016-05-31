@@ -92,10 +92,11 @@ describe 'messages', ->
                   {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
                 ]
               json:
-                metadata:
-                  jobType: 'hello'
-                data:
-                  greeting: 'hola'
+                payload:
+                  metadata:
+                    jobType: 'hello'
+                  data:
+                    greeting: 'hola'
               auth:
                 username: 'cred-uuid'
                 password: 'cred-token'
@@ -130,10 +131,11 @@ describe 'messages', ->
                   {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
                 ]
               json:
-                metadata:
-                  jobType: 'hello'
-                data:
-                  greeting: 'hola'
+                payload:
+                  metadata:
+                    jobType: 'hello'
+                  data:
+                    greeting: 'hola'
               auth:
                 username: 'cred-uuid'
                 password: 'cred-token'
@@ -199,10 +201,11 @@ describe 'messages', ->
                   {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
                 ]
               json:
-                metadata:
-                  jobType: 'hello'
-                data:
-                  greeting: 'hola'
+                payload:
+                  metadata:
+                    jobType: 'hello'
+                  data:
+                    greeting: 'hola'
               auth:
                 username: 'cred-uuid'
                 password: 'cred-token'
@@ -218,14 +221,15 @@ describe 'messages', ->
 
           it 'should call the hello messageHandler with the message and auth', ->
             expect(@messageHandler.onMessage).to.have.been.calledWith sinon.match {
-              metadata:
-                jobType: 'hello'
-              data:
-                greeting: 'hola'
               encrypted:
                 secrets:
                   credentials:
                     secret: 'this is secret'
+            }, {
+              metadata:
+                jobType: 'hello'
+              data:
+                greeting: 'hola'
             }
 
         describe 'when called with a valid message, but theres an error', ->
@@ -251,10 +255,11 @@ describe 'messages', ->
                   {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
                 ]
               json:
-                metadata:
-                  jobType: 'hello'
-                data:
-                  greeting: 'hola'
+                payload:
+                  metadata:
+                    jobType: 'hello'
+                  data:
+                    greeting: 'hola'
               auth:
                 username: 'cred-uuid'
                 password: 'cred-token'
@@ -264,14 +269,15 @@ describe 'messages', ->
 
           it 'should call the onMessage messageHandler with the message and auth', ->
             expect(@messageHandler.onMessage).to.have.been.calledWith sinon.match {
-              metadata:
-                jobType: 'hello'
-              data:
-                greeting: 'hola'
               encrypted:
                 secrets:
                   credentials:
                     secret: 'this is secret'
+            }, {
+              metadata:
+                jobType: 'hello'
+              data:
+                greeting: 'hola'
             }
 
           it 'should return a 500', ->
@@ -303,10 +309,11 @@ describe 'messages', ->
                   {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
                 ]
               json:
-                metadata:
-                  jobType: 'hello'
-                data:
-                  greeting: 'hola'
+                payload:
+                  metadata:
+                    jobType: 'hello'
+                  data:
+                    greeting: 'hola'
               auth:
                 username: 'cred-uuid'
                 password: 'cred-token'
