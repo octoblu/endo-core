@@ -1,7 +1,8 @@
 url = require 'url'
 
 class CredentialsDeviceController
-  constructor: ({@credentialsDeviceService, @serviceUrl, @userDeviceManagerUrl}) ->
+  constructor: ({@credentialsDeviceService, @appOctobluHost, @serviceUrl, @userDeviceManagerUrl}) ->
+    throw new Error 'appOctobluHost is required' unless @appOctobluHost?
     throw new Error 'credentialsDeviceService is required' unless @credentialsDeviceService?
     throw new Error 'serviceUrl is required' unless @serviceUrl?
     throw new Error 'userDeviceManagerUrl is required' unless @userDeviceManagerUrl?
@@ -38,6 +39,7 @@ class CredentialsDeviceController
         userDeviceManagerUrl = url.parse @userDeviceManagerUrl, true
         userDeviceManagerUrl.query.meshbluAuthBearer = req.meshbluAuth.bearerToken
         userDeviceManagerUrl.query.credentialsDeviceUrl = url.format serviceUrl
+        userDeviceManagerUrl.query.appOctobluHost = url.format @appOctobluHost
 
         return res.redirect url.format userDeviceManagerUrl
 

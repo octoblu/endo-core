@@ -50,6 +50,7 @@ describe 'Auth Spec', ->
       port: undefined,
       serviceUrl: "http://the-endo-url"
       userDeviceManagerUrl: 'http://manage-my.endo'
+      appOctobluHost: 'http://app.octoblu.biz/'
 
     @server = new Server serverOptions
 
@@ -251,7 +252,7 @@ describe 'Auth Spec', ->
         @createMessageReceivedSubscription.done()
 
       it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
-        EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid'
+        EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid&appOctobluHost=http%3A%2F%2Fapp.octoblu.biz%2F'
         expect(@response.headers.location).to.equal EXPECTED
 
     describe 'when the credentials device does exist', ->
@@ -347,7 +348,7 @@ describe 'Auth Spec', ->
         expect(@response.statusCode).to.equal 302
 
       it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
-        EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid'
+        EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid&appOctobluHost=http%3A%2F%2Fapp.octoblu.biz%2F'
         expect(@response.headers.location).to.equal EXPECTED
 
     describe 'when two credentials devices exist, but only one has an valid endoSignature', ->
@@ -450,7 +451,7 @@ describe 'Auth Spec', ->
         expect(@response.statusCode).to.equal 302
 
       it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
-        EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid'
+        EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid&appOctobluHost=http%3A%2F%2Fapp.octoblu.biz%2F'
         expect(@response.headers.location).to.equal EXPECTED
 
     describe 'when two credentials devices exist with valid endoSignature, but one has a bad credentialsDeviceUrl', ->
@@ -551,5 +552,5 @@ describe 'Auth Spec', ->
         @createMessageReceivedSubscription.done()
 
       it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
-        EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid'
+        EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid&appOctobluHost=http%3A%2F%2Fapp.octoblu.biz%2F'
         expect(@response.headers.location).to.equal EXPECTED

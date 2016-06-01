@@ -35,6 +35,7 @@ describe 'Credentials Device Spec', ->
         uuid: 'service-uuid'
         token: 'service-token'
         privateKey: @privateKey
+      appOctobluHost: 'http://app.octoblu.luxury'
       userDeviceManagerUrl: 'http://manage-my.endo'
 
     serviceAuth = new Buffer('service-uuid:service-token').toString 'base64'

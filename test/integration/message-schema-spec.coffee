@@ -47,6 +47,7 @@ describe 'message schema', ->
         uuid: 'peter'
         token: 'i-could-eat'
         privateKey: @privateKey
+      appOctobluHost: 'http://app.octoblu.xxx'
       userDeviceManagerUrl: 'http://manage-my.endo'
 
     @server = new Server serverOptions

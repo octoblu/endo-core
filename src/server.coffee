@@ -16,11 +16,12 @@ MessagesService          = require './services/messages-service'
 
 class Server
   constructor: (options)->
-    {@apiStrategy, @deviceType, @meshbluConfig, @messageHandler, @octobluStrategy, @schemas, @serviceUrl} = options
-    {@userDeviceManagerUrl} = options
+    {@apiStrategy, @appOctobluHost, @deviceType, @meshbluConfig, @messageHandler, @octobluStrategy, } = options
+    {@schemas, @serviceUrl, @userDeviceManagerUrl} = options
     {@disableLogging, @logFn, @port} = options
 
     throw new Error('apiStrategy is required') unless @apiStrategy?
+    throw new Error('appOctobluHost is required') unless @appOctobluHost?
     throw new Error('deviceType is required') unless @deviceType?
     throw new Error('meshbluConfig is required') unless @meshbluConfig?
     throw new Error('messageHandler is required') unless @messageHandler?
@@ -59,7 +60,7 @@ class Server
       {imageUrl} = device.options
       credentialsDeviceService  = new CredentialsDeviceService {@deviceType, imageUrl, @meshbluConfig, @serviceUrl}
       messagesService           = new MessagesService {@messageHandler, @schemas}
-      router = new Router {credentialsDeviceService, messagesService, @meshbluConfig, @serviceUrl, @userDeviceManagerUrl}
+      router = new Router {credentialsDeviceService, messagesService, @appOctobluHost, @meshbluConfig, @serviceUrl, @userDeviceManagerUrl}
       router.route app
 
       @server = app.listen @port, callback

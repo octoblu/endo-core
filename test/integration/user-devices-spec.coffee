@@ -35,6 +35,7 @@ describe 'User Devices Spec', ->
         uuid: 'peter'
         token: 'i-could-eat'
         privateKey: @privateKey
+      appOctobluHost: 'http://app.octoblu.rentals'
       userDeviceManagerUrl: 'http://manage-my.endo'
 
     @meshblu
