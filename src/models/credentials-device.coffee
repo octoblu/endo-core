@@ -26,6 +26,7 @@ class CredentialsDevice
       resourceOwnerName: resourceOwnerName
       formSchemaUrl: @_getFormSchemaUrl()
       messageSchemaUrl: @_getMessageSchemaUrl()
+      responseSchemaUrl: @_getResponseSchemaUrl()
 
     @meshblu.register userDeviceConfig, (error, userDevice) =>
       return callback error if error?
@@ -76,6 +77,11 @@ class CredentialsDevice
   _getMessageSchemaUrl: =>
     uri = url.parse @serviceUrl
     uri.pathname = "#{uri.pathname}v1/message-schema"
+    return url.format uri
+
+  _getResponseSchemaUrl: =>
+    uri = url.parse @serviceUrl
+    uri.pathname = "#{uri.pathname}v1/response-schema"
     return url.format uri
 
   _getSignedUpdate: ({authorizedUuid, encrypted, id}) =>

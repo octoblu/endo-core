@@ -243,6 +243,8 @@ describe 'User Devices Spec', ->
                 $ref: 'http://octoblu.xxx/v1/form-schema'
               message:
                 $ref: 'http://octoblu.xxx/v1/message-schema'
+              response:
+                $ref: 'http://octoblu.xxx/v1/response-schema'
             meshblu:
               version: '2.0.0'
               whitelists:
