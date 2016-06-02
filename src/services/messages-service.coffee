@@ -1,9 +1,7 @@
-fs          = require 'fs'
 {Validator} = require 'jsonschema'
 _           = require 'lodash'
 Encryption  = require 'meshblu-encryption'
 MeshbluHTTP = require 'meshblu-http'
-path        = require 'path'
 
 debug = require('debug')('endo-core:messages-service')
 
@@ -17,8 +15,6 @@ MISSING_ROUTE_HEADER   = 'Missing x-meshblu-route header in request'
 class MessagesService
   constructor: ({@messageHandler}) ->
     throw new Error 'messageHandler is required' unless @messageHandler?
-
-    @endoMessageSchema = @_getEndoMessageSchemaSync()
     @validator = new Validator
 
   formSchema: (callback) =>
@@ -58,6 +54,9 @@ class MessagesService
     meshblu = new MeshbluHTTP auth
     meshblu.message message, as: userDeviceUuid, callback
 
+  responseSchema: (callback) =>
+    @messageHandler.responseSchema callback
+
   send: ({auth, endo, message}, callback) =>
     return callback @_userError(MISSING_METADATA, 422) unless message?.payload?.metadata?
     {data, metadata} = message.payload
@@ -66,10 +65,6 @@ class MessagesService
     encryption = Encryption.fromJustGuess auth.privateKey
     encrypted  = encryption.decrypt endo.encrypted
     @messageHandler.onMessage {data, encrypted, metadata}, callback
-
-  _getEndoMessageSchemaSync: =>
-    filepath = path.join __dirname, '../../endo-message-schema.json'
-    JSON.parse fs.readFileSync(filepath, 'utf8')
 
   _userError: (message, code) =>
     error = new Error message

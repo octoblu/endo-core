@@ -6,6 +6,7 @@ FormSchemaController        = require './controllers/form-schema-controller'
 MessagesController          = require './controllers/messages-controller'
 MessageSchemaController     = require './controllers/message-schema-controller'
 OctobluAuthController       = require './controllers/octoblu-auth-controller'
+ResponseSchemaController    = require './controllers/response-schema-controller'
 UserDevicesController       = require './controllers/user-devices-controller'
 
 class Router
@@ -21,17 +22,19 @@ class Router
     throw new Error 'userDeviceManagerUrl is required' unless @userDeviceManagerUrl?
 
     @credentialsDeviceController = new CredentialsDeviceController {@credentialsDeviceService, @appOctobluHost, @serviceUrl, @userDeviceManagerUrl}
-    @formSchemaController    = new FormSchemaController {@messagesService}
-    @messagesController      = new MessagesController {@credentialsDeviceService, @messagesService}
-    @messageSchemaController = new MessageSchemaController {@messagesService}
-    @octobluAuthController   = new OctobluAuthController
-    @userDevicesController   = new UserDevicesController
+    @formSchemaController        = new FormSchemaController {@messagesService}
+    @messagesController          = new MessagesController {@credentialsDeviceService, @messagesService}
+    @messageSchemaController     = new MessageSchemaController {@messagesService}
+    @octobluAuthController       = new OctobluAuthController
+    @responseSchemaController    = new ResponseSchemaController {@messagesService}
+    @userDevicesController       = new UserDevicesController
 
   route: (app) =>
     meshbluAuth = new MeshbluAuth @meshbluConfig
 
     app.get '/v1/form-schema', @formSchemaController.list
     app.get '/v1/message-schema', @messageSchemaController.list
+    app.get '/v1/response-schema', @responseSchemaController.list
 
     app.get '/auth/octoblu', passport.authenticate('octoblu')
     app.get '/auth/octoblu/callback', passport.authenticate('octoblu', failureRedirect: '/auth/octoblu'), @octobluAuthController.storeAuthAndRedirect
