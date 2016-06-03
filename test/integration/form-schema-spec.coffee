@@ -2,12 +2,14 @@
 {expect} = require 'chai'
 sinon    = require 'sinon'
 
-fs           = require 'fs'
-request      = require 'request'
-shmock       = require '@octoblu/shmock'
-MockStrategy = require '../mock-strategy'
-Server       = require '../../src/server'
-Encryption  = require 'meshblu-encryption'
+fs            = require 'fs'
+Encryption    = require 'meshblu-encryption'
+request       = require 'request'
+enableDestroy = require 'server-destroy'
+shmock        = require '@octoblu/shmock'
+
+MockStrategy  = require '../mock-strategy'
+Server        = require '../../src/server'
 
 describe 'form schema', ->
   beforeEach (done) ->
@@ -20,6 +22,7 @@ describe 'form schema', ->
     @encrypted = @encryption.encrypt encrypted
 
     @meshblu = shmock 0xd00d
+    enableDestroy @meshblu
     @apiStrategy = new MockStrategy name: 'api'
     @octobluStrategy = new MockStrategy name: 'octoblu'
     @messageHandler = formSchema: sinon.stub()
@@ -61,7 +64,7 @@ describe 'form schema', ->
     @server.stop done
 
   afterEach (done) ->
-    @meshblu.close done
+    @meshblu.destroy done
 
   describe 'On GET /v1/form-schema', ->
     describe 'when the message-handler yields an empty object', ->

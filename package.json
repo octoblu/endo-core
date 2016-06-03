@@ -1,6 +1,6 @@
 {
   "name": "endo-core",
-  "version": "12.2.0",
+  "version": "12.2.1",
   "description": "Put some description here",
   "keywords": [],
   "homepage": "https://github.com/octoblu/endo-core",
@@ -28,6 +28,7 @@
     "mocha-istanbul": "^0.2.0",
     "passport-strategy": "^1.0.0",
     "request": "^2.66.0",
+    "server-destroy": "^1.0.1",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0"
   },

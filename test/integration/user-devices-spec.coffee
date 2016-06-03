@@ -1,16 +1,20 @@
 {afterEach, beforeEach, describe, it} = global
 {expect} = require 'chai'
 
-fs           = require 'fs'
-request      = require 'request'
-shmock       = require '@octoblu/shmock'
-MockStrategy = require '../mock-strategy'
-Server       = require '../../src/server'
-Encryption   = require 'meshblu-encryption'
+fs            = require 'fs'
+Encryption    = require 'meshblu-encryption'
+request       = require 'request'
+enableDestroy = require 'server-destroy'
+shmock        = require '@octoblu/shmock'
+
+MockStrategy  = require '../mock-strategy'
+Server        = require '../../src/server'
 
 describe 'User Devices Spec', ->
   beforeEach (done) ->
     @meshblu = shmock 0xd00d
+    enableDestroy @meshblu
+
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
 
     encryption = Encryption.fromPem @privateKey
@@ -58,7 +62,7 @@ describe 'User Devices Spec', ->
     @server.stop done
 
   afterEach (done) ->
-    @meshblu.close done
+    @meshblu.destroy done
 
   describe 'On GET /cred-uuid/user-devices', ->
     describe 'when authorized', ->

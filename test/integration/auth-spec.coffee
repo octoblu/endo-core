@@ -2,12 +2,13 @@
 {expect}                   = require 'chai'
 sinon                      = require 'sinon'
 
-fs           = require 'fs'
-request      = require 'request'
-shmock       = require '@octoblu/shmock'
-MockStrategy = require '../mock-strategy'
-Server       = require '../../src/server'
-Encryption   = require 'meshblu-encryption'
+fs            = require 'fs'
+Encryption    = require 'meshblu-encryption'
+request       = require 'request'
+enableDestroy = require 'server-destroy'
+shmock        = require '@octoblu/shmock'
+MockStrategy  = require '../mock-strategy'
+Server        = require '../../src/server'
 
 describe 'Auth Spec', ->
   beforeEach (done) ->
@@ -21,6 +22,7 @@ describe 'Auth Spec', ->
       next()
 
     @meshblu = shmock 0xd00d, [decryptClientSecret]
+    enableDestroy @meshblu
 
     @apiStub = sinon.stub().yields(new Error('Unauthorized'))
     @apiStrategy = new MockStrategy name: 'api', @apiStub
@@ -63,7 +65,7 @@ describe 'Auth Spec', ->
     @server.stop done
 
   afterEach (done) ->
-    @meshblu.close done
+    @meshblu.destroy done
 
   describe 'When inauthenticated', ->
     describe 'On GET /', ->
