@@ -32,6 +32,7 @@ class Router
   route: (app) =>
     meshbluAuth = new MeshbluAuth @meshbluConfig
 
+    app.get '/', (req, res) => res.redirect('/auth/octoblu')
     app.get '/v1/form-schema', @formSchemaController.list
     app.get '/v1/message-schema', @messageSchemaController.list
     app.get '/v1/response-schema', @responseSchemaController.list
