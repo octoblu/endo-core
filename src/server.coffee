@@ -8,7 +8,9 @@ errorHandler       = require 'errorhandler'
 meshbluHealthcheck = require 'express-meshblu-healthcheck'
 sendError          = require 'express-send-error'
 MeshbluHTTP        = require 'meshblu-http'
+path               = require 'path'
 passport           = require 'passport'
+favicon            = require 'serve-favicon'
 
 Router                   = require './router'
 CredentialsDeviceService = require './services/credentials-device-service'
@@ -41,6 +43,7 @@ class Server
     passport.use 'api', @apiStrategy
 
     app = express()
+    app.use favicon path.join(__dirname, '../favicon.ico')
     app.use meshbluHealthcheck()
     app.use morgan 'dev', immediate: false unless @disableLogging
     app.use cors()
