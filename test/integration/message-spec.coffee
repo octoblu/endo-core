@@ -96,11 +96,10 @@ describe 'messages', ->
                   {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
                 ]
               json:
-                payload:
-                  metadata:
-                    jobType: 'hello'
-                  data:
-                    greeting: 'hola'
+                metadata:
+                  jobType: 'hello'
+                data:
+                  greeting: 'hola'
               auth:
                 username: 'cred-uuid'
                 password: 'cred-token'
@@ -135,11 +134,10 @@ describe 'messages', ->
                   {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
                 ]
               json:
-                payload:
-                  metadata:
-                    jobType: 'hello'
-                  data:
-                    greeting: 'hola'
+                metadata:
+                  jobType: 'hello'
+                data:
+                  greeting: 'hola'
               auth:
                 username: 'cred-uuid'
                 password: 'cred-token'
@@ -205,11 +203,10 @@ describe 'messages', ->
                   {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
                 ]
               json:
-                payload:
-                  metadata:
-                    jobType: 'hello'
-                  data:
-                    greeting: 'hola'
+                metadata:
+                  jobType: 'hello'
+                data:
+                  greeting: 'hola'
               auth:
                 username: 'cred-uuid'
                 password: 'cred-token'
@@ -259,11 +256,10 @@ describe 'messages', ->
                   {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
                 ]
               json:
-                payload:
-                  metadata:
-                    jobType: 'hello'
-                  data:
-                    greeting: 'hola'
+                metadata:
+                  jobType: 'hello'
+                data:
+                  greeting: 'hola'
               auth:
                 username: 'cred-uuid'
                 password: 'cred-token'
@@ -313,11 +309,10 @@ describe 'messages', ->
                   {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
                 ]
               json:
-                payload:
-                  metadata:
-                    jobType: 'hello'
-                  data:
-                    greeting: 'hola'
+                metadata:
+                  jobType: 'hello'
+                data:
+                  greeting: 'hola'
               auth:
                 username: 'cred-uuid'
                 password: 'cred-token'

@@ -58,8 +58,8 @@ class MessagesService
     @messageHandler.responseSchema callback
 
   send: ({auth, endo, message}, callback) =>
-    return callback @_userError(MISSING_METADATA, 422) unless message?.payload?.metadata?
-    {data, metadata} = message.payload
+    return callback @_userError(MISSING_METADATA, 422) unless message?.metadata?
+    {data, metadata} = message
     debug 'send', JSON.stringify({data,metadata})
 
     encryption = Encryption.fromJustGuess auth.privateKey

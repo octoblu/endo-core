@@ -20,7 +20,7 @@ module.exports = (options) ->
       flow:
         forwardMetadata: true
     schemas:
-      version: '1.0.0'
+      version: '2.0.0'
       form:
         $ref: formSchemaUrl
       message:
