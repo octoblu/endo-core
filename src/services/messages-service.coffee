@@ -5,12 +5,8 @@ MeshbluHTTP = require 'meshblu-http'
 
 debug = require('debug')('endo-core:messages-service')
 
-# ENDO_MESSAGE_INVALID   = 'Message does not match endo schema'
-MISSING_METADATA         = 'Message is missing required property "metadata"'
-# JOB_TYPE_UNSUPPORTED   = 'That jobType is not supported'
-# JOB_TYPE_UNIMPLEMENTED = 'That jobType has not yet been implemented'
-# MESSAGE_DATA_INVALID   = 'Message data does not match schema for jobType'
-MISSING_ROUTE_HEADER   = 'Missing x-meshblu-route header in request'
+MISSING_METADATA     = 'Message is missing required property "metadata"'
+MISSING_ROUTE_HEADER = 'Missing x-meshblu-route header in request'
 
 class MessagesService
   constructor: ({@messageHandler}) ->
@@ -23,22 +19,23 @@ class MessagesService
   messageSchema: (callback) =>
     @messageHandler.messageSchema callback
 
-  reply: ({auth, route, response}, callback) =>
+  reply: ({auth, route, response, respondTo}, callback) =>
     return callback @_userError(MISSING_ROUTE_HEADER, 422) if _.isEmpty route
 
     firstHop       = _.first JSON.parse route
     senderUuid     = firstHop.from
     userDeviceUuid = firstHop.to
+    metadata       = _.assign {to: respondTo}, response.metadata
 
     message =
       devices:  [senderUuid]
-      metadata: response.metadata
+      metadata: metadata
       data:     response.data
 
     meshblu = new MeshbluHTTP auth
     meshblu.message message, as: userDeviceUuid, callback
 
-  replyWithError: ({auth, error, route}, callback) =>
+  replyWithError: ({auth, error, route, respondTo}, callback) =>
     return callback @_userError(MISSING_ROUTE_HEADER, 422) if _.isEmpty route
     firstHop       = _.first JSON.parse route
     senderUuid     = firstHop.from
@@ -48,6 +45,7 @@ class MessagesService
       devices: [senderUuid]
       metadata:
         code: error.code ? 500
+        to: respondTo
         error:
           message: error.message
 

@@ -191,6 +191,7 @@ describe 'messages', ->
                 devices: ['flow-uuid']
                 metadata:
                   code: 200
+                  to: { foo: 'bar' }
                 data:
                   whatever: 'this is a response'
               .reply 201
@@ -205,6 +206,7 @@ describe 'messages', ->
               json:
                 metadata:
                   jobType: 'hello'
+                  respondTo: { foo: 'bar' }
                 data:
                   greeting: 'hola'
               auth:
@@ -244,6 +246,7 @@ describe 'messages', ->
                 devices: ['flow-uuid']
                 metadata:
                   code: 500
+                  to: 'food'
                   error:
                     message: 'Something very bad happened'
               .reply 201
@@ -258,6 +261,7 @@ describe 'messages', ->
               json:
                 metadata:
                   jobType: 'hello'
+                  respondTo: 'food'
                 data:
                   greeting: 'hola'
               auth:
