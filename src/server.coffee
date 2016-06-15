@@ -46,7 +46,7 @@ class Server
     app.use favicon path.join(__dirname, '../favicon.ico')
     app.use meshbluHealthcheck()
     app.use morgan 'dev', immediate: false unless @disableLogging
-    app.use cors()
+    app.use cors(exposedHeaders: ['Location'])
     app.use errorHandler()
     app.use cookieSession secret: @meshbluConfig.token
     app.use cookieParser()
