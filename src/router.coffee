@@ -45,6 +45,7 @@ class Router
 
     app.get  '/auth/api', passport.authenticate('api')
     app.get  '/auth/api/callback', passport.authenticate('api'), @credentialsDeviceController.upsert
+    app.post  '/auth/api/callback', passport.authenticate('api'), @credentialsDeviceController.upsert
 
     app.post '/v1/messages', @messagesController.create
 
