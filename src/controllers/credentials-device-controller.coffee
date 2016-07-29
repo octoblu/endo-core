@@ -41,6 +41,6 @@ class CredentialsDeviceController
         userDeviceManagerUrl.query.credentialsDeviceUrl = url.format serviceUrl
         userDeviceManagerUrl.query.appOctobluHost = url.format @appOctobluHost
 
-        return res.redirect 201, url.format(userDeviceManagerUrl)
+        return res.redirect 301, url.format(userDeviceManagerUrl)
 
 module.exports = CredentialsDeviceController
