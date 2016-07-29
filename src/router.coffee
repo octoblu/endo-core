@@ -49,11 +49,11 @@ class Router
 
     app.post '/v1/messages', @messagesController.create
 
-    app.all  '/:credentialsDeviceUuid*', @credentialsDeviceController.getCredentialsDevice
-    app.get  '/:credentialsDeviceUuid', @credentialsDeviceController.get
-    app.get  '/:credentialsDeviceUuid/user-devices', @userDevicesController.list
-    app.post '/:credentialsDeviceUuid/user-devices', @userDevicesController.create
-    app.delete  '/:credentialsDeviceUuid/user-devices/:userDeviceUuid', @userDevicesController.delete
+    app.all  '/credentials/:credentialsDeviceUuid*', @credentialsDeviceController.getCredentialsDevice
+    app.get  '/credentials/:credentialsDeviceUuid', @credentialsDeviceController.get
+    app.get  '/credentials/:credentialsDeviceUuid/user-devices', @userDevicesController.list
+    app.post '/credentials/:credentialsDeviceUuid/user-devices', @userDevicesController.create
+    app.delete  '/credentials/:credentialsDeviceUuid/user-devices/:userDeviceUuid', @userDevicesController.delete
 
     app.use (req, res) => res.redirect '/auth/api'
 

@@ -111,7 +111,7 @@ describe 'User Devices Spec', ->
             username: 'some-uuid'
             password: 'some-token'
 
-        request.get '/cred-uuid/user-devices', options, (error, @response, @body) =>
+        request.get '/credentials/cred-uuid/user-devices', options, (error, @response, @body) =>
           done error
 
       it 'should return a 200', ->
@@ -161,7 +161,7 @@ describe 'User Devices Spec', ->
             username: 'some-uuid'
             password: 'some-token'
 
-        request.get '/cred-uuid/user-devices', options, (error, @response, @body) =>
+        request.get '/credentials/cred-uuid/user-devices', options, (error, @response, @body) =>
           done error
 
       it 'should return a 404', ->
@@ -196,7 +196,7 @@ describe 'User Devices Spec', ->
             username: 'some-uuid'
             password: 'some-token'
 
-        request.get '/bad-cred-uuid/user-devices', options, (error, @response, @body) =>
+        request.get '/credentials/bad-cred-uuid/user-devices', options, (error, @response, @body) =>
           done error
 
       it 'should return a 404', ->
@@ -282,7 +282,7 @@ describe 'User Devices Spec', ->
           headers:
             Authorization: "Bearer #{userAuth}"
 
-        request.post '/cred-uuid/user-devices', options, (error, @response, @body) =>
+        request.post '/credentials/cred-uuid/user-devices', options, (error, @response, @body) =>
           done error
 
       it 'should create the user device', ->
@@ -337,7 +337,7 @@ describe 'User Devices Spec', ->
           headers:
             Authorization: "Bearer #{userAuth}"
 
-        request.delete '/cred-uuid/user-devices/user_device_uuid', options, (error, @response, @body) =>
+        request.delete '/credentials/cred-uuid/user-devices/user_device_uuid', options, (error, @response, @body) =>
           done error
 
       it "should delete the subscription from the credentials-device to the user device's received messages", ->
@@ -383,7 +383,7 @@ describe 'User Devices Spec', ->
           headers:
             Authorization: "Bearer #{userAuth}"
 
-        request.delete '/cred-uuid/user-devices/cred-uuid', options, (error, @response, @body) =>
+        request.delete '/credentials/cred-uuid/user-devices/cred-uuid', options, (error, @response, @body) =>
           done error
 
       it 'should return a 403', ->

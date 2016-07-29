@@ -241,8 +241,8 @@ describe 'Auth Spec', ->
         request.get options, (error, @response, @body) =>
           done error
 
-      it 'should return a 201', ->
-        expect(@response.statusCode).to.equal 201, @body
+      it 'should return a 301', ->
+        expect(@response.statusCode).to.equal 301, @body
 
       it 'should create a credentials device', ->
         @createCredentialsDevice.done()
@@ -346,8 +346,8 @@ describe 'Auth Spec', ->
       it 'should subscribe to its own received messages', ->
         @createMessageReceivedSubscription.done()
 
-      it 'should return a 201', ->
-        expect(@response.statusCode).to.equal 201
+      it 'should return a 301', ->
+        expect(@response.statusCode).to.equal 301
 
       it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
         EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid&appOctobluHost=http%3A%2F%2Fapp.octoblu.biz%2F'
@@ -449,8 +449,8 @@ describe 'Auth Spec', ->
       it 'should subscribe to its own received messages', ->
         @createMessageReceivedSubscription.done()
 
-      it 'should return a 201', ->
-        expect(@response.statusCode).to.equal 201
+      it 'should return a 301', ->
+        expect(@response.statusCode).to.equal 301
 
       it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
         EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcred-uuid&appOctobluHost=http%3A%2F%2Fapp.octoblu.biz%2F'
@@ -544,8 +544,8 @@ describe 'Auth Spec', ->
         request.get options, (error, @response, @body) =>
           done error
 
-      it 'should return a 201', ->
-        expect(@response.statusCode).to.equal 201, JSON.stringify(@body)
+      it 'should return a 301', ->
+        expect(@response.statusCode).to.equal 301, JSON.stringify(@body)
 
       it 'should update the credentials device with the new resourceOwnerSecret and authorizedUuid', ->
         @updateCredentialsDevice.done()

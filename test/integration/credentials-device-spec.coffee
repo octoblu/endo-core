@@ -63,7 +63,7 @@ describe 'Credentials Device Spec', ->
   afterEach (done) ->
     @meshblu.destroy done
 
-  describe 'On GET /cred-uuid', ->
+  describe 'On GET /credentials/cred-uuid', ->
     describe 'when authorized', ->
       beforeEach (done) ->
         userAuth = new Buffer('user-uuid:user-token').toString 'base64'
@@ -111,7 +111,7 @@ describe 'Credentials Device Spec', ->
             username: 'user-uuid'
             password: 'user-token'
 
-        request.get '/cred-uuid', options, (error, @response, @body) =>
+        request.get '/credentials/cred-uuid', options, (error, @response, @body) =>
           done error
 
       it 'should return a 200', ->
@@ -152,7 +152,7 @@ describe 'Credentials Device Spec', ->
             username: 'user-uuid'
             password: 'user-token'
 
-        request.get '/cred-uuid/user-devices', options, (error, @response, @body) =>
+        request.get '/credentials/cred-uuid/user-devices', options, (error, @response, @body) =>
           done error
 
       it 'should return a 404', ->
@@ -187,7 +187,7 @@ describe 'Credentials Device Spec', ->
             username: 'user-uuid'
             password: 'user-token'
 
-        request.get '/bad-cred-uuid/user-devices', options, (error, @response, @body) =>
+        request.get '/credentials/bad-cred-uuid/user-devices', options, (error, @response, @body) =>
           done error
 
       it 'should return a 404', ->
