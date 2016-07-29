@@ -11,6 +11,7 @@ MeshbluHTTP        = require 'meshblu-http'
 path               = require 'path'
 passport           = require 'passport'
 favicon            = require 'serve-favicon'
+expressVersion     = require 'express-package-version'
 
 Router                   = require './router'
 CredentialsDeviceService = require './services/credentials-device-service'
@@ -45,6 +46,7 @@ class Server
     app = express()
     app.use favicon path.join(__dirname, '../favicon.ico')
     app.use meshbluHealthcheck()
+    app.use expressVersion format: '{"version": "%s"}'
     app.use morgan 'dev', immediate: false unless @disableLogging
     app.use cors(exposedHeaders: ['Location'])
     app.use errorHandler()

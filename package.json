@@ -1,6 +1,6 @@
 {
   "name": "endo-core",
-  "version": "13.2.1",
+  "version": "13.3.0",
   "description": "Put some description here",
   "keywords": [],
   "homepage": "https://github.com/octoblu/endo-core",
@@ -43,6 +43,7 @@
     "express": "^4.13.3",
     "express-meshblu-auth": "^6.0.0",
     "express-meshblu-healthcheck": "^1.0.1",
+    "express-package-version": "0.0.2",
     "express-send-error": "^1.1.0",
     "jsonschema": "^1.1.0",
     "lodash": "^4.11.1",
