@@ -34,7 +34,7 @@ class CredentialsDeviceController
         return res.sendError error if error?
 
         serviceUrl = url.parse @serviceUrl
-        serviceUrl.pathname = credentialsDevice.getUuid()
+        serviceUrl.pathname = "/credentials/#{credentialsDevice.getUuid()}"
 
         userDeviceManagerUrl = url.parse @userDeviceManagerUrl, true
         userDeviceManagerUrl.query.meshbluAuthBearer = req.meshbluAuth.bearerToken
