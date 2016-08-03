@@ -4,6 +4,7 @@ sinon    = require 'sinon'
 
 fs            = require 'fs'
 Encryption    = require 'meshblu-encryption'
+path          = require 'path'
 request       = require 'request'
 enableDestroy = require 'server-destroy'
 shmock        = require 'shmock'
@@ -11,7 +12,7 @@ shmock        = require 'shmock'
 MockStrategy  = require '../mock-strategy'
 Server        = require '../../src/server'
 
-describe 'response schema', ->
+describe 'static schemas', ->
   beforeEach (done) ->
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
     @encryption = Encryption.fromPem @privateKey
@@ -25,7 +26,7 @@ describe 'response schema', ->
     enableDestroy @meshblu
     @apiStrategy = new MockStrategy name: 'api'
     @octobluStrategy = new MockStrategy name: 'octoblu'
-    @messageHandler = responseSchema: sinon.stub()
+    @messageHandler = messageSchema: sinon.stub()
 
     @meshblu
       .get '/v2/whoami'
@@ -50,8 +51,9 @@ describe 'response schema', ->
         uuid: 'peter'
         token: 'i-could-eat'
         privateKey: @privateKey
-      appOctobluHost: 'app.octoblu.guru'
+      appOctobluHost: 'http://app.octoblu.xxx'
       userDeviceManagerUrl: 'http://manage-my.endo'
+      staticSchemasPath: path.join(__dirname, '../fixtures/schemas')
 
     @server = new Server serverOptions
 
@@ -66,74 +68,33 @@ describe 'response schema', ->
   afterEach (done) ->
     @meshblu.destroy done
 
-  describe 'On GET /v1/response-schema', ->
-    describe 'when the message-handler yields an empty object', ->
+  describe 'On GET /schemas/non-extant', ->
+    describe 'When no non-extant.cson or non-extant.json file is available', ->
       beforeEach (done) ->
-        @messageHandler.responseSchema.yields null, {}
-
         options =
-          baseUrl: "http://localhost:#{@serverPort}"
           json: true
+          baseUrl: "http://localhost:#{@server.address().port}"
+        request.get '/schemas/non-extant', options, (error, @response, @body) =>
+          done error
 
-        request.get '/v1/response-schema', options, (error, @response, @body) =>
+      it 'should return a 404', ->
+        expect(@response.statusCode).to.equal 404, JSON.stringify @body
+
+      it 'should return an error', ->
+        expect(@body).to.deep.equal {error: 'Could not find a schema for that path'}
+
+  describe 'On GET /schemas/configure', ->
+    describe 'When configure.cson is available at <path>/configure.cson', ->
+      beforeEach (done) ->
+        options =
+          json: true
+          baseUrl: "http://localhost:#{@server.address().port}"
+
+        request.get '/schemas/configure', options, (error, @response, @body) =>
           done error
 
       it 'should return a 200', ->
         expect(@response.statusCode).to.equal 200, JSON.stringify @body
 
-      it 'should return the empty object', ->
-        expect(@body).to.deep.equal {}
-
-    describe 'when the message-handler yields a larger schema', ->
-      beforeEach (done) ->
-        @messageHandler.responseSchema.yields null, {
-          doSomething:
-            type: 'object'
-            required: ['name', 'color']
-            properties:
-              name:
-                type: 'string'
-              color:
-                type: 'string'
-        }
-
-        options =
-          baseUrl: "http://localhost:#{@serverPort}"
-          json: true
-
-        request.get '/v1/response-schema', options, (error, @response, @body) =>
-          done error
-
-      it 'should return a 200', ->
-        expect(@response.statusCode).to.equal 200, JSON.stringify @body
-
-      it 'should return the schema', ->
-        expect(@body).to.deep.equal {
-          doSomething:
-            type: 'object'
-            required: ['name', 'color']
-            properties:
-              name:
-                type: 'string'
-              color:
-                type: 'string'
-        }
-
-    describe 'when the message-handler yields an error', ->
-      beforeEach (done) ->
-        error = new Error 'Something is awry'
-        error.code = 418
-        @messageHandler.responseSchema.yields error
-
-        options =
-          baseUrl: "http://localhost:#{@serverPort}"
-          json: true
-
-        request.get '/v1/response-schema', options, (error, @response, @body) =>
-          done error
-
-      it 'should return a 418', ->
-        expect(@response.statusCode).to.equal 418, JSON.stringify @body
-
-      it 'should return the schema', ->
-        expect(@body).to.deep.equal error: 'Something is awry'
+      it 'should return the configure schema', ->
+        expect(@body).to.deep.equal {foo: 'bar'}

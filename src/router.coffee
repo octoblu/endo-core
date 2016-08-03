@@ -7,12 +7,13 @@ MessagesController          = require './controllers/messages-controller'
 MessageSchemaController     = require './controllers/message-schema-controller'
 OctobluAuthController       = require './controllers/octoblu-auth-controller'
 ResponseSchemaController    = require './controllers/response-schema-controller'
+StaticSchemasController     = require './controllers/static-schemas-controller'
 UserDevicesController       = require './controllers/user-devices-controller'
 
 class Router
   constructor: (options) ->
     {@appOctobluHost, @credentialsDeviceService, @messagesService} = options
-    {@meshbluConfig, @serviceUrl, @userDeviceManagerUrl} = options
+    {@meshbluConfig, @serviceUrl, @userDeviceManagerUrl, @staticSchemasPath} = options
 
     throw new Error 'appOctobluHost is required' unless @appOctobluHost?
     throw new Error 'credentialsDeviceService is required' unless @credentialsDeviceService?
@@ -27,6 +28,7 @@ class Router
     @messageSchemaController     = new MessageSchemaController {@messagesService}
     @octobluAuthController       = new OctobluAuthController
     @responseSchemaController    = new ResponseSchemaController {@messagesService}
+    @staticSchemasController     = new StaticSchemasController {@staticSchemasPath}
     @userDevicesController       = new UserDevicesController
 
   route: (app) =>
@@ -36,6 +38,7 @@ class Router
     app.get '/v1/form-schema', @formSchemaController.list
     app.get '/v1/message-schema', @messageSchemaController.list
     app.get '/v1/response-schema', @responseSchemaController.list
+    app.get '/schemas/:name', @staticSchemasController.get
 
     app.get '/auth/octoblu', passport.authenticate('octoblu')
     app.get '/auth/octoblu/callback', passport.authenticate('octoblu', failureRedirect: '/auth/octoblu'), @octobluAuthController.storeAuthAndRedirect
@@ -54,6 +57,7 @@ class Router
     app.get  '/credentials/:credentialsDeviceUuid/user-devices', @userDevicesController.list
     app.post '/credentials/:credentialsDeviceUuid/user-devices', @userDevicesController.create
     app.delete  '/credentials/:credentialsDeviceUuid/user-devices/:userDeviceUuid', @userDevicesController.delete
+
 
     app.use (req, res) => res.redirect '/auth/api'
 

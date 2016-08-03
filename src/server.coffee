@@ -21,7 +21,7 @@ class Server
   constructor: (options)->
     {@apiStrategy, @appOctobluHost, @deviceType, @meshbluConfig, @messageHandler, @octobluStrategy, } = options
     {@schemas, @serviceUrl, @userDeviceManagerUrl} = options
-    {@disableLogging, @logFn, @port} = options
+    {@disableLogging, @logFn, @port, @staticSchemasPath} = options
 
     throw new Error('apiStrategy is required') unless @apiStrategy?
     throw new Error('appOctobluHost is required') unless @appOctobluHost?
@@ -65,7 +65,7 @@ class Server
       {imageUrl} = device.options
       credentialsDeviceService  = new CredentialsDeviceService {@deviceType, imageUrl, @meshbluConfig, @serviceUrl}
       messagesService           = new MessagesService {@messageHandler, @schemas}
-      router = new Router {credentialsDeviceService, messagesService, @appOctobluHost, @meshbluConfig, @serviceUrl, @userDeviceManagerUrl}
+      router = new Router {credentialsDeviceService, messagesService, @appOctobluHost, @meshbluConfig, @serviceUrl, @userDeviceManagerUrl, @staticSchemasPath}
       router.route app
 
       @server = app.listen @port, callback

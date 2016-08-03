@@ -6,7 +6,7 @@ fs            = require 'fs'
 request       = require 'request'
 Encryption    = require 'meshblu-encryption'
 enableDestroy = require 'server-destroy'
-shmock        = require '@octoblu/shmock'
+shmock        = require 'shmock'
 
 MockStrategy  = require '../mock-strategy'
 Server        = require '../../src/server'
