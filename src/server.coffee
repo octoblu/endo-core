@@ -62,7 +62,7 @@ class Server
     meshblu = new MeshbluHTTP @meshbluConfig
     meshblu.whoami (error, device) =>
       throw new Error('Could not authenticate with meshblu!') if error?
-      {imageUrl} = device.options
+      {imageUrl} = device.options ? {}
       credentialsDeviceService  = new CredentialsDeviceService {@deviceType, imageUrl, @meshbluConfig, @serviceUrl}
       messagesService           = new MessagesService {@messageHandler, @schemas}
       router = new Router {credentialsDeviceService, messagesService, @appOctobluHost, @meshbluConfig, @serviceUrl, @userDeviceManagerUrl, @staticSchemasPath}
