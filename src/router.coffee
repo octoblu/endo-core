@@ -12,8 +12,16 @@ UserDevicesController       = require './controllers/user-devices-controller'
 
 class Router
   constructor: (options) ->
-    {@appOctobluHost, @credentialsDeviceService, @messagesService} = options
-    {@meshbluConfig, @serviceUrl, @userDeviceManagerUrl, @staticSchemasPath} = options
+    {
+      @appOctobluHost
+      @credentialsDeviceService
+      @messagesService
+      @meshbluConfig
+      @serviceUrl
+      @userDeviceManagerUrl
+      @staticSchemasPath
+      @skipRedirectAfterApiAuth
+    } = options
 
     throw new Error 'appOctobluHost is required' unless @appOctobluHost?
     throw new Error 'credentialsDeviceService is required' unless @credentialsDeviceService?
@@ -46,9 +54,12 @@ class Router
     app.use meshbluAuth.auth()
     app.use meshbluAuth.gatewayRedirect('/auth/octoblu')
 
+    upsert = @credentialsDeviceController.upsertWithRedirect
+    upsert = @credentialsDeviceController.upsertWithoutRedirect if @skipRedirectAfterApiAuth
+
     app.get  '/auth/api', passport.authenticate('api')
-    app.get  '/auth/api/callback', passport.authenticate('api'), @credentialsDeviceController.upsert
-    app.post  '/auth/api/callback', passport.authenticate('api'), @credentialsDeviceController.upsert
+    app.get  '/auth/api/callback', passport.authenticate('api'), upsert
+    app.post  '/auth/api/callback', passport.authenticate('api'), upsert
 
     app.post '/v1/messages', @messagesController.create
 

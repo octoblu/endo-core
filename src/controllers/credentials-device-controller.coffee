@@ -21,17 +21,28 @@ class CredentialsDeviceController
       return res.sendError error if error?
       res.send publicDevice
 
-  upsert: (req, res) =>
+  upsertWithRedirect: (req, res) =>
+    @_upsert req, res, (error, userDeviceManagerUrl)=>
+      return res.sendError error if error?
+      return res.redirect 301, url.format(userDeviceManagerUrl)
+
+  upsertWithoutRedirect: (req, res) =>
+    @_upsert req, res, (error, userDeviceManagerUrl)=>
+      return res.sendError error if error?
+      res.set location: url.format(userDeviceManagerUrl)
+      return res.status(201).end()
+
+  _upsert: (req, res, callback) =>
     encrypted = req.user
     {id} = req.user
 
     authorizedUuid = req.meshbluAuth.uuid
 
     @credentialsDeviceService.findOrCreate id, (error, credentialsDevice) =>
-      return res.sendError error if error?
+      return callback error if error?
 
       credentialsDevice.update {authorizedUuid, id, encrypted}, (error) =>
-        return res.sendError error if error?
+        return callback error if error?
 
         serviceUrl = url.parse @serviceUrl
         serviceUrl.pathname = "/credentials/#{credentialsDevice.getUuid()}"
@@ -41,6 +52,6 @@ class CredentialsDeviceController
         userDeviceManagerUrl.query.credentialsDeviceUrl = url.format serviceUrl
         userDeviceManagerUrl.query.appOctobluHost = url.format @appOctobluHost
 
-        return res.redirect 301, url.format(userDeviceManagerUrl)
+        callback(null, userDeviceManagerUrl)
 
 module.exports = CredentialsDeviceController
