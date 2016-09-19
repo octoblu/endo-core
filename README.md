@@ -1,10 +1,13 @@
 # endo-core
 
+[![Build Status](https://travis-ci.org/octoblu/endo-core.svg?branch=master)](https://travis-ci.org/octoblu/endo-core)
+[![Test Coverage](https://codecov.io/gh/octoblu/endo-core/branch/master/graph/badge.svg)](https://codecov.io/gh/octoblu/endo-core)
 [![Dependency status](http://img.shields.io/david/octoblu/endo-core.svg?style=flat)](https://david-dm.org/octoblu/endo-core)
 [![devDependency Status](http://img.shields.io/david/dev/octoblu/endo-core.svg?style=flat)](https://david-dm.org/octoblu/endo-core#info=devDependencies)
-[![Build Status](http://img.shields.io/travis/octoblu/endo-core.svg?style=flat&branch=master)](https://travis-ci.org/octoblu/endo-core)
+[![Slack Status](http://community-slack.octoblu.com/badge.svg)](http://community-slack.octoblu.com)
 
 [![NPM](https://nodei.co/npm/endo-core.svg?style=flat)](https://npmjs.org/package/endo-core)
+
 
 ## Installing
 
