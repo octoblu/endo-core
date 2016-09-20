@@ -27,3 +27,4 @@ build/Release
 node_modules
 
 meshblu.json
+.nyc_output
