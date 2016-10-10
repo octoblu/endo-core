@@ -92,8 +92,9 @@ describe 'messages', ->
               baseUrl: "http://localhost:#{@serverPort}"
               headers:
                 'x-meshblu-route': JSON.stringify [
-                  {"from": "flow-uuid", "to": "user-device", "type": "message.sent"}
-                  {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
+                  {"from": "flow-uuid", "to": "user-uuid", "type": "message.sent"}
+                  {"from": "user-uuid", "to": "cred-uuid", "type": "message.received"}
+                  {"from": "cred-uuid", "to": "cred-uuid", "type": "message.received"}
                 ]
               json:
                 metadata:
@@ -130,8 +131,9 @@ describe 'messages', ->
               baseUrl: "http://localhost:#{@serverPort}"
               headers:
                 'x-meshblu-route': JSON.stringify [
-                  {"from": "flow-uuid", "to": "user-device", "type": "message.sent"}
-                  {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
+                  {"from": "flow-uuid", "to": "user-uuid", "type": "message.sent"}
+                  {"from": "user-uuid", "to": "cred-uuid", "type": "message.received"}
+                  {"from": "cred-uuid", "to": "cred-uuid", "type": "message.received"}
                 ]
               json:
                 metadata:
@@ -186,7 +188,7 @@ describe 'messages', ->
             @responseHandler = @meshblu
               .post '/messages'
               .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
-              .set 'x-meshblu-as', 'user-device'
+              .set 'x-meshblu-as', 'user-uuid'
               .send
                 devices: ['flow-uuid']
                 metadata:
@@ -200,8 +202,9 @@ describe 'messages', ->
               baseUrl: "http://localhost:#{@serverPort}"
               headers:
                 'x-meshblu-route': JSON.stringify [
-                  {"from": "flow-uuid", "to": "user-device", "type": "message.sent"}
-                  {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
+                  {"from": "flow-uuid", "to": "user-uuid", "type": "message.sent"}
+                  {"from": "user-uuid", "to": "cred-uuid", "type": "message.received"}
+                  {"from": "cred-uuid", "to": "cred-uuid", "type": "message.received"}
                 ]
               json:
                 metadata:
@@ -235,13 +238,84 @@ describe 'messages', ->
                 greeting: 'hola'
             }
 
+        describe 'when called with message that is a result of a user-uuid\'s subscription to itself', ->
+          beforeEach (done) ->
+            @messageHandler.onMessage.yields null, metadata: {code: 200}, data: {whatever: 'this is a response'}
+            options =
+              baseUrl: "http://localhost:#{@serverPort}"
+              headers:
+                'x-meshblu-route': JSON.stringify [
+                  {"from": "flow-uuid", "to": "user-uuid", "type": "message.sent"}
+                  {"from": "user-uuid", "to": "user-uuid", "type": "message.received"}
+                  {"from": "user-uuid", "to": "cred-uuid", "type": "message.received"}
+                  {"from": "cred-uuid", "to": "cred-uuid", "type": "message.received"}
+                ]
+              json:
+                metadata:
+                  jobType: 'hello'
+                  respondTo: { foo: 'bar' }
+                data:
+                  greeting: 'hola'
+              auth:
+                username: 'cred-uuid'
+                password: 'cred-token'
+
+            request.post '/v1/messages', options, (error, @response, @body) =>
+              done error
+
+          it 'should return a 422', ->
+            expect(@response.statusCode).to.equal 422
+
+
+        describe 'when called with a valid message that is the result of some other device\'s subscription to itself', ->
+          beforeEach (done) ->
+            @messageHandler.onMessage.yields null, metadata: {code: 200}, data: {whatever: 'this is a response'}
+            @responseHandler = @meshblu
+              .post '/messages'
+              .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
+              .set 'x-meshblu-as', 'user-uuid'
+              .send
+                devices: ['flow-uuid']
+                metadata:
+                  code: 200
+                  to: { foo: 'bar' }
+                data:
+                  whatever: 'this is a response'
+              .reply 201
+
+            options =
+              baseUrl: "http://localhost:#{@serverPort}"
+              headers:
+                'x-meshblu-route': JSON.stringify [
+                  {"from": "whatever-uuid", "to": "whatever-uuid", "type": "message.received"}
+                  {"from": "whatever-uuid", "to": "flow-uuid", "type": "message.received"}
+                  {"from": "flow-uuid", "to": "user-uuid", "type": "message.received"}
+                  {"from": "user-uuid", "to": "cred-uuid", "type": "message.received"}
+                  {"from": "cred-uuid", "to": "cred-uuid", "type": "message.received"}
+                ]
+              json:
+                metadata:
+                  jobType: 'hello'
+                  respondTo: { foo: 'bar' }
+                data:
+                  greeting: 'hola'
+              auth:
+                username: 'cred-uuid'
+                password: 'cred-token'
+
+            request.post '/v1/messages', options, (error, @response, @body) =>
+              done error
+
+          it 'should return a 201', ->
+            expect(@response.statusCode).to.equal 201, JSON.stringify @body
+
         describe 'when called with a valid message, but theres an error', ->
           beforeEach (done) ->
             @messageHandler.onMessage.yields new Error 'Something very bad happened'
             @responseHandler = @meshblu
               .post '/messages'
               .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
-              .set 'x-meshblu-as', 'user-device'
+              .set 'x-meshblu-as', 'user-uuid'
               .send
                 devices: ['flow-uuid']
                 metadata:
@@ -255,8 +329,8 @@ describe 'messages', ->
               baseUrl: "http://localhost:#{@serverPort}"
               headers:
                 'x-meshblu-route': JSON.stringify [
-                  {"from": "flow-uuid", "to": "user-device", "type": "message.sent"}
-                  {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
+                  {"from": "flow-uuid", "to": "user-uuid", "type": "message.sent"}
+                  {"from": "user-uuid", "to": "cred-uuid", "type": "message.received"}
                 ]
               json:
                 metadata:
@@ -296,7 +370,7 @@ describe 'messages', ->
             @responseHandler = @meshblu
               .post '/messages'
               .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
-              .set 'x-meshblu-as', 'user-device'
+              .set 'x-meshblu-as', 'user-uuid'
               .send
                 devices: ['flow-uuid']
                 metadata:
@@ -309,8 +383,8 @@ describe 'messages', ->
               baseUrl: "http://localhost:#{@serverPort}"
               headers:
                 'x-meshblu-route': JSON.stringify [
-                  {"from": "flow-uuid", "to": "user-device", "type": "message.sent"}
-                  {"from": "user-device", "to": "cred-uuid", "type": "message.received"}
+                  {"from": "flow-uuid", "to": "user-uuid", "type": "message.sent"}
+                  {"from": "user-uuid", "to": "cred-uuid", "type": "message.received"}
                 ]
               json:
                 metadata:

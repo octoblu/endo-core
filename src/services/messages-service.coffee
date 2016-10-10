@@ -22,7 +22,7 @@ class MessagesService
   reply: ({auth, route, response, respondTo}, callback) =>
     return callback @_userError(MISSING_ROUTE_HEADER, 422) if _.isEmpty route
 
-    firstHop       = _.first JSON.parse route
+    firstHop       = _.first route
     senderUuid     = firstHop.from
     userDeviceUuid = firstHop.to
     metadata       = _.assign {to: respondTo}, response.metadata
@@ -37,7 +37,7 @@ class MessagesService
 
   replyWithError: ({auth, error, route, respondTo}, callback) =>
     return callback @_userError(MISSING_ROUTE_HEADER, 422) if _.isEmpty route
-    firstHop       = _.first JSON.parse route
+    firstHop       = _.first route
     senderUuid     = firstHop.from
     userDeviceUuid = firstHop.to
 

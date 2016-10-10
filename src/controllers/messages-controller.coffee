@@ -5,12 +5,14 @@ class MessagesController
   constructor: ({@credentialsDeviceService, @messagesService}) ->
 
   create: (req, res) =>
-    route     = req.get 'x-meshblu-route'
+    route     = JSON.parse req.get('x-meshblu-route') if req.get('x-meshblu-route')?
     auth      = req.meshbluAuth
     message   = req.body
     respondTo = _.get message, 'metadata.respondTo'
 
     debug 'create', auth.uuid
+    return @respondWithError {error: @_badRouteError(), auth, res, route, respondTo} if @_isBadRoute route
+
     @credentialsDeviceService.getEndoByUuid auth.uuid, (error, endo) =>
       debug 'credentialsDeviceService.getEndoByUuid', error
       return @respondWithError {auth, error, res, route, respondTo} if error?
@@ -24,6 +26,17 @@ class MessagesController
           return @respondWithError {auth, error, res, route, respondTo} if error?
 
           res.sendStatus 201
+
+  _isBadRoute: (route) =>
+    return true unless route?
+    userDeviceUuid = _.nth(route, -2).from
+    return _.some route, (hop) =>
+      hop.type == 'message.received' && hop.from == userDeviceUuid && hop.to == userDeviceUuid
+
+  _badRouteError: =>
+    error = new Error('Bad route')
+    error.code = 422
+    return error
 
   respondWithError: ({auth, error, res, route, respondTo}) =>
     @messagesService.replyWithError {auth, error, route, respondTo}, (newError) =>
