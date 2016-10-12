@@ -190,6 +190,8 @@ describe 'Auth Spec', ->
                   view: [{uuid: 'peter'}]
                 configure:
                   update: [{uuid: 'peter'}]
+                message:
+                  received: [{uuid: 'peter'}]
           .reply 200, uuid: 'cred-uuid', token: 'cred-token'
 
         @meshblu
@@ -215,19 +217,11 @@ describe 'Auth Spec', ->
                       secret:       'resource owner secret'
                       refreshToken: 'resource owner refresh token'
               endoSignature: 'a1aPDryhnkn7TSpGcRID5ah9FMdkb+uNvp+5w8tRybXvKt3JuWcBDI0JYGAnSPH3EYBqolPbGrsXJJnl19vJjw=='
-
-              'meshblu.forwarders.message.received': [{
-                type: 'webhook'
-                url: 'http://the-endo-url/v1/messages'
-                method: 'POST'
-                generateAndForwardMeshbluCredentials: true
-              }]
-
           .reply 204
 
         @createMessageReceivedSubscription = @meshblu
-          .post '/v2/devices/cred-uuid/subscriptions/cred-uuid/message.received'
-          .set 'Authorization', "Basic #{credentialsDeviceAuth}"
+          .post '/v2/devices/peter/subscriptions/cred-uuid/message.received'
+          .set 'Authorization', "Basic #{serviceAuth}"
           .reply 201
 
         options =
@@ -250,12 +244,12 @@ describe 'Auth Spec', ->
       it 'should update the credentials device with the new resourceOwnerSecret and authorizedUuid', ->
         @updateCredentialsDevice.done()
 
-      it 'should subscribe to its own received messages', ->
+      it "should subscribe the service to the credential's received messages", ->
         @createMessageReceivedSubscription.done()
 
       it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
-        EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcredentials%2Fcred-uuid&appOctobluHost=http%3A%2F%2Fapp.octoblu.biz%2F'
-        expect(@response.headers.location).to.equal EXPECTED
+        UNEXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcredentials%2Fcred-uuid&appOctobluHost=http%3A%2F%2Fapp.octoblu.biz%2F'
+        expect(@response.headers.location).to.equal UNEXPECTED
 
     describe 'when the credentials device does exist', ->
       beforeEach (done) ->
@@ -313,18 +307,8 @@ describe 'Auth Spec', ->
                       secret:       'resource owner secret'
                       refreshToken: 'resource owner refresh token'
               endoSignature: 'a1aPDryhnkn7TSpGcRID5ah9FMdkb+uNvp+5w8tRybXvKt3JuWcBDI0JYGAnSPH3EYBqolPbGrsXJJnl19vJjw=='
-              'meshblu.forwarders.message.received': [{
-                type: 'webhook'
-                url: 'http://the-endo-url/v1/messages'
-                method: 'POST'
-                generateAndForwardMeshbluCredentials: true
-              }]
-          .reply 204
 
-        @createMessageReceivedSubscription = @meshblu
-          .post '/v2/devices/cred-uuid/subscriptions/cred-uuid/message.received'
-          .set 'Authorization', "Basic #{credentialsDeviceAuth}"
-          .reply 201
+          .reply 204
 
         options =
           uri: '/auth/api/callback'
@@ -342,9 +326,6 @@ describe 'Auth Spec', ->
 
       it 'should update the credentials device with the new resourceOwnerSecret and authorizedUuid', ->
         @updateCredentialsDevice.done()
-
-      it 'should subscribe to its own received messages', ->
-        @createMessageReceivedSubscription.done()
 
       it 'should return a 301', ->
         expect(@response.statusCode).to.equal 301
@@ -416,18 +397,7 @@ describe 'Auth Spec', ->
                       secret:       'resource owner secret'
                       refreshToken: 'resource owner refresh token'
               endoSignature: 'a1aPDryhnkn7TSpGcRID5ah9FMdkb+uNvp+5w8tRybXvKt3JuWcBDI0JYGAnSPH3EYBqolPbGrsXJJnl19vJjw=='
-              'meshblu.forwarders.message.received': [{
-                type: 'webhook'
-                url: 'http://the-endo-url/v1/messages'
-                method: 'POST'
-                generateAndForwardMeshbluCredentials: true
-              }]
           .reply 204
-
-        @createMessageReceivedSubscription = @meshblu
-          .post '/v2/devices/cred-uuid/subscriptions/cred-uuid/message.received'
-          .set 'Authorization', "Basic #{credentialsDeviceAuth}"
-          .reply 201
 
         options =
           uri: '/auth/api/callback'
@@ -445,9 +415,6 @@ describe 'Auth Spec', ->
 
       it 'should update the credentials device with the new resourceOwnerSecret and authorizedUuid', ->
         @updateCredentialsDevice.done()
-
-      it 'should subscribe to its own received messages', ->
-        @createMessageReceivedSubscription.done()
 
       it 'should return a 301', ->
         expect(@response.statusCode).to.equal 301
@@ -517,18 +484,7 @@ describe 'Auth Spec', ->
                       secret:       'resource owner secret'
                       refreshToken: 'resource owner refresh token'
               endoSignature: 'a1aPDryhnkn7TSpGcRID5ah9FMdkb+uNvp+5w8tRybXvKt3JuWcBDI0JYGAnSPH3EYBqolPbGrsXJJnl19vJjw=='
-              'meshblu.forwarders.message.received': [{
-                type: 'webhook'
-                url: 'http://the-endo-url/v1/messages'
-                method: 'POST'
-                generateAndForwardMeshbluCredentials: true
-              }]
           .reply 204
-
-        @createMessageReceivedSubscription = @meshblu
-          .post '/v2/devices/cred-uuid/subscriptions/cred-uuid/message.received'
-          .set 'Authorization', "Basic #{credentialsDeviceAuth}"
-          .reply 201
 
         options =
           uri: '/auth/api/callback'
@@ -549,9 +505,6 @@ describe 'Auth Spec', ->
 
       it 'should update the credentials device with the new resourceOwnerSecret and authorizedUuid', ->
         @updateCredentialsDevice.done()
-
-      it 'should subscribe to its own received messages', ->
-        @createMessageReceivedSubscription.done()
 
       it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
         EXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcredentials%2Fcred-uuid&appOctobluHost=http%3A%2F%2Fapp.octoblu.biz%2F'

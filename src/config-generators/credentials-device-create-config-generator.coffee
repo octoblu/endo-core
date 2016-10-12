@@ -7,3 +7,5 @@ module.exports = ({serviceUuid}) ->
         view: [{uuid: serviceUuid}]
       configure:
         update: [{uuid: serviceUuid}]
+      message:
+        received: [{uuid: serviceUuid}]

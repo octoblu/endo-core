@@ -65,9 +65,7 @@ class CredentialsDevice
     endo.encrypted = @encryption.encrypt endo.encrypted
 
     update = credentialsDeviceUpdateGenerator {endo, endoSignature, @serviceUrl}
-    @meshblu.updateDangerously @uuid, update, (error) =>
-      return callback error if error?
-      @_subscribeToOwnMessagesReceived callback
+    @meshblu.updateDangerously @uuid, update, callback
 
   _getFormSchemaUrl: =>
     uri = url.parse @serviceUrl
@@ -94,12 +92,6 @@ class CredentialsDevice
     }
     endoSignature = @encryption.sign endo
     return {endo, endoSignature}
-
-  _subscribeToOwnMessagesReceived: (callback) =>
-    subscription = {subscriberUuid: @uuid, emitterUuid: @uuid, type: 'message.received'}
-    @meshblu.createSubscription subscription, (error, ignored) =>
-      return callback error if error?
-      return callback()
 
   _userDevicesFromSubscriptions: (subscriptions) =>
     _(subscriptions)

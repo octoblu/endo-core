@@ -46,7 +46,14 @@ class CredentialsDeviceService
       devices = _.filter devices, @_isSignedCorrectly
       return callback null, _.first devices unless _.isEmpty devices
       record = credentialsDeviceCreateGenerator {serviceUuid: @uuid}
-      @meshblu.register record, callback
+      @meshblu.register record, (error, device) =>
+        return callback error if error?
+        @_subscribeToCredentialsMessagesReceived device.uuid, (error) =>
+          return callback error, device
+
+  _subscribeToCredentialsMessagesReceived: (credentialsUuid, callback) =>
+    subscription = {subscriberUuid: @uuid, emitterUuid: credentialsUuid, type: 'message.received'}
+    @meshblu.createSubscription subscription, callback
 
   _getCredentialsDevice: ({uuid, encrypted}, callback) =>
     @meshblu.generateAndStoreToken uuid, (error, {token}={}) =>
