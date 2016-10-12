@@ -34,7 +34,7 @@ class MessagesController
       hop.type == 'message.received' && hop.from == userDeviceUuid && hop.to == userDeviceUuid
 
   _badRouteError: =>
-    error = new Error('Bad route')
+    error = new Error("Bad route - This message was the result of a user device's subscription to itself.")
     error.code = 422
     return error
 
