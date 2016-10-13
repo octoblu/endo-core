@@ -238,6 +238,65 @@ describe 'messages', ->
                 greeting: 'hola'
             }
 
+
+        describe 'when called with a valid message that was forwarded to the service device', ->
+          beforeEach (done) ->
+            @messageHandler.onMessage.yields null, metadata: {code: 200}, data: {whatever: 'this is a response'}
+            @responseHandler = @meshblu
+              .post '/messages'
+              .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
+              .set 'x-meshblu-as', 'user-uuid'
+              .send
+                devices: ['flow-uuid']
+                metadata:
+                  code: 200
+                  to: { foo: 'bar' }
+                data:
+                  whatever: 'this is a response'
+              .reply 201
+
+            options =
+              baseUrl: "http://localhost:#{@serverPort}"
+              headers:
+                'x-meshblu-route': JSON.stringify [
+                  {"from": "flow-uuid", "to": "user-uuid", "type": "message.sent"}
+                  {"from": "user-uuid", "to": "cred-uuid", "type": "message.received"}
+                  {"from": "cred-uuid", "to": "cred-uuid", "type": "message.received"}
+                  {"from": "cred-uuid", "to": "peter", "type": "message.received"}
+                  {"from": "peter", "to": "peter", "type": "message.received"}
+                ]
+              json:
+                metadata:
+                  jobType: 'hello'
+                  respondTo: { foo: 'bar' }
+                data:
+                  greeting: 'hola'
+              auth:
+                username: 'cred-uuid'
+                password: 'cred-token'
+
+            request.post '/v1/messages', options, (error, @response, @body) =>
+              done error
+
+          it 'should return a 201', ->
+            expect(@response.statusCode).to.equal 201, JSON.stringify @body
+
+          it 'should respond to the message via meshblu', ->
+            @responseHandler.done()
+
+          it 'should call the hello messageHandler with the message and auth', ->
+            expect(@messageHandler.onMessage).to.have.been.calledWith sinon.match {
+              encrypted:
+                secrets:
+                  credentials:
+                    secret: 'this is secret'
+            }, {
+              metadata:
+                jobType: 'hello'
+              data:
+                greeting: 'hola'
+            }
+
         describe 'when called with message that is a result of a user-uuid\'s subscription to itself', ->
           beforeEach (done) ->
             @messageHandler.onMessage.yields null, metadata: {code: 200}, data: {whatever: 'this is a response'}
