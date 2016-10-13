@@ -9,7 +9,7 @@ MISSING_METADATA     = 'Message is missing required property "metadata"'
 MISSING_ROUTE_HEADER = 'Missing x-meshblu-route header in request'
 
 class MessagesService
-  constructor: ({@messageHandler}) ->
+  constructor: ({@messageHandler, @meshbluConfig}) ->
     throw new Error 'messageHandler is required' unless @messageHandler?
     @validator = new Validator
 
@@ -19,12 +19,7 @@ class MessagesService
   messageSchema: (callback) =>
     @messageHandler.messageSchema callback
 
-  reply: ({auth, route, response, respondTo}, callback) =>
-    return callback @_userError(MISSING_ROUTE_HEADER, 422) if _.isEmpty route
-
-    firstHop       = _.first route
-    senderUuid     = firstHop.from
-    userDeviceUuid = firstHop.to
+  reply: ({auth, senderUuid, userDeviceUuid, response, respondTo}, callback) =>
     metadata       = _.assign {to: respondTo}, response.metadata
 
     message =
@@ -35,12 +30,8 @@ class MessagesService
     meshblu = new MeshbluHTTP auth
     meshblu.message message, as: userDeviceUuid, callback
 
-  replyWithError: ({auth, error, route, respondTo}, callback) =>
-    return callback @_userError(MISSING_ROUTE_HEADER, 422) if _.isEmpty route
-    firstHop       = _.first route
-    senderUuid     = firstHop.from
-    userDeviceUuid = firstHop.to
-
+  replyWithError: ({auth, senderUuid, userDeviceUuid, error, respondTo}, callback) =>
+    console.log 'replyWithError', {auth, senderUuid, userDeviceUuid, error, respondTo}
     message =
       devices: [senderUuid]
       metadata:
@@ -55,12 +46,10 @@ class MessagesService
   responseSchema: (callback) =>
     @messageHandler.responseSchema callback
 
-  send: ({auth, endo, message}, callback) =>
+  send: ({endo, message}, callback) =>
     return callback @_userError(MISSING_METADATA, 422) unless message?.metadata?
     {data, metadata} = message
-    debug 'send', JSON.stringify({data,metadata})
-
-    encryption = Encryption.fromJustGuess auth.privateKey
+    encryption = Encryption.fromJustGuess @meshbluConfig.privateKey
     encrypted  = encryption.decrypt endo.encrypted
     @messageHandler.onMessage {data, encrypted, metadata}, callback
 

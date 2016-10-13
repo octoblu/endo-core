@@ -16,6 +16,7 @@ expressVersion     = require 'express-package-version'
 Router                   = require './router'
 CredentialsDeviceService = require './services/credentials-device-service'
 MessagesService          = require './services/messages-service'
+MessageRouter                = require './models/message-router'
 
 class Server
   constructor: (options)->
@@ -77,9 +78,11 @@ class Server
       throw new Error('Could not authenticate with meshblu!') if error?
       {imageUrl} = device.options ? {}
       credentialsDeviceService  = new CredentialsDeviceService {@deviceType, imageUrl, @meshbluConfig, @serviceUrl}
-      messagesService           = new MessagesService {@messageHandler, @schemas}
+      messagesService           = new MessagesService {@messageHandler, @schemas, @meshbluConfig}
+      messageRouter = new MessageRouter {messagesService, credentialsDeviceService, @meshbluConfig}
       router = new Router {
         credentialsDeviceService
+        messageRouter
         messagesService
         @appOctobluHost
         @meshbluConfig

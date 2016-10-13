@@ -79,8 +79,6 @@ class CredentialsDeviceService
       console.error error.stack
       return false
 
-    # correctSig___ = @encryption.sign endo
-    # console.log JSON.stringify({correctSig___, endoSignature}, null, 2)
     return @encryption.verify endo, endoSignature
 
   _userError: (message, code) =>
