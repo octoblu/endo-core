@@ -9,12 +9,19 @@ class MessageRouter
 
     {credentialsUuid, userDeviceUuid, senderUuid} = routeParser.parse()
     @credentialsDeviceService.getEndoByUuid credentialsUuid, (error, endo) =>
-      return callback error if error?
+      return @_respondWithError {auth, senderUuid, userDeviceUuid, error, respondTo}, callback if error?
 
-      @messagesService.send {auth, userDeviceUuid, senderUuid, endo, message}, (error, response) =>
-        return callback error if error?
+      @messagesService.send {endo, message}, (error, response) =>
+        return @_respondWithError {auth, senderUuid, userDeviceUuid, error, respondTo}, callback if error?
 
-        @messagesService.reply {auth, userDeviceUuid, senderUuid, response, respondTo}, callback
+        @messagesService.reply {auth, userDeviceUuid, senderUuid, response, respondTo}, (error) =>
+          return @_respondWithError {auth, senderUuid, userDeviceUuid, error, respondTo}, callback if error?
+          callback()
+
+  _respondWithError: ({auth, senderUuid, userDeviceUuid, error, respondTo}, callback) =>
+    @messagesService.replyWithError {auth, senderUuid, userDeviceUuid, error, respondTo}, (newError) =>
+      return callback newError if newError?
+      callback error
 
   _badRouteError: =>
     error = new Error "Bad route"

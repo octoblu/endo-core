@@ -33,7 +33,7 @@ class Router
 
     @credentialsDeviceController = new CredentialsDeviceController {@credentialsDeviceService, @appOctobluHost, @serviceUrl, @userDeviceManagerUrl}
     @formSchemaController        = new FormSchemaController {@messagesService}
-    @messagesController          = new MessagesController {@messageRouter, @messagesService}
+    @messagesController          = new MessagesController {@messageRouter}
     @messageSchemaController     = new MessageSchemaController {@messagesService}
     @octobluAuthController       = new OctobluAuthController
     @responseSchemaController    = new ResponseSchemaController {@messagesService}

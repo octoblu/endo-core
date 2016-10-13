@@ -30,8 +30,7 @@ class MessagesService
     meshblu = new MeshbluHTTP auth
     meshblu.message message, as: userDeviceUuid, callback
 
-  replyWithError: ({auth, senderUuid, userDeviceUuid, error, respondTo}, callback) =>
-    console.log 'replyWithError', {auth, senderUuid, userDeviceUuid, error, respondTo}
+  replyWithError: ({auth, senderUuid, userDeviceUuid, error, respondTo}, callback) =>    
     message =
       devices: [senderUuid]
       metadata:
