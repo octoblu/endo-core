@@ -12,16 +12,22 @@ Server        = require '../../src/server'
 
 describe 'Auth Spec', ->
   beforeEach (done) ->
-    @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
-    encryption = Encryption.fromPem @privateKey
-    @encryptedSecrets = encryption.encrypt 'this is secret'
+    @privateKey             = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
+    encryption              = Encryption.fromPem @privateKey
+    @publicKey              = encryption.key.exportKey 'public'
+    @encryptedSecrets       = encryption.encrypt 'this is secret'
     @resourceOwnerSignature = 'Ula5075pW5J6pbIzhez3Be78UsyVApbXMXEPXmMwBAtVdtxdHoXNx+fI9nLV/pHZzlOI0RjhJmO+qQ3zAnKviw=='
+
     decryptClientSecret = (req, res, next) =>
       return next() unless req.body?.$set?['endo']?['encrypted']?
       req.body.$set['endo']['encrypted'] = encryption.decrypt req.body.$set['endo']['encrypted']
       next()
 
     @meshblu = shmock 0xd00d, [decryptClientSecret]
+    @meshblu
+      .get '/publickey'
+      .reply 200, {@publicKey}
+
     enableDestroy @meshblu
 
     @apiStub = sinon.stub().yields(new Error('Unauthorized'))
@@ -53,6 +59,7 @@ describe 'Auth Spec', ->
       serviceUrl: "http://the-endo-url"
       userDeviceManagerUrl: 'http://manage-my.endo'
       appOctobluHost: 'http://app.octoblu.biz/'
+      meshbluPublicKeyUri: 'http://localhost:53261/publickey'
 
     @server = new Server serverOptions
 

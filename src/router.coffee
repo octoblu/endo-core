@@ -1,9 +1,10 @@
-MeshbluAuth = require 'express-meshblu-auth'
-passport    = require 'passport'
-
+MeshbluAuth                 = require 'express-meshblu-auth'
+passport                    = require 'passport'
+httpSignature               = require '@octoblu/connect-http-signature'
 CredentialsDeviceController = require './controllers/credentials-device-controller'
 FormSchemaController        = require './controllers/form-schema-controller'
 MessagesController          = require './controllers/messages-controller'
+MessagesV2Controller        = require './controllers/messages-v2-controller'
 MessageSchemaController     = require './controllers/message-schema-controller'
 OctobluAuthController       = require './controllers/octoblu-auth-controller'
 ResponseSchemaController    = require './controllers/response-schema-controller'
@@ -13,31 +14,35 @@ UserDevicesController       = require './controllers/user-devices-controller'
 class Router
   constructor: (options) ->
     {
-      @appOctobluHost
-      @credentialsDeviceService
-      @messageRouter
-      @messagesService
+      appOctobluHost
+      credentialsDeviceService
+      messageRouter
+      messagesService
       @meshbluConfig
-      @serviceUrl
-      @userDeviceManagerUrl
-      @staticSchemasPath
+      @meshbluPublicKey
+      serviceUrl
+      userDeviceManagerUrl
+      staticSchemasPath
       @skipRedirectAfterApiAuth
     } = options
 
-    throw new Error 'appOctobluHost is required' unless @appOctobluHost?
-    throw new Error 'credentialsDeviceService is required' unless @credentialsDeviceService?
+    throw new Error 'appOctobluHost is required' unless appOctobluHost?
+    throw new Error 'credentialsDeviceService is required' unless credentialsDeviceService?
     throw new Error 'meshbluConfig is required' unless @meshbluConfig?
-    throw new Error 'messagesService is required' unless @messagesService?
-    throw new Error 'serviceUrl is required' unless @serviceUrl?
-    throw new Error 'userDeviceManagerUrl is required' unless @userDeviceManagerUrl?
+    throw new Error 'meshbluPublicKey is required' unless @meshbluPublicKey?
+    throw new Error 'messagesService is required' unless messagesService?
+    throw new Error 'messageRouter is required' unless messageRouter?
+    throw new Error 'serviceUrl is required' unless serviceUrl?
+    throw new Error 'userDeviceManagerUrl is required' unless userDeviceManagerUrl?
 
-    @credentialsDeviceController = new CredentialsDeviceController {@credentialsDeviceService, @appOctobluHost, @serviceUrl, @userDeviceManagerUrl}
-    @formSchemaController        = new FormSchemaController {@messagesService}
-    @messagesController          = new MessagesController {@messageRouter}
-    @messageSchemaController     = new MessageSchemaController {@messagesService}
+    @credentialsDeviceController = new CredentialsDeviceController {credentialsDeviceService, appOctobluHost, serviceUrl, userDeviceManagerUrl}
+    @formSchemaController        = new FormSchemaController {messagesService}
+    @messagesController          = new MessagesController {messageRouter}
+    @messagesV2Controller        = new MessagesV2Controller {messageRouter}
+    @messageSchemaController     = new MessageSchemaController {messagesService}
     @octobluAuthController       = new OctobluAuthController
-    @responseSchemaController    = new ResponseSchemaController {@messagesService}
-    @staticSchemasController     = new StaticSchemasController {@staticSchemasPath}
+    @responseSchemaController    = new ResponseSchemaController {messagesService}
+    @staticSchemasController     = new StaticSchemasController {staticSchemasPath}
     @userDevicesController       = new UserDevicesController
 
   route: (app) =>
@@ -63,6 +68,7 @@ class Router
     app.post  '/auth/api/callback', passport.authenticate('api'), upsert
 
     app.post '/v1/messages', @messagesController.create
+    app.post '/v2/messages', httpSignature.verify(pub: @meshbluPublicKey), httpSignature.gateway(), @messagesV2Controller.create
 
     app.all  '/credentials/:credentialsDeviceUuid*', @credentialsDeviceController.getCredentialsDevice
     app.get  '/credentials/:credentialsDeviceUuid', @credentialsDeviceController.get

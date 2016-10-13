@@ -3,33 +3,35 @@
 sinon    = require 'sinon'
 
 fs            = require 'fs'
-Encryption    = require 'meshblu-encryption'
-path          = require 'path'
 request       = require 'request'
+Encryption    = require 'meshblu-encryption'
 enableDestroy = require 'server-destroy'
 shmock        = require 'shmock'
 
 MockStrategy  = require '../mock-strategy'
 Server        = require '../../src/server'
 
-describe 'static schemas', ->
+describe 'v2 messages', ->
   beforeEach (done) ->
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
     @encryption = Encryption.fromPem @privateKey
+    @publicKey = @encryption.key.exportKey 'public'
+
     encrypted =
       secrets:
         credentials:
           secret: 'this is secret'
-
     @encrypted = @encryption.encrypt encrypted
-    @publicKey = @encryption.key.exportKey 'public'
-
 
     @meshblu = shmock 0xd00d
     enableDestroy @meshblu
     @apiStrategy = new MockStrategy name: 'api'
     @octobluStrategy = new MockStrategy name: 'octoblu'
-    @messageHandler = messageSchema: sinon.stub()
+    @messageHandler = onMessage: sinon.stub()
+
+    @meshblu
+      .get 'publickey'
+      .reply 200, @privateKey
 
     @meshblu
       .get '/v2/whoami'
@@ -58,10 +60,10 @@ describe 'static schemas', ->
         uuid: 'peter'
         token: 'i-could-eat'
         privateKey: @privateKey
-      appOctobluHost: 'http://app.octoblu.xxx'
+      appOctobluHost: 'http://app.octoblu.mom'
       userDeviceManagerUrl: 'http://manage-my.endo'
-      staticSchemasPath: path.join(__dirname, '../fixtures/schemas')
       meshbluPublicKeyUri: 'http://localhost:53261/publickey'
+
 
     @server = new Server serverOptions
 
@@ -76,33 +78,28 @@ describe 'static schemas', ->
   afterEach (done) ->
     @meshblu.destroy done
 
-  describe 'On GET /schemas/non-extant', ->
-    describe 'When no non-extant.cson or non-extant.json file is available', ->
+  describe 'On POST /v2/messages', ->
+    describe 'when not signed by meshblu', ->
       beforeEach (done) ->
         options =
-          json: true
-          baseUrl: "http://localhost:#{@server.address().port}"
-        request.get '/schemas/non-extant', options, (error, @response, @body) =>
+          baseUrl: "http://localhost:#{@serverPort}"
+          headers:
+            'x-meshblu-route': JSON.stringify [
+              {"from": "flow-uuid", "to": "user-uuid", "type": "message.sent"}
+              {"from": "user-uuid", "to": "cred-uuid", "type": "message.received"}
+              {"from": "cred-uuid", "to": "cred-uuid", "type": "message.received"}
+            ]
+          json:
+            metadata:
+              jobType: 'hello'
+            data:
+              greeting: 'hola'
+          auth:
+            username: 'cred-uuid'
+            password: 'cred-token'
+
+        request.post '/v2/messages', options, (error, @response) =>
           done error
 
-      it 'should return a 404', ->
-        expect(@response.statusCode).to.equal 404, JSON.stringify @body
-
-      it 'should return an error', ->
-        expect(@body).to.deep.equal {error: 'Could not find a schema for that path'}
-
-  describe 'On GET /schemas/configure', ->
-    describe 'When configure.cson is available at <path>/configure.cson', ->
-      beforeEach (done) ->
-        options =
-          json: true
-          baseUrl: "http://localhost:#{@server.address().port}"
-
-        request.get '/schemas/configure', options, (error, @response, @body) =>
-          done error
-
-      it 'should return a 200', ->
-        expect(@response.statusCode).to.equal 200, JSON.stringify @body
-
-      it 'should return the configure schema', ->
-        expect(@body).to.deep.equal {foo: 'bar'}
+      it "should not do anything, because the signature doesn't exist", ->
+        expect(@response).not.to.exist

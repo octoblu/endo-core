@@ -13,10 +13,12 @@ passport           = require 'passport'
 favicon            = require 'serve-favicon'
 expressVersion     = require 'express-package-version'
 
+FetchPublicKey     = require 'fetch-meshblu-public-key'
+
 Router                   = require './router'
 CredentialsDeviceService = require './services/credentials-device-service'
 MessagesService          = require './services/messages-service'
-MessageRouter                = require './models/message-router'
+MessageRouter            = require './models/message-router'
 
 class Server
   constructor: (options)->
@@ -35,6 +37,7 @@ class Server
       @port
       @staticSchemasPath
       @skipRedirectAfterApiAuth
+      @meshbluPublicKeyUri
     } = options
 
     throw new Error('apiStrategy is required') unless @apiStrategy?
@@ -46,54 +49,63 @@ class Server
     throw new Error('schemas not allowed') if @schemas?
     throw new Error('serviceUrl is required') unless @serviceUrl?
     throw new Error('userDeviceManagerUrl is required') unless @userDeviceManagerUrl?
+    throw new Error('meshbluPublicKeyUri is required') unless @meshbluPublicKeyUri?
 
   address: =>
     @server.address()
 
-  run: (callback) =>
-    passport.serializeUser   (user, done) => done null, user
-    passport.deserializeUser (user, done) => done null, user
+  run: (callback) =>    
+    new FetchPublicKey().fetch @meshbluPublicKeyUri, (error, {publicKey}={}) =>
+      if error?
+        console.error "Error fetching public key: #{error.message}"
+        process.exit 1
+        return
 
-    passport.use 'octoblu', @octobluStrategy
-    passport.use 'api', @apiStrategy
+      passport.serializeUser   (user, done) => done null, user
+      passport.deserializeUser (user, done) => done null, user
 
-    app = express()
-    app.use favicon path.join(__dirname, '../favicon.ico')
-    app.use meshbluHealthcheck()
-    app.use expressVersion format: '{"version": "%s"}'
-    app.use morgan 'dev', immediate: false unless @disableLogging
-    app.use cors(exposedHeaders: ['Location'])
-    app.use errorHandler()
-    app.use cookieSession secret: @meshbluConfig.token
-    app.use cookieParser()
-    app.use passport.initialize()
-    app.use passport.session()
-    app.use bodyParser.urlencoded limit: '1mb', extended : true
-    app.use bodyParser.json limit : '1mb'
-    app.use sendError {@logFn}
-    app.options '*', cors()
+      passport.use 'octoblu', @octobluStrategy
+      passport.use 'api', @apiStrategy
 
-    meshblu = new MeshbluHTTP @meshbluConfig
-    meshblu.whoami (error, device) =>
-      throw new Error('Could not authenticate with meshblu!') if error?
-      {imageUrl} = device.options ? {}
-      credentialsDeviceService  = new CredentialsDeviceService {@deviceType, imageUrl, @meshbluConfig, @serviceUrl}
-      messagesService           = new MessagesService {@messageHandler, @schemas, @meshbluConfig}
-      messageRouter = new MessageRouter {messagesService, credentialsDeviceService, @meshbluConfig}
-      router = new Router {
-        credentialsDeviceService
-        messageRouter
-        messagesService
-        @appOctobluHost
-        @meshbluConfig
-        @serviceUrl
-        @userDeviceManagerUrl
-        @staticSchemasPath
-        @skipRedirectAfterApiAuth
-      }
-      router.route app
+      app = express()
+      app.use favicon path.join(__dirname, '../favicon.ico')
+      app.use meshbluHealthcheck()
+      app.use expressVersion format: '{"version": "%s"}'
+      app.use morgan 'dev', immediate: false unless @disableLogging
+      app.use cors(exposedHeaders: ['Location'])
+      app.use errorHandler()
+      app.use cookieSession secret: @meshbluConfig.token
+      app.use cookieParser()
+      app.use passport.initialize()
+      app.use passport.session()
+      app.use bodyParser.urlencoded limit: '1mb', extended : true
+      app.use bodyParser.json limit : '1mb'
+      app.use sendError {@logFn}
+      app.options '*', cors()
 
-      @server = app.listen @port, callback
+      meshblu = new MeshbluHTTP @meshbluConfig
+      meshblu.whoami (error, device) =>
+        throw new Error('Could not authenticate with meshblu!') if error?
+        {imageUrl} = device.options ? {}
+        credentialsDeviceService  = new CredentialsDeviceService {@deviceType, imageUrl, @meshbluConfig, @serviceUrl}
+        messagesService           = new MessagesService {@messageHandler, @schemas, @meshbluConfig}
+        messageRouter = new MessageRouter {messagesService, credentialsDeviceService, @meshbluConfig}
+        router = new Router {
+          credentialsDeviceService
+          @meshbluConfig
+          messageRouter
+          messagesService
+          meshbluPublicKey: publicKey
+          @appOctobluHost
+          @meshbluConfig
+          @serviceUrl
+          @userDeviceManagerUrl
+          @staticSchemasPath
+          @skipRedirectAfterApiAuth
+        }
+        router.route app
+
+        @server = app.listen @port, callback
 
   stop: (callback) =>
     @server.close callback

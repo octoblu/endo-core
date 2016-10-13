@@ -15,13 +15,16 @@ describe 'form schema', ->
   beforeEach (done) ->
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
     @encryption = Encryption.fromPem @privateKey
+
     encrypted =
       secrets:
         credentials:
           secret: 'this is secret'
-    @encrypted = @encryption.encrypt encrypted
 
-    @meshblu = shmock 0xd00d
+    @encrypted = @encryption.encrypt encrypted
+    @publicKey = @encryption.key.exportKey 'public'
+    @meshblu   = shmock 0xd00d
+
     enableDestroy @meshblu
     @apiStrategy = new MockStrategy name: 'api'
     @octobluStrategy = new MockStrategy name: 'octoblu'
@@ -34,6 +37,10 @@ describe 'form schema', ->
         options:
           imageUrl: "http://this-is-an-image.exe"
       }
+
+    @meshblu
+      .get '/publickey'
+      .reply 200, {@publicKey}
 
     serverOptions =
       logFn: ->
@@ -52,6 +59,7 @@ describe 'form schema', ->
         privateKey: @privateKey
       appOctobluHost: 'http://app.octoblu.bikes'
       userDeviceManagerUrl: 'http://manage-my.endo'
+      meshbluPublicKeyUri: 'http://localhost:53261/publickey'
 
     @server = new Server serverOptions
 

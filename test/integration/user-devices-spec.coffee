@@ -19,6 +19,7 @@ describe 'User Devices Spec', ->
 
     encryption = Encryption.fromPem @privateKey
     @encrypted = encryption.encrypt 'this is secret'
+    @publicKey = encryption.key.exportKey 'public'
 
     @apiStrategy = new MockStrategy name: 'lib'
     @octobluStrategy = new MockStrategy name: 'octoblu'
@@ -41,6 +42,7 @@ describe 'User Devices Spec', ->
         privateKey: @privateKey
       appOctobluHost: 'http://app.octoblu.rentals'
       userDeviceManagerUrl: 'http://manage-my.endo'
+      meshbluPublicKeyUri: 'http://localhost:53261/publickey'
 
     @meshblu
       .get '/v2/whoami'
@@ -50,6 +52,10 @@ describe 'User Devices Spec', ->
           imageUrl: "http://this-is-an-image.exe"
           resourceOwnerName: 'resource owner name'
       }
+
+    @meshblu
+      .get '/publickey'
+      .reply 200, {@publicKey}
 
     @server = new Server serverOptions
 
