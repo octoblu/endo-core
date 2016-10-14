@@ -37,7 +37,7 @@ class Server
       @port
       @staticSchemasPath
       @skipRedirectAfterApiAuth
-      @meshbluPublicKeyUri
+      @meshbluPublicKeyUri = 'https://meshblu.octoblu.com/publickey'
     } = options
 
     throw new Error('apiStrategy is required') unless @apiStrategy?
@@ -48,13 +48,12 @@ class Server
     throw new Error('octobluStrategy is required') unless @octobluStrategy?
     throw new Error('schemas not allowed') if @schemas?
     throw new Error('serviceUrl is required') unless @serviceUrl?
-    throw new Error('userDeviceManagerUrl is required') unless @userDeviceManagerUrl?
-    throw new Error('meshbluPublicKeyUri is required') unless @meshbluPublicKeyUri?
+    throw new Error('userDeviceManagerUrl is required') unless @userDeviceManagerUrl?    
 
   address: =>
     @server.address()
 
-  run: (callback) =>    
+  run: (callback) =>
     new FetchPublicKey().fetch @meshbluPublicKeyUri, (error, {publicKey}={}) =>
       if error?
         console.error "Error fetching public key: #{error.message}"
