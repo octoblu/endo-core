@@ -48,7 +48,7 @@ class Server
     throw new Error('octobluStrategy is required') unless @octobluStrategy?
     throw new Error('schemas not allowed') if @schemas?
     throw new Error('serviceUrl is required') unless @serviceUrl?
-    throw new Error('userDeviceManagerUrl is required') unless @userDeviceManagerUrl?    
+    throw new Error('userDeviceManagerUrl is required') unless @userDeviceManagerUrl?
 
   address: =>
     @server.address()
@@ -88,7 +88,7 @@ class Server
         {imageUrl} = device.options ? {}
         credentialsDeviceService  = new CredentialsDeviceService {@deviceType, imageUrl, @meshbluConfig, @serviceUrl}
         messagesService           = new MessagesService {@messageHandler, @schemas, @meshbluConfig}
-        messageRouter = new MessageRouter {messagesService, credentialsDeviceService, @meshbluConfig}
+        messageRouter             = new MessageRouter {messagesService, credentialsDeviceService, @meshbluConfig}
         router = new Router {
           credentialsDeviceService
           @meshbluConfig
