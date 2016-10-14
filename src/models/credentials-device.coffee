@@ -84,13 +84,13 @@ class CredentialsDevice
 
   _getSignedUpdate: ({authorizedUuid, encrypted, id}) =>
     endo = {
-      authorizedKey: @encryption.sign(authorizedUuid).toString 'base64'
-      idKey:         @encryption.sign(id).toString 'base64'
+      authorizedKey: @encryption.sign authorizedUuid
+      idKey:         @encryption.sign id
       credentialsDeviceUuid: @uuid
       version: '1.0.0'
       encrypted: encrypted
     }
-    endoSignature = @encryption.sign endo
+    endoSignature = @encryption.sign(endo)
     return {endo, endoSignature}
 
   _userDevicesFromSubscriptions: (subscriptions) =>

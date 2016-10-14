@@ -27,10 +27,10 @@ class MessagesService
       metadata: metadata
       data:     response.data
 
-    meshblu = new MeshbluHTTP auth
+    meshblu = new MeshbluHTTP _.defaults auth, @meshbluConfig
     meshblu.message message, as: userDeviceUuid, callback
 
-  replyWithError: ({auth, senderUuid, userDeviceUuid, error, respondTo}, callback) =>    
+  replyWithError: ({auth, senderUuid, userDeviceUuid, error, respondTo}, callback) =>
     message =
       devices: [senderUuid]
       metadata:
@@ -39,7 +39,7 @@ class MessagesService
         error:
           message: error.message
 
-    meshblu = new MeshbluHTTP auth
+    meshblu = new MeshbluHTTP _.defaults auth, @meshbluConfig
     meshblu.message message, as: userDeviceUuid, callback
 
   responseSchema: (callback) =>

@@ -1,17 +1,15 @@
 _           = require 'lodash'
-debug       = require('debug')('endo-core:messages-controller')
+debug       = require('debug')('endo-core:messages-v2-controller')
 
-class MessagesController
+class MessagesV2Controller
   constructor: ({@messageRouter}) ->
 
   create: (req, res) =>
     route     = JSON.parse req.get('x-meshblu-route') if req.get('x-meshblu-route')?
-    auth      = req.meshbluAuth
     message   = req.body
     respondTo = _.get message, 'metadata.respondTo'
-
-    @messageRouter.route {auth, message, route, respondTo}, (error) =>
+    @messageRouter.route {message, route, respondTo}, (error) =>
       return res.sendError error if error?
       res.sendStatus 201
 
-module.exports = MessagesController
+module.exports = MessagesV2Controller

@@ -45,6 +45,11 @@ class Router
     @staticSchemasController     = new StaticSchemasController {staticSchemasPath}
     @userDevicesController       = new UserDevicesController
 
+
+  rejectIfNotServiceUuid: (req, res, next) =>
+    return res.sendStatus 401 unless req.get('x-meshblu-uuid') == @meshbluConfig.uuid
+    next()
+
   route: (app) =>
     meshbluAuth = new MeshbluAuth @meshbluConfig
 
@@ -57,6 +62,8 @@ class Router
     app.get '/auth/octoblu', passport.authenticate('octoblu')
     app.get '/auth/octoblu/callback', passport.authenticate('octoblu', failureRedirect: '/auth/octoblu'), @octobluAuthController.storeAuthAndRedirect
 
+    app.post '/v2/messages', httpSignature.verify(pub: @meshbluPublicKey), httpSignature.gateway(), @rejectIfNotServiceUuid, @messagesV2Controller.create
+
     app.use meshbluAuth.auth()
     app.use meshbluAuth.gatewayRedirect('/auth/octoblu')
 
@@ -68,14 +75,12 @@ class Router
     app.post  '/auth/api/callback', passport.authenticate('api'), upsert
 
     app.post '/v1/messages', @messagesController.create
-    app.post '/v2/messages', httpSignature.verify(pub: @meshbluPublicKey), httpSignature.gateway(), @messagesV2Controller.create
 
     app.all  '/credentials/:credentialsDeviceUuid*', @credentialsDeviceController.getCredentialsDevice
     app.get  '/credentials/:credentialsDeviceUuid', @credentialsDeviceController.get
     app.get  '/credentials/:credentialsDeviceUuid/user-devices', @userDevicesController.list
     app.post '/credentials/:credentialsDeviceUuid/user-devices', @userDevicesController.create
     app.delete  '/credentials/:credentialsDeviceUuid/user-devices/:userDeviceUuid', @userDevicesController.delete
-
 
     app.use (req, res) => res.redirect '/auth/api'
 

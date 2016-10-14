@@ -32,6 +32,8 @@ class CredentialsDeviceService
       return callback @_userError 'invalid credentials device', 400 unless @_isSignedCorrectly device
       return callback null, device.endo
 
+  getCredentialsTokenFromEndo: ({encrypted}) => @encryption.decrypt(encrypted)?.secrets?.credentialsDeviceToken
+
   findOrCreate: (resourceOwnerID, callback) =>
     @_findOrCreate resourceOwnerID, (error, device) =>
       return callback error if error?
