@@ -17,6 +17,7 @@ describe 'Credentials Device Spec', ->
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
 
     encryption = Encryption.fromPem @privateKey
+    @publicKey = encryption.key.exportKey 'public'
     @encrypted = encryption.encrypt username: 'sqrtofsaturn', secrets: {}
 
     @apiStrategy = new MockStrategy {name: 'lib'}
@@ -40,6 +41,7 @@ describe 'Credentials Device Spec', ->
         privateKey: @privateKey
       appOctobluHost: 'http://app.octoblu.luxury'
       userDeviceManagerUrl: 'http://manage-my.endo'
+      meshbluPublicKeyUri: 'http://localhost:53261/publickey'
 
     serviceAuth = new Buffer('service-uuid:service-token').toString 'base64'
     @meshblu
@@ -49,6 +51,10 @@ describe 'Credentials Device Spec', ->
         options:
           imageUrl: "http://this-is-an-image.exe"
       }
+
+    @meshblu
+      .get '/publickey'
+      .reply 200, {@publicKey}
 
     @server = new Server serverOptions
 

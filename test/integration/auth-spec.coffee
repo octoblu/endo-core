@@ -12,16 +12,27 @@ Server        = require '../../src/server'
 
 describe 'Auth Spec', ->
   beforeEach (done) ->
-    @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
-    encryption = Encryption.fromPem @privateKey
-    @encryptedSecrets = encryption.encrypt 'this is secret'
+    @privateKey             = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
+    encryption              = Encryption.fromPem @privateKey
+    @publicKey              = encryption.key.exportKey 'public'
+    @encryptedSecrets       = encryption.encrypt {
+      credentialsDeviceToken: 'cred-token2'
+      credentials:
+        secret:       'resource owner secret'
+        refreshToken: 'resource owner refresh token'
+    }
     @resourceOwnerSignature = 'Ula5075pW5J6pbIzhez3Be78UsyVApbXMXEPXmMwBAtVdtxdHoXNx+fI9nLV/pHZzlOI0RjhJmO+qQ3zAnKviw=='
+
     decryptClientSecret = (req, res, next) =>
       return next() unless req.body?.$set?['endo']?['encrypted']?
       req.body.$set['endo']['encrypted'] = encryption.decrypt req.body.$set['endo']['encrypted']
       next()
 
     @meshblu = shmock 0xd00d, [decryptClientSecret]
+    @meshblu
+      .get '/publickey'
+      .reply 200, {@publicKey}
+
     enableDestroy @meshblu
 
     @apiStub = sinon.stub().yields(new Error('Unauthorized'))
@@ -53,6 +64,7 @@ describe 'Auth Spec', ->
       serviceUrl: "http://the-endo-url"
       userDeviceManagerUrl: 'http://manage-my.endo'
       appOctobluHost: 'http://app.octoblu.biz/'
+      meshbluPublicKeyUri: 'http://localhost:53261/publickey'
 
     @server = new Server serverOptions
 
@@ -213,10 +225,11 @@ describe 'Auth Spec', ->
                   id:           'resource owner id'
                   username:     'resource owner username'
                   secrets:
+                    credentialsDeviceToken: 'cred-token2'
                     credentials:
                       secret:       'resource owner secret'
                       refreshToken: 'resource owner refresh token'
-              endoSignature: 'a1aPDryhnkn7TSpGcRID5ah9FMdkb+uNvp+5w8tRybXvKt3JuWcBDI0JYGAnSPH3EYBqolPbGrsXJJnl19vJjw=='
+              endoSignature: 'i7OF2Kc6ReZ2EKpDRLgyt/VlyxilV7nes+36ib6zsqe6i90RkZ2IF9JRFhEcwWbt4/JYUpZcfr1YhODtGH769g=='
           .reply 204
 
         @createMessageReceivedSubscription = @meshblu
@@ -278,7 +291,7 @@ describe 'Auth Spec', ->
           .reply 200, [{
             uuid: 'cred-uuid'
             token: 'cred-token'
-            endoSignature: 'OLE06dTcCpQni4qWRxRnRwtzm1XBrkflhQeAdbHCeJgwzjXvvTv6kKcWrV+0zkPaQavWANNKg/EZsnY7kq7TmQ=='
+            endoSignature: 'chpYIsrXkwFXGJ+n/tPkS0UwIQlMr7F6xjP2QdFJP/sBwkDKokLyUgYW8ZYFbQn/RLriSv8Do7CmTBkoKofX5g=='
             endo:
               credentialsDeviceUuid: 'cred-uuid'
               encrypted: @encryptedSecrets
@@ -306,8 +319,8 @@ describe 'Auth Spec', ->
                     credentials:
                       secret:       'resource owner secret'
                       refreshToken: 'resource owner refresh token'
-              endoSignature: 'a1aPDryhnkn7TSpGcRID5ah9FMdkb+uNvp+5w8tRybXvKt3JuWcBDI0JYGAnSPH3EYBqolPbGrsXJJnl19vJjw=='
-
+                    credentialsDeviceToken: 'cred-token2'
+              endoSignature: "i7OF2Kc6ReZ2EKpDRLgyt/VlyxilV7nes+36ib6zsqe6i90RkZ2IF9JRFhEcwWbt4/JYUpZcfr1YhODtGH769g=="
           .reply 204
 
         options =
@@ -368,7 +381,7 @@ describe 'Auth Spec', ->
           }, {
             uuid: 'cred-uuid'
             token: 'cred-token'
-            endoSignature: 'OLE06dTcCpQni4qWRxRnRwtzm1XBrkflhQeAdbHCeJgwzjXvvTv6kKcWrV+0zkPaQavWANNKg/EZsnY7kq7TmQ=='
+            endoSignature: 'chpYIsrXkwFXGJ+n/tPkS0UwIQlMr7F6xjP2QdFJP/sBwkDKokLyUgYW8ZYFbQn/RLriSv8Do7CmTBkoKofX5g=='
             endo:
               credentialsDeviceUuid: 'cred-uuid'
               encrypted: @encryptedSecrets
@@ -393,10 +406,11 @@ describe 'Auth Spec', ->
                   id:       'resource owner id'
                   username: 'resource owner username'
                   secrets:
+                    credentialsDeviceToken: 'cred-token2'
                     credentials:
                       secret:       'resource owner secret'
                       refreshToken: 'resource owner refresh token'
-              endoSignature: 'a1aPDryhnkn7TSpGcRID5ah9FMdkb+uNvp+5w8tRybXvKt3JuWcBDI0JYGAnSPH3EYBqolPbGrsXJJnl19vJjw=='
+              endoSignature: "i7OF2Kc6ReZ2EKpDRLgyt/VlyxilV7nes+36ib6zsqe6i90RkZ2IF9JRFhEcwWbt4/JYUpZcfr1YhODtGH769g=="
           .reply 204
 
         options =
@@ -449,13 +463,13 @@ describe 'Auth Spec', ->
           .send 'endo.idKey': 'Ula5075pW5J6pbIzhez3Be78UsyVApbXMXEPXmMwBAtVdtxdHoXNx+fI9nLV/pHZzlOI0RjhJmO+qQ3zAnKviw=='
           .reply 200, [{
             uuid: 'bad-cred-uuid'
-            endoSignature: 'OLE06dTcCpQni4qWRxRnRwtzm1XBrkflhQeAdbHCeJgwzjXvvTv6kKcWrV+0zkPaQavWANNKg/EZsnY7kq7TmQ=='
+            endoSignature: 'chpYIsrXkwFXGJ+n/tPkS0UwIQlMr7F6xjP2QdFJP/sBwkDKokLyUgYW8ZYFbQn/RLriSv8Do7CmTBkoKofX5g=='
             endo:
               credentialsDeviceUuid: 'cred-uuid'
               encrypted: @encryptedSecrets
           }, {
             uuid: 'cred-uuid'
-            endoSignature: 'OLE06dTcCpQni4qWRxRnRwtzm1XBrkflhQeAdbHCeJgwzjXvvTv6kKcWrV+0zkPaQavWANNKg/EZsnY7kq7TmQ=='
+            endoSignature: 'chpYIsrXkwFXGJ+n/tPkS0UwIQlMr7F6xjP2QdFJP/sBwkDKokLyUgYW8ZYFbQn/RLriSv8Do7CmTBkoKofX5g=='
             endo:
               credentialsDeviceUuid: 'cred-uuid'
               encrypted: @encryptedSecrets
@@ -483,7 +497,8 @@ describe 'Auth Spec', ->
                     credentials:
                       secret:       'resource owner secret'
                       refreshToken: 'resource owner refresh token'
-              endoSignature: 'a1aPDryhnkn7TSpGcRID5ah9FMdkb+uNvp+5w8tRybXvKt3JuWcBDI0JYGAnSPH3EYBqolPbGrsXJJnl19vJjw=='
+                    credentialsDeviceToken: "cred-token2"
+              endoSignature: "i7OF2Kc6ReZ2EKpDRLgyt/VlyxilV7nes+36ib6zsqe6i90RkZ2IF9JRFhEcwWbt4/JYUpZcfr1YhODtGH769g=="
           .reply 204
 
         options =

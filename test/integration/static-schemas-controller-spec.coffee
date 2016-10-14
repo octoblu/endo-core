@@ -20,7 +20,10 @@ describe 'static schemas', ->
       secrets:
         credentials:
           secret: 'this is secret'
+
     @encrypted = @encryption.encrypt encrypted
+    @publicKey = @encryption.key.exportKey 'public'
+
 
     @meshblu = shmock 0xd00d
     enableDestroy @meshblu
@@ -35,6 +38,10 @@ describe 'static schemas', ->
         options:
           imageUrl: "http://this-is-an-image.exe"
       }
+
+    @meshblu
+      .get '/publickey'
+      .reply 200, {@publicKey}
 
     serverOptions =
       logFn: ->
@@ -54,6 +61,7 @@ describe 'static schemas', ->
       appOctobluHost: 'http://app.octoblu.xxx'
       userDeviceManagerUrl: 'http://manage-my.endo'
       staticSchemasPath: path.join(__dirname, '../fixtures/schemas')
+      meshbluPublicKeyUri: 'http://localhost:53261/publickey'
 
     @server = new Server serverOptions
 

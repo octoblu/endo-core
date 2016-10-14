@@ -10,7 +10,7 @@ class CredentialsDevice
   constructor: ({@deviceType, @encrypted, @imageUrl, meshbluConfig, @serviceUrl, @serviceUuid}) ->
     throw new Error('deviceType is required') unless @deviceType?
     throw new Error('serviceUuid is required') unless @serviceUuid?
-    {@uuid, @privateKey} = meshbluConfig
+    {@uuid, @privateKey, @token} = meshbluConfig
 
     @encryption = Encryption.fromJustGuess @privateKey
     @meshblu    = new MeshbluHTTP meshbluConfig
@@ -83,14 +83,17 @@ class CredentialsDevice
     return url.format uri
 
   _getSignedUpdate: ({authorizedUuid, encrypted, id}) =>
+    encrypted = _.cloneDeep encrypted
+    encrypted.secrets ?= {}
+    encrypted.secrets.credentialsDeviceToken = @token
     endo = {
-      authorizedKey: @encryption.sign(authorizedUuid).toString 'base64'
-      idKey:         @encryption.sign(id).toString 'base64'
+      authorizedKey: @encryption.sign authorizedUuid
+      idKey:         @encryption.sign id
       credentialsDeviceUuid: @uuid
       version: '1.0.0'
       encrypted: encrypted
     }
-    endoSignature = @encryption.sign endo
+    endoSignature = @encryption.sign(endo)
     return {endo, endoSignature}
 
   _userDevicesFromSubscriptions: (subscriptions) =>

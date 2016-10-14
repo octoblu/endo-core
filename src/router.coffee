@@ -1,9 +1,10 @@
-MeshbluAuth = require 'express-meshblu-auth'
-passport    = require 'passport'
-
+MeshbluAuth                 = require 'express-meshblu-auth'
+passport                    = require 'passport'
+httpSignature               = require '@octoblu/connect-http-signature'
 CredentialsDeviceController = require './controllers/credentials-device-controller'
 FormSchemaController        = require './controllers/form-schema-controller'
 MessagesController          = require './controllers/messages-controller'
+MessagesV2Controller        = require './controllers/messages-v2-controller'
 MessageSchemaController     = require './controllers/message-schema-controller'
 OctobluAuthController       = require './controllers/octoblu-auth-controller'
 ResponseSchemaController    = require './controllers/response-schema-controller'
@@ -13,32 +14,41 @@ UserDevicesController       = require './controllers/user-devices-controller'
 class Router
   constructor: (options) ->
     {
-      @appOctobluHost
-      @credentialsDeviceService
-      @messageRouter
-      @messagesService
+      appOctobluHost
+      credentialsDeviceService
+      messageRouter
+      messagesService
       @meshbluConfig
-      @serviceUrl
-      @userDeviceManagerUrl
-      @staticSchemasPath
+      @meshbluPublicKey
+      serviceUrl
+      userDeviceManagerUrl
+      staticSchemasPath
       @skipRedirectAfterApiAuth
     } = options
 
-    throw new Error 'appOctobluHost is required' unless @appOctobluHost?
-    throw new Error 'credentialsDeviceService is required' unless @credentialsDeviceService?
+    throw new Error 'appOctobluHost is required' unless appOctobluHost?
+    throw new Error 'credentialsDeviceService is required' unless credentialsDeviceService?
     throw new Error 'meshbluConfig is required' unless @meshbluConfig?
-    throw new Error 'messagesService is required' unless @messagesService?
-    throw new Error 'serviceUrl is required' unless @serviceUrl?
-    throw new Error 'userDeviceManagerUrl is required' unless @userDeviceManagerUrl?
+    throw new Error 'meshbluPublicKey is required' unless @meshbluPublicKey?
+    throw new Error 'messagesService is required' unless messagesService?
+    throw new Error 'messageRouter is required' unless messageRouter?
+    throw new Error 'serviceUrl is required' unless serviceUrl?
+    throw new Error 'userDeviceManagerUrl is required' unless userDeviceManagerUrl?
 
-    @credentialsDeviceController = new CredentialsDeviceController {@credentialsDeviceService, @appOctobluHost, @serviceUrl, @userDeviceManagerUrl}
-    @formSchemaController        = new FormSchemaController {@messagesService}
-    @messagesController          = new MessagesController {@messageRouter}
-    @messageSchemaController     = new MessageSchemaController {@messagesService}
+    @credentialsDeviceController = new CredentialsDeviceController {credentialsDeviceService, appOctobluHost, serviceUrl, userDeviceManagerUrl}
+    @formSchemaController        = new FormSchemaController {messagesService}
+    @messagesController          = new MessagesController {messageRouter}
+    @messagesV2Controller        = new MessagesV2Controller {messageRouter}
+    @messageSchemaController     = new MessageSchemaController {messagesService}
     @octobluAuthController       = new OctobluAuthController
-    @responseSchemaController    = new ResponseSchemaController {@messagesService}
-    @staticSchemasController     = new StaticSchemasController {@staticSchemasPath}
+    @responseSchemaController    = new ResponseSchemaController {messagesService}
+    @staticSchemasController     = new StaticSchemasController {staticSchemasPath}
     @userDevicesController       = new UserDevicesController
+
+
+  rejectIfNotServiceUuid: (req, res, next) =>
+    return res.sendStatus 401 unless req.get('x-meshblu-uuid') == @meshbluConfig.uuid
+    next()
 
   route: (app) =>
     meshbluAuth = new MeshbluAuth @meshbluConfig
@@ -51,6 +61,8 @@ class Router
 
     app.get '/auth/octoblu', passport.authenticate('octoblu')
     app.get '/auth/octoblu/callback', passport.authenticate('octoblu', failureRedirect: '/auth/octoblu'), @octobluAuthController.storeAuthAndRedirect
+
+    app.post '/v2/messages', httpSignature.verify(pub: @meshbluPublicKey), httpSignature.gateway(), @rejectIfNotServiceUuid, @messagesV2Controller.create
 
     app.use meshbluAuth.auth()
     app.use meshbluAuth.gatewayRedirect('/auth/octoblu')
@@ -69,7 +81,6 @@ class Router
     app.get  '/credentials/:credentialsDeviceUuid/user-devices', @userDevicesController.list
     app.post '/credentials/:credentialsDeviceUuid/user-devices', @userDevicesController.create
     app.delete  '/credentials/:credentialsDeviceUuid/user-devices/:userDeviceUuid', @userDevicesController.delete
-
 
     app.use (req, res) => res.redirect '/auth/api'
 

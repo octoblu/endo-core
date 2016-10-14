@@ -27,10 +27,10 @@ class MessagesService
       metadata: metadata
       data:     response.data
 
-    meshblu = new MeshbluHTTP auth
+    meshblu = new MeshbluHTTP _.defaults auth, @meshbluConfig
     meshblu.message message, as: userDeviceUuid, callback
 
-  replyWithError: ({auth, senderUuid, userDeviceUuid, error, respondTo}, callback) =>    
+  replyWithError: ({auth, senderUuid, userDeviceUuid, error, respondTo}, callback) =>
     message =
       devices: [senderUuid]
       metadata:
@@ -39,7 +39,7 @@ class MessagesService
         error:
           message: error.message
 
-    meshblu = new MeshbluHTTP auth
+    meshblu = new MeshbluHTTP _.defaults auth, @meshbluConfig
     meshblu.message message, as: userDeviceUuid, callback
 
   responseSchema: (callback) =>
@@ -50,6 +50,7 @@ class MessagesService
     {data, metadata} = message
     encryption = Encryption.fromJustGuess @meshbluConfig.privateKey
     encrypted  = encryption.decrypt endo.encrypted
+    encrypted.secrets = _.omit encrypted.secrets, 'credentialsDeviceToken'
     @messageHandler.onMessage {data, encrypted, metadata}, callback
 
   _userError: (message, code) =>

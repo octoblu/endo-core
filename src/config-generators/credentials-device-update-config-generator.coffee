@@ -1,4 +1,4 @@
-module.exports = ({endo, endoSignature, serviceUrl}) ->
+module.exports = ({endo, endoSignature}) ->
   $set:
     'endo':               endo
     'endoSignature':      endoSignature

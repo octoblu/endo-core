@@ -23,7 +23,6 @@ class CredentialsDeviceService
       options =
         uuid: credentialsDeviceUuid
         encrypted: device.endo.encrypted
-
       return @_getCredentialsDevice options, callback
 
   getEndoByUuid: (uuid, callback) =>
@@ -31,6 +30,9 @@ class CredentialsDeviceService
       return callback error if error?
       return callback @_userError 'invalid credentials device', 400 unless @_isSignedCorrectly device
       return callback null, device.endo
+
+  getCredentialsTokenFromEndo: ({encrypted}) =>
+     @encryption.decrypt(encrypted)?.secrets?.credentialsDeviceToken
 
   findOrCreate: (resourceOwnerID, callback) =>
     @_findOrCreate resourceOwnerID, (error, device) =>

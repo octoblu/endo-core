@@ -15,6 +15,8 @@ describe 'response schema', ->
   beforeEach (done) ->
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
     @encryption = Encryption.fromPem @privateKey
+    @publicKey = @encryption.key.exportKey 'public'
+    
     encrypted =
       secrets:
         credentials:
@@ -35,6 +37,10 @@ describe 'response schema', ->
           imageUrl: "http://this-is-an-image.exe"
       }
 
+    @meshblu
+      .get '/publickey'
+      .reply 200, {@publicKey}
+
     serverOptions =
       logFn: ->
       port: undefined,
@@ -52,6 +58,7 @@ describe 'response schema', ->
         privateKey: @privateKey
       appOctobluHost: 'app.octoblu.guru'
       userDeviceManagerUrl: 'http://manage-my.endo'
+      meshbluPublicKeyUri: 'http://localhost:53261/publickey'
 
     @server = new Server serverOptions
 
