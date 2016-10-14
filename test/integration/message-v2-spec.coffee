@@ -233,14 +233,14 @@ describe 'v2 messages', ->
           @responseHandler.done()
 
         it 'should call the hello messageHandler with the message and auth', ->
-          expect(@messageHandler.onMessage).to.have.been.calledWith sinon.match {
+          expect(@messageHandler.onMessage).to.have.been.calledWith {
             encrypted:
               secrets:
                 credentials:
                   secret: 'this is secret'
-          }, {
             metadata:
               jobType: 'hello'
+              respondTo: foo: 'bar'
             data:
               greeting: 'hola'
           }

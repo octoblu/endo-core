@@ -50,6 +50,7 @@ class MessagesService
     {data, metadata} = message
     encryption = Encryption.fromJustGuess @meshbluConfig.privateKey
     encrypted  = encryption.decrypt endo.encrypted
+    encrypted.secrets = _.omit encrypted.secrets, 'credentialsDeviceToken'
     @messageHandler.onMessage {data, encrypted, metadata}, callback
 
   _userError: (message, code) =>
