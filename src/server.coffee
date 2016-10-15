@@ -38,6 +38,8 @@ class Server
       @staticSchemasPath
       @skipRedirectAfterApiAuth
       @meshbluPublicKeyUri = 'https://meshblu.octoblu.com/publickey'
+      @useFirehose = false
+      @skipMessageRoutes = false
     } = options
 
     throw new Error('apiStrategy is required') unless @apiStrategy?
@@ -101,6 +103,7 @@ class Server
           @userDeviceManagerUrl
           @staticSchemasPath
           @skipRedirectAfterApiAuth
+          @skipMessageRoutes
         }
         router.route app
 
