@@ -51,7 +51,8 @@ describe 'messages', ->
       serviceUrl: 'http://octoblu.xxx'
       deviceType: 'endo-endor'
       meshbluConfig:
-        server: 'localhost'
+        hostname: 'localhost'
+        protocol: 'http'
         port: 0xd00d
         uuid: 'peter'
         token: 'i-could-eat'
@@ -59,7 +60,7 @@ describe 'messages', ->
       appOctobluHost: 'http://app.octoblu.mom'
       userDeviceManagerUrl: 'http://manage-my.endo'
       meshbluPublicKeyUri: 'http://localhost:53261/publickey'
-      
+
     @server = new Server serverOptions
 
     @server.run (error) =>

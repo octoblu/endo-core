@@ -34,7 +34,8 @@ describe 'Credentials Device Spec', ->
       octobluStrategy: @octobluStrategy
       serviceUrl: 'http://octoblu.xxx'
       meshbluConfig:
-        server: 'localhost'
+        hostname: 'localhost'
+        protocol: 'http'
         port: 0xd00d
         uuid: 'service-uuid'
         token: 'service-token'

@@ -16,8 +16,8 @@ class Endo
       @deviceType
       @disableLogging
       @logFn
-      @meshbluConfig
       @firehoseMeshbluConfig
+      @meshbluConfig
       @meshbluPublicKeyUri
       @messageHandler
       @octobluStrategy
@@ -39,7 +39,6 @@ class Endo
 
   run: (callback) =>
     callback = _.after callback, 2 if @useFirehose && !@skipExpress
-
     meshblu = new MeshbluHTTP @meshbluConfig
     meshblu.whoami (error, device) =>
       throw new Error('Could not authenticate with meshblu!') if error?

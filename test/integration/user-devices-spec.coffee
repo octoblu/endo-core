@@ -35,7 +35,8 @@ describe 'User Devices Spec', ->
       octobluStrategy: @octobluStrategy
       serviceUrl: 'http://octoblu.xxx'
       meshbluConfig:
-        server: 'localhost'
+        hostname: 'localhost'
+        protocol: 'http'
         port: 0xd00d
         uuid: 'peter'
         token: 'i-could-eat'

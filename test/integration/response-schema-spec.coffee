@@ -16,7 +16,7 @@ describe 'response schema', ->
     @privateKey = fs.readFileSync "#{__dirname}/../data/private-key.pem", 'utf8'
     @encryption = Encryption.fromPem @privateKey
     @publicKey = @encryption.key.exportKey 'public'
-    
+
     encrypted =
       secrets:
         credentials:
@@ -51,7 +51,8 @@ describe 'response schema', ->
       serviceUrl: 'http://octoblu.xxx'
       deviceType: 'endo-endor'
       meshbluConfig:
-        server: 'localhost'
+        hostname: 'localhost'
+        protocol: 'http'
         port: 0xd00d
         uuid: 'peter'
         token: 'i-could-eat'
