@@ -34,7 +34,8 @@
     "server-destroy": "^1.0.1",
     "shmock": "^0.7.2",
     "sinon": "^1.17.4",
-    "sinon-chai": "^2.8.0"
+    "sinon-chai": "^2.8.0",
+    "socket.io": "^1.5.0"
   },
   "dependencies": {
     "@octoblu/connect-http-signature": "^0.1.3",

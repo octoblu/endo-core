@@ -17,6 +17,7 @@ class Endo
       @disableLogging
       @logFn
       @meshbluConfig
+      @firehoseMeshbluConfig
       @meshbluPublicKeyUri
       @messageHandler
       @octobluStrategy
@@ -69,7 +70,8 @@ class Endo
         @server.run callback
 
       if @useFirehose
-        @firehose = new FirehoseMessageProcessor {meshbluConfig, messageRouter}
+        @firehoseMeshbluConfig ?= @meshbluConfig
+        @firehose = new FirehoseMessageProcessor {meshbluConfig: @firehoseMeshbluConfig, messageRouter}
         @firehose.run callback
 
   stop: (callback) =>
