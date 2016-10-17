@@ -1,7 +1,7 @@
 MeshbluFirehose = require 'meshblu-firehose-socket.io'
 
 class FirehoseMessageProcessor
-  constructor: ({@meshbluConfig,   @messageRouter}) ->
+  constructor: ({@meshbluConfig, @messageRouter}) ->
 
     throw new Error 'meshbluConfig is required' unless @meshbluConfig?
     throw new Error 'messageRouter is required' unless @messageRouter?
@@ -9,6 +9,7 @@ class FirehoseMessageProcessor
     @firehose.on 'message', @_onMessage
 
   run: (callback) =>
+    debug 'running express server'
     @firehose.connect callback
 
   @_onMessage: ({metadata, data}) =>

@@ -69,7 +69,7 @@ class Endo
         @server.run callback
 
       if @useFirehose
-        @firehose = new FirehoseMessageProcessor @options
+        @firehose = new FirehoseMessageProcessor {meshbluConfig, messageRouter}
         @firehose.run callback
 
   stop: (callback) =>
