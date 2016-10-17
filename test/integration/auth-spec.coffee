@@ -8,7 +8,7 @@ request       = require 'request'
 enableDestroy = require 'server-destroy'
 shmock        = require 'shmock'
 MockStrategy  = require '../mock-strategy'
-Server        = require '../../src/server'
+Server        = require '../..'
 
 describe 'Auth Spec', ->
   beforeEach (done) ->

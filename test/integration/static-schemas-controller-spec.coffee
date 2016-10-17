@@ -10,7 +10,7 @@ enableDestroy = require 'server-destroy'
 shmock        = require 'shmock'
 
 MockStrategy  = require '../mock-strategy'
-Server        = require '../../src/server'
+Server        = require '../..'
 
 describe 'static schemas', ->
   beforeEach (done) ->

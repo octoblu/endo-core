@@ -19,6 +19,7 @@ Router                   = require './router'
 CredentialsDeviceService = require './services/credentials-device-service'
 MessagesService          = require './services/messages-service'
 MessageRouter            = require './models/message-router'
+debug                    = require('debug')('endo-core:server')
 
 class Server
   constructor: (options)->
@@ -38,8 +39,6 @@ class Server
       @staticSchemasPath
       @skipRedirectAfterApiAuth
       @meshbluPublicKeyUri = 'https://meshblu.octoblu.com/publickey'
-      @useFirehose = false
-      @skipMessageRoutes = false
     } = options
 
     throw new Error('apiStrategy is required') unless @apiStrategy?
@@ -56,6 +55,8 @@ class Server
     @server.address()
 
   run: (callback) =>
+    debug 'running server'
+
     new FetchPublicKey().fetch @meshbluPublicKeyUri, (error, {publicKey}={}) =>
       if error?
         console.error "Error fetching public key: #{error.message}"
@@ -88,9 +89,11 @@ class Server
       meshblu.whoami (error, device) =>
         throw new Error('Could not authenticate with meshblu!') if error?
         {imageUrl} = device.options ? {}
+
         credentialsDeviceService  = new CredentialsDeviceService {@deviceType, imageUrl, @meshbluConfig, @serviceUrl}
         messagesService           = new MessagesService {@messageHandler, @schemas, @meshbluConfig}
         messageRouter             = new MessageRouter {messagesService, credentialsDeviceService, @meshbluConfig}
+
         router = new Router {
           credentialsDeviceService
           @meshbluConfig
@@ -105,6 +108,7 @@ class Server
           @skipRedirectAfterApiAuth
           @skipMessageRoutes
         }
+        
         router.route app
 
         @server = app.listen @port, callback

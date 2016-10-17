@@ -9,7 +9,7 @@ enableDestroy = require 'server-destroy'
 shmock        = require 'shmock'
 
 MockStrategy  = require '../mock-strategy'
-Server        = require '../../src/server'
+Server        = require '../..'
 describe 'v2 messages', ->
   beforeEach (done) ->
     @serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'

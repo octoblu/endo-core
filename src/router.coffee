@@ -24,7 +24,6 @@ class Router
       userDeviceManagerUrl
       staticSchemasPath
       @skipRedirectAfterApiAuth
-      @skipMessageRoutes
     } = options
 
     throw new Error 'appOctobluHost is required' unless appOctobluHost?
@@ -63,8 +62,7 @@ class Router
     app.get '/auth/octoblu', passport.authenticate('octoblu')
     app.get '/auth/octoblu/callback', passport.authenticate('octoblu', failureRedirect: '/auth/octoblu'), @octobluAuthController.storeAuthAndRedirect
 
-    unless @skipMessageRoutes
-      app.post '/v2/messages', httpSignature.verify(pub: @meshbluPublicKey), httpSignature.gateway(), @rejectIfNotServiceUuid, @messagesV2Controller.create
+    app.post '/v2/messages', httpSignature.verify(pub: @meshbluPublicKey), httpSignature.gateway(), @rejectIfNotServiceUuid, @messagesV2Controller.create
 
     app.use meshbluAuth.auth()
     app.use meshbluAuth.gatewayRedirect('/auth/octoblu')
