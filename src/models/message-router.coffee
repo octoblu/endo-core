@@ -2,6 +2,9 @@ RouteParser = require './route-parser'
 
 class MessageRouter
   constructor: ({@credentialsDeviceService, @messagesService, @meshbluConfig})->
+    throw new Error('messagesService is required') unless @messagesService?
+    throw new Error('credentialsDeviceService is required') unless @credentialsDeviceService?
+    throw new Error('meshbluConfig is required') unless @meshbluConfig?
 
   route: ({auth, message, route, respondTo}, callback) =>
     routeParser = new RouteParser {route, serviceUuid: @meshbluConfig.uuid}

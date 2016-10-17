@@ -7,7 +7,6 @@ cookieSession      = require 'cookie-session'
 errorHandler       = require 'errorhandler'
 meshbluHealthcheck = require 'express-meshblu-healthcheck'
 sendError          = require 'express-send-error'
-MeshbluHTTP        = require 'meshblu-http'
 path               = require 'path'
 passport           = require 'passport'
 favicon            = require 'serve-favicon'
@@ -16,9 +15,6 @@ expressVersion     = require 'express-package-version'
 FetchPublicKey     = require 'fetch-meshblu-public-key'
 
 Router                   = require './router'
-CredentialsDeviceService = require './services/credentials-device-service'
-MessagesService          = require './services/messages-service'
-MessageRouter            = require './models/message-router'
 debug                    = require('debug')('endo-core:server')
 
 class Server
@@ -26,30 +22,31 @@ class Server
     {
       @apiStrategy
       @appOctobluHost
-      @deviceType
-      @meshbluConfig
-      @messageHandler
-      @octobluStrategy
-      @schemas
-      @serviceUrl
-      @userDeviceManagerUrl
+      @credentialsDeviceService
       @disableLogging
       @logFn
-      @port
-      @staticSchemasPath
-      @skipRedirectAfterApiAuth
+      @meshbluConfig
+      @messagesService
+      @messageRouter
       @meshbluPublicKeyUri = 'https://meshblu.octoblu.com/publickey'
+      @octobluStrategy
+      @port
+      @serviceUrl
+      @skipRedirectAfterApiAuth
+      @staticSchemasPath
+      @userDeviceManagerUrl
     } = options
 
     throw new Error('apiStrategy is required') unless @apiStrategy?
     throw new Error('appOctobluHost is required') unless @appOctobluHost?
-    throw new Error('deviceType is required') unless @deviceType?
     throw new Error('meshbluConfig is required') unless @meshbluConfig?
-    throw new Error('messageHandler is required') unless @messageHandler?
     throw new Error('octobluStrategy is required') unless @octobluStrategy?
-    throw new Error('schemas not allowed') if @schemas?
     throw new Error('serviceUrl is required') unless @serviceUrl?
     throw new Error('userDeviceManagerUrl is required') unless @userDeviceManagerUrl?
+
+    throw new Error('messageRouter is required') unless @messageRouter?
+    throw new Error('messagesService is required') unless @messagesService?
+    throw new Error('credentialsDeviceService is required') unless @credentialsDeviceService?
 
   address: =>
     @server.address()
@@ -85,33 +82,23 @@ class Server
       app.use sendError {@logFn}
       app.options '*', cors()
 
-      meshblu = new MeshbluHTTP @meshbluConfig
-      meshblu.whoami (error, device) =>
-        throw new Error('Could not authenticate with meshblu!') if error?
-        {imageUrl} = device.options ? {}
+      router = new Router {
+        @credentialsDeviceService
+        @meshbluConfig
+        @messageRouter
+        @messagesService
+        meshbluPublicKey: publicKey
+        @appOctobluHost
+        @serviceUrl
+        @userDeviceManagerUrl
+        @staticSchemasPath
+        @skipRedirectAfterApiAuth
+        @skipMessageRoutes
+      }
 
-        credentialsDeviceService  = new CredentialsDeviceService {@deviceType, imageUrl, @meshbluConfig, @serviceUrl}
-        messagesService           = new MessagesService {@messageHandler, @schemas, @meshbluConfig}
-        messageRouter             = new MessageRouter {messagesService, credentialsDeviceService, @meshbluConfig}
+      router.route app
 
-        router = new Router {
-          credentialsDeviceService
-          @meshbluConfig
-          messageRouter
-          messagesService
-          meshbluPublicKey: publicKey
-          @appOctobluHost
-          @meshbluConfig
-          @serviceUrl
-          @userDeviceManagerUrl
-          @staticSchemasPath
-          @skipRedirectAfterApiAuth
-          @skipMessageRoutes
-        }
-        
-        router.route app
-
-        @server = app.listen @port, callback
+      @server = app.listen @port, callback
 
   stop: (callback) =>
     @server.close callback
