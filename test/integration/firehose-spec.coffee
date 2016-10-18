@@ -11,8 +11,8 @@ shmock        = require 'shmock'
 SocketIO      = require 'socket.io'
 MockStrategy  = require '../mock-strategy'
 Endo          = require '../..'
-
-xdescribe 'firehose', ->
+_             = require 'lodash'
+describe 'firehose', ->
   beforeEach 'setup socket.io', ->
     @firehoseServer = new SocketIO 0xcaf1
 
@@ -28,7 +28,16 @@ xdescribe 'firehose', ->
 
     @meshblu = shmock 0xd00d
     enableDestroy @meshblu
-    @messageHandler = onMessage: sinon.stub()
+
+    class MessageHandler
+      _onMessage: sinon.stub()
+
+      onMessage: (data, callback) =>
+        @_onMessage data, callback
+        @done() if @done?
+
+    @messageHandler = new MessageHandler()
+
     @meshblu
       .get '/v2/whoami'
       .set 'Authorization', "Basic #{@serviceAuth}"
@@ -69,8 +78,8 @@ xdescribe 'firehose', ->
 
     @sut = new Endo options
 
-    afterEach (done) ->
-      @sut.stop done
+  afterEach (done) ->
+    @sut.stop done
 
   describe '->run', ->
     beforeEach (done) ->
@@ -91,3 +100,82 @@ xdescribe 'firehose', ->
       expect(@token).to.equal 'i-could-eat'
       expect(@query.uuid).to.equal 'peter'
       expect(@query.token).to.equal 'i-could-eat'
+
+    describe 'when the credentials device has an encrypted token', ->
+      beforeEach 'message', ->
+        @message =
+          metadata:
+            route: [
+              {"from": "flow-uuid", "to": "user-uuid", "type": "message.sent"}
+              {"from": "user-uuid", "to": "cred-uuid", "type": "message.received"}
+              {"from": "cred-uuid", "to": "cred-uuid", "type": "message.received"}
+              {"from": "cred-uuid", "to": "peter",     "type": "message.received"}
+            ]
+          rawData: JSON.stringify(
+            metadata:
+              jobType: 'hello'
+              respondTo: foo: 'bar'
+            data:
+              greeting: 'hola'
+          )
+
+      beforeEach 'credentials-device', ->
+        unencrypted =
+          secrets:
+            credentialsDeviceToken: 'cred-token'
+            credentials:
+              secret: 'this is secret'
+        endo =
+          authorizedKey: 'some-uuid'
+          credentialsDeviceUuid: 'cred-uuid'
+          encrypted: @encryption.encrypt unencrypted
+
+        endoSignature = @encryption.sign {
+          authorizedKey: 'some-uuid'
+          credentialsDeviceUuid: 'cred-uuid'
+          encrypted: unencrypted
+        }
+
+        @meshblu
+          .get '/v2/devices/cred-uuid'
+          .set 'Authorization', "Basic #{@serviceAuth}"
+          .reply 200,
+            uuid: 'cred-uuid'
+            endoSignature: endoSignature
+            endo: endo
+
+      beforeEach (done) ->
+        credentialsDeviceAuth = new Buffer('cred-uuid:cred-token').toString 'base64'
+
+        @responseHandler = @meshblu
+          .post '/messages'
+          .set 'Authorization', "Basic #{credentialsDeviceAuth}"
+          .set 'x-meshblu-as', 'user-uuid'
+          .send
+            devices: ['flow-uuid']
+            metadata:
+              code: 200
+              to: { foo: 'bar' }
+            data:
+              whatever: 'this is a response'
+          .reply 201
+
+        @socket.emit 'message', @message
+        @messageHandler.done = _.once done
+        @messageHandler._onMessage.yields null, metadata: {code: 200}, data: {whatever: 'this is a response'}
+
+      it 'should respond to the message via meshblu', (done)->
+        @responseHandler.wait(1000, done)
+
+      it 'should call the hello messageHandler with the message and auth', ->
+        expect(@messageHandler._onMessage).to.have.been.calledWith {
+          encrypted:
+            secrets:
+              credentials:
+                secret: 'this is secret'
+          metadata:
+            jobType: 'hello'
+            respondTo: foo: 'bar'
+          data:
+            greeting: 'hola'
+        }
