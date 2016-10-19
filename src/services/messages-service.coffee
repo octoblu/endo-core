@@ -1,5 +1,7 @@
-{Validator} = require 'jsonschema'
 _           = require 'lodash'
+moment      = require 'moment'
+
+{Validator} = require 'jsonschema'
 Encryption  = require 'meshblu-encryption'
 MeshbluHTTP = require 'meshblu-http'
 
@@ -42,18 +44,21 @@ class MessagesService
     meshblu = new MeshbluHTTP _.defaults auth, @meshbluConfig
     meshblu.message message, as: userDeviceUuid, (newError) =>
       return callback newError if newError?
-      @_updateStatusDeviceWithError {auth, userDeviceUuid, error, respondTo}, callback
+      @_updateStatusDeviceWithError {auth, senderUuid, userDeviceUuid, error, respondTo}, callback
 
-  _updateStatusDeviceWithError: ({auth, userDeviceUuid, error, respondTo}, callback) =>
+  _updateStatusDeviceWithError: ({auth, senderUuid, userDeviceUuid, error, respondTo}, callback) =>
     meshblu = new MeshbluHTTP _.defaults auth, @meshbluConfig
-    meshblu.device userDeviceUuid, as: userDeviceUuid, (newError, {statusDevice}={}) =>
+    meshblu.device userDeviceUuid, (newError, {statusDevice}={}) =>
       return callback() if newError?
       return callback() unless statusDevice?
       update =
         $push:
           errors:
+            senderUuid: senderUuid
+            date: moment.utc().format()
+            metadata:
+              to: respondTo
             code: error.code ? 500
-            to: respondTo
             error:
               message: error.message
       meshblu.updateDangerously statusDevice, update, as: userDeviceUuid, callback

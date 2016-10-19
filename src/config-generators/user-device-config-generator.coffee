@@ -40,8 +40,8 @@ module.exports = (options) ->
           sent:     [{uuid: authorizedUuid}]
           update:   [{uuid: authorizedUuid}]
         discover:
-          view:     [{uuid: authorizedUuid}]
-          as:       [{uuid: authorizedUuid}, {uuid: credentialsUuid}]
+          view:     [{uuid: authorizedUuid}, {uuid: credentialsUuid}]
+          as:       [{uuid: authorizedUuid}]
         message:
           as:       [{uuid: authorizedUuid}, {uuid: credentialsUuid}]
           received: [{uuid: authorizedUuid}, {uuid: credentialsUuid}]

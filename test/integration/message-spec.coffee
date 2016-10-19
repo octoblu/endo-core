@@ -10,6 +10,7 @@ shmock        = require 'shmock'
 
 MockStrategy  = require '../mock-strategy'
 Server        = require '../..'
+moment        = require 'moment'
 
 describe 'messages', ->
   beforeEach (done) ->
@@ -376,6 +377,13 @@ describe 'messages', ->
             expect(@response.statusCode).to.equal 201, JSON.stringify @body
 
         describe 'when called with a valid message, but theres an error', ->
+
+          beforeEach 'Go back in time to 8am MST 2016-09-28 ', ->
+            sinon.useFakeTimers moment('2016-09-28T15:00:00Z').valueOf()
+
+          afterEach 'Back to the future', ->
+            sinon.restore()
+
           beforeEach (done) ->
             @messageHandler.onMessage.yields new Error 'Something very bad happened'
             @responseHandler = @meshblu
@@ -411,7 +419,6 @@ describe 'messages', ->
             @getUserDeviceHandler = @meshblu
               .get '/v2/devices/user-uuid'
               .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
-              .set 'x-meshblu-as', 'user-uuid'
               .reply 200, statusDevice: 'status-device-uuid'
 
             @updateStatusDeviceHandler = @meshblu
@@ -422,7 +429,10 @@ describe 'messages', ->
                 $push:
                   errors:
                     code: 500
-                    to: 'food'
+                    senderUuid: 'flow-uuid'
+                    date: '2016-09-28T15:00:00Z'
+                    metadata:
+                      to: 'food'
                     error:
                       message: 'Something very bad happened'
               .reply 204
