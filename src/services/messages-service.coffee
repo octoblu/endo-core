@@ -40,7 +40,23 @@ class MessagesService
           message: error.message
 
     meshblu = new MeshbluHTTP _.defaults auth, @meshbluConfig
-    meshblu.message message, as: userDeviceUuid, callback
+    meshblu.message message, as: userDeviceUuid, (newError) =>
+      return callback newError if newError?
+      @_updateStatusDeviceWithError {auth, userDeviceUuid, error, respondTo}, callback
+
+  _updateStatusDeviceWithError: ({auth, userDeviceUuid, error, respondTo}, callback) =>
+    meshblu = new MeshbluHTTP _.defaults auth, @meshbluConfig
+    meshblu.device userDeviceUuid, as: userDeviceUuid, (newError, {statusDevice}={}) =>
+      return callback() if newError?
+      return callback() unless statusDevice?
+      update =
+        $push:
+          errors:
+            code: error.code ? 500
+            to: respondTo
+            error:
+              message: error.message
+      meshblu.updateDangerously statusDevice, update, as: userDeviceUuid, callback
 
   responseSchema: (callback) =>
     @messageHandler.responseSchema callback

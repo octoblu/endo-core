@@ -5,6 +5,7 @@ url         = require 'url'
 
 credentialsDeviceUpdateGenerator = require '../config-generators/credentials-device-update-config-generator'
 userDeviceConfigGenerator = require '../config-generators/user-device-config-generator'
+statusDeviceConfigGenerator = require '../config-generators/status-device-create-config-generator'
 
 class CredentialsDevice
   constructor: ({@deviceType, @encrypted, @imageUrl, meshbluConfig, @serviceUrl, @serviceUuid}) ->
@@ -34,7 +35,17 @@ class CredentialsDevice
       subscription = {subscriberUuid: @uuid, emitterUuid: userDevice.uuid, type: 'message.received'}
       @meshblu.createSubscription subscription, (error) =>
         return callback error if error?
-        return callback null, userDevice
+        @createStatusDevice {userDeviceUuid: userDevice.uuid, authorizedUuid}, (error, {uuid}={}) =>
+          callback error if error?
+          @updateUserStatusDevice {userDeviceUuid: userDevice.uuid, statusDeviceUuid: uuid}, (error) =>
+            callback error, userDevice
+
+  createStatusDevice: ({userDeviceUuid, authorizedUuid}, callback) =>
+    statusDeviceConfig = statusDeviceConfigGenerator {userDeviceUuid, authorizedUuid}
+    @meshblu.register statusDeviceConfig, callback
+
+  updateUserStatusDevice: ({userDeviceUuid, statusDeviceUuid}, callback) =>
+    @meshblu.updateDangerously userDeviceUuid, $set: statusDevice: statusDeviceUuid, callback
 
   deleteUserDeviceSubscription: ({userDeviceUuid}, callback) =>
     return callback @_userError 'Cannot remove the credentials subscription to itself', 403 if userDeviceUuid == @uuid

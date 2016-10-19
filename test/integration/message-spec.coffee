@@ -246,7 +246,6 @@ describe 'messages', ->
                 greeting: 'hola'
             }
 
-
         describe 'when called with a valid message that was forwarded to the service device', ->
           beforeEach (done) ->
             @messageHandler.onMessage.yields null, metadata: {code: 200}, data: {whatever: 'this is a response'}
@@ -409,6 +408,25 @@ describe 'messages', ->
                 username: 'cred-uuid'
                 password: 'cred-token'
 
+            @getUserDeviceHandler = @meshblu
+              .get '/v2/devices/user-uuid'
+              .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
+              .set 'x-meshblu-as', 'user-uuid'
+              .reply 200, statusDevice: 'status-device-uuid'
+
+            @updateStatusDeviceHandler = @meshblu
+              .put '/v2/devices/status-device-uuid'
+              .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
+              .set 'x-meshblu-as', 'user-uuid'
+              .send
+                $push:
+                  errors:
+                    code: 500
+                    to: 'food'
+                    error:
+                      message: 'Something very bad happened'
+              .reply 204
+
             request.post '/v1/messages', options, (error, @response, @body) =>
               done error
 
@@ -430,6 +448,9 @@ describe 'messages', ->
 
           it 'should respond to the message with the error via meshblu', ->
             @responseHandler.done()
+
+          it 'should update the status device with the error', ->
+            @updateStatusDeviceHandler.done()
 
         describe 'when called with a valid message, but the the endo is invalid', ->
           beforeEach (done) ->

@@ -35,13 +35,13 @@ module.exports = (options) ->
           received: [{uuid: authorizedUuid}]
           sent:     [{uuid: authorizedUuid}]
         configure:
-          as:       [{uuid: authorizedUuid}]
+          as:       [{uuid: authorizedUuid}, {uuid: credentialsUuid}]
           received: [{uuid: authorizedUuid}]
           sent:     [{uuid: authorizedUuid}]
           update:   [{uuid: authorizedUuid}]
         discover:
           view:     [{uuid: authorizedUuid}]
-          as:       [{uuid: authorizedUuid}]
+          as:       [{uuid: authorizedUuid}, {uuid: credentialsUuid}]
         message:
           as:       [{uuid: authorizedUuid}, {uuid: credentialsUuid}]
           received: [{uuid: authorizedUuid}, {uuid: credentialsUuid}]

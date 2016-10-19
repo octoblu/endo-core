@@ -264,19 +264,50 @@ describe 'User Devices Spec', ->
                   received: [{uuid: 'some-uuid'}]
                   sent: [{uuid: 'some-uuid'}]
                 configure:
-                  as: [{uuid: 'some-uuid'}]
+                  as: [{uuid: 'some-uuid'}, {uuid: 'cred-uuid'}]
                   received: [{uuid: 'some-uuid'}]
                   sent: [{uuid: 'some-uuid'}]
                   update: [{uuid: 'some-uuid'}]
                 discover:
                   view: [{uuid: 'some-uuid'}]
-                  as: [{uuid: 'some-uuid'}]
+                  as: [{uuid: 'some-uuid'}, {uuid: 'cred-uuid'}]
                 message:
                   as: [{uuid: 'some-uuid'}, {uuid: 'cred-uuid'}]
                   received: [{uuid: 'some-uuid'}, {uuid: 'cred-uuid'}]
                   sent: [{uuid: 'some-uuid'}]
                   from: [{uuid: 'some-uuid'}]
           .reply 201, uuid: 'user_device_uuid', token: 'user_device_token'
+
+        @createStatusDevice = @meshblu
+          .post '/devices'
+          .send
+            type: 'status-device',
+            owner: 'user_device_uuid'
+            meshblu:
+              whitelists:
+                version: '2.0.0'
+                configure:
+                  update: [
+                    {uuid: 'user_device_uuid'}
+                    {uuid: 'some-uuid'}
+                  ]
+                  sent: [
+                    {uuid: 'user_device_uuid'}
+                    {uuid: 'some-uuid'}
+                  ]
+                discover:
+                  view: [
+                    {uuid: 'user_device_uuid'}
+                    {uuid: 'some-uuid'}
+                  ]
+          .reply 201, uuid: 'status-device-uuid', token: 'status-device-token'
+
+        @updateUserStatusDevice = @meshblu
+          .put '/v2/devices/user_device_uuid'
+          .send
+            $set:
+              statusDevice: 'status-device-uuid'
+          .reply 204
 
         @createMessageReceivedSubscription = @meshblu
           .post '/v2/devices/cred-uuid/subscriptions/user_device_uuid/message.received'
@@ -303,6 +334,12 @@ describe 'User Devices Spec', ->
 
       it 'should return the user device', ->
         expect(@body).to.deep.equal uuid: 'user_device_uuid', token: 'user_device_token'
+
+      it 'should create the status device', ->
+        @createStatusDevice.done()
+
+      it 'should update the user device with the statusDevice', ->
+        @updateUserStatusDevice.done()
 
   describe 'On DELETE /cred-uuid/user-devices/user_device_uuid', ->
     describe 'when authorized', ->
