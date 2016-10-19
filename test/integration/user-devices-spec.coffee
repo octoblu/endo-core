@@ -215,7 +215,7 @@ describe 'User Devices Spec', ->
         userAuth = new Buffer('some-uuid:some-token').toString 'base64'
         serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
         credentialsDeviceAuth = new Buffer('cred-uuid:cred-token2').toString 'base64'
-
+        userDeviceAuth = new Buffer('user_device_uuid:user_device_token').toString 'base64'
         @meshblu
           .post '/authenticate'
           .set 'Authorization', "Basic #{userAuth}"
@@ -304,6 +304,7 @@ describe 'User Devices Spec', ->
 
         @updateUserStatusDevice = @meshblu
           .put '/v2/devices/user_device_uuid'
+          .set 'Authorization', "Basic #{userDeviceAuth}"
           .send
             $set:
               statusDevice: 'status-device-uuid'

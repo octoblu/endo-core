@@ -8,13 +8,13 @@ userDeviceConfigGenerator = require '../config-generators/user-device-config-gen
 statusDeviceConfigGenerator = require '../config-generators/status-device-create-config-generator'
 
 class CredentialsDevice
-  constructor: ({@deviceType, @encrypted, @imageUrl, meshbluConfig, @serviceUrl, @serviceUuid}) ->
+  constructor: ({@deviceType, @encrypted, @imageUrl, @meshbluConfig, @serviceUrl, @serviceUuid}) ->
     throw new Error('deviceType is required') unless @deviceType?
     throw new Error('serviceUuid is required') unless @serviceUuid?
-    {@uuid, @privateKey, @token} = meshbluConfig
+    {@uuid, @privateKey, @token} = @meshbluConfig
 
     @encryption = Encryption.fromJustGuess @privateKey
-    @meshblu    = new MeshbluHTTP meshbluConfig
+    @meshblu    = new MeshbluHTTP @meshbluConfig
 
   createUserDevice: ({authorizedUuid}, callback) =>
     resourceOwnerName = @encryption.decrypt(@encrypted).username
@@ -37,15 +37,16 @@ class CredentialsDevice
         return callback error if error?
         @createStatusDevice {userDeviceUuid: userDevice.uuid, authorizedUuid}, (error, {uuid}={}) =>
           callback error if error?
-          @updateUserStatusDevice {userDeviceUuid: userDevice.uuid, statusDeviceUuid: uuid}, (error) =>
+          @updateUserStatusDevice {userDeviceUuid: userDevice.uuid, userDeviceToken: userDevice.token, statusDeviceUuid: uuid}, (error) =>
             callback error, userDevice
 
   createStatusDevice: ({userDeviceUuid, authorizedUuid}, callback) =>
     statusDeviceConfig = statusDeviceConfigGenerator {userDeviceUuid, authorizedUuid}
     @meshblu.register statusDeviceConfig, callback
 
-  updateUserStatusDevice: ({userDeviceUuid, statusDeviceUuid}, callback) =>
-    @meshblu.updateDangerously userDeviceUuid, $set: statusDevice: statusDeviceUuid, callback
+  updateUserStatusDevice: ({userDeviceUuid, userDeviceToken, statusDeviceUuid}, callback) =>
+    userDeviceMeshblu = new MeshbluHTTP _.defaults {uuid: userDeviceUuid, token: userDeviceToken}, @meshbluConfig
+    userDeviceMeshblu.updateDangerously userDeviceUuid, $set: statusDevice: statusDeviceUuid, callback
 
   deleteUserDeviceSubscription: ({userDeviceUuid}, callback) =>
     return callback @_userError 'Cannot remove the credentials subscription to itself', 403 if userDeviceUuid == @uuid
