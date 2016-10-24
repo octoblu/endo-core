@@ -429,12 +429,11 @@ describe 'messages', ->
                 $push:
                   errors:
                     code: 500
+                    message: 'Something very bad happened'
                     senderUuid: 'flow-uuid'
                     date: '2016-09-28T15:00:00Z'
                     metadata:
                       to: 'food'
-                    error:
-                      message: 'Something very bad happened'
               .reply 204
 
             request.post '/v1/messages', options, (error, @response, @body) =>

@@ -59,8 +59,7 @@ class MessagesService
             metadata:
               to: respondTo
             code: error.code ? 500
-            error:
-              message: error.message
+            message: error.message
       meshblu.updateDangerously statusDevice, update, as: userDeviceUuid, callback
 
   responseSchema: (callback) =>
