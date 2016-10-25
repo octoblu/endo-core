@@ -1,6 +1,6 @@
 {
   "name": "endo-core",
-  "version": "14.9.0",
+  "version": "14.10.0",
   "description": "Put some description here",
   "keywords": [],
   "homepage": "https://github.com/octoblu/endo-core",
@@ -58,7 +58,7 @@
     "lodash": "^4.11.1",
     "meshblu-encryption": "^2.0.0",
     "meshblu-firehose-socket.io": "^2.0.1",
-    "meshblu-http": "^7.4.0",
+    "meshblu-http": "^8.1.0",
     "moment": "^2.15.1",
     "morgan": "^1.6.1",
     "passport": "^0.3.2",

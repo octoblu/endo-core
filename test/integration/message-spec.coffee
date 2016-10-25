@@ -117,8 +117,8 @@ describe 'messages', ->
             request.post '/v1/messages', options, (error, @response, @body) =>
               done error
 
-          it 'should return a 400', ->
-            expect(@response.statusCode).to.equal 400, JSON.stringify @body
+          it 'should return a 404', ->
+            expect(@response.statusCode).to.equal 404, JSON.stringify @body
 
       describe 'when we get an invalid credentials device', ->
         beforeEach ->
@@ -156,8 +156,8 @@ describe 'messages', ->
             request.post '/v1/messages', options, (error, @response, @body) =>
               done error
 
-          it 'should return a 400', ->
-            expect(@response.statusCode).to.equal 400, JSON.stringify @body
+          it 'should return a 404', ->
+            expect(@response.statusCode).to.equal 404, JSON.stringify @body
 
       describe 'when we have a real credentials device', ->
         beforeEach ->
@@ -342,7 +342,7 @@ describe 'messages', ->
               .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
               .set 'x-meshblu-as', 'user-uuid'
               .send
-                devices: ['flow-uuid']
+                devices: ['whatever-uuid']
                 metadata:
                   code: 200
                   to: { foo: 'bar' }
