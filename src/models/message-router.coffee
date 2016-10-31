@@ -12,6 +12,8 @@ class MessageRouter
 
     {credentialsUuid, userDeviceUuid, senderUuid} = routeParser.parse()
     @credentialsDeviceService.getEndoByUuid credentialsUuid, (error, endo) =>
+      return @_respondWithError {auth, senderUuid, userDeviceUuid, error, respondTo}, callback if error?
+
       auth ?= {uuid: credentialsUuid, token: @credentialsDeviceService.getCredentialsTokenFromEndo(endo)}
 
       return callback @_noCredentialsTokenError() unless auth.token?
