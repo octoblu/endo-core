@@ -54,12 +54,15 @@ class MessagesService
       update =
         $push:
           errors:
-            senderUuid: senderUuid
-            date: moment.utc().format()
-            metadata:
-              to: respondTo
-            code: error.code ? 500
-            message: error.message
+            $each: [
+              senderUuid: senderUuid
+              date: moment.utc().format()
+              metadata:
+                to: respondTo
+              code: error.code ? 500
+              message: error.message
+            ]
+            $slice: -99
       meshblu.updateDangerously statusDevice, update, as: userDeviceUuid, callback
 
   responseSchema: (callback) =>

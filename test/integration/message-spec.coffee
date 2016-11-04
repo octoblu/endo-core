@@ -428,12 +428,15 @@ describe 'messages', ->
               .send
                 $push:
                   errors:
-                    code: 500
-                    message: 'Something very bad happened'
-                    senderUuid: 'flow-uuid'
-                    date: '2016-09-28T15:00:00Z'
-                    metadata:
-                      to: 'food'
+                    $each: [
+                      code: 500
+                      message: 'Something very bad happened'
+                      senderUuid: 'flow-uuid'
+                      date: '2016-09-28T15:00:00Z'
+                      metadata:
+                        to: 'food'
+                    ]
+                    $slice: -99
               .reply 204
 
             request.post '/v1/messages', options, (error, @response, @body) =>
