@@ -87,14 +87,15 @@ describe 'messages', ->
       describe 'when we get some weird device instead of a credentials device', ->
         beforeEach ->
           serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
-
           @meshblu
-            .get '/v2/devices/cred-uuid'
-            .set 'Authorization', "Basic #{serviceAuth}"
+            .post '/search/devices'
+            .set 'Authorization', "Basic #{@serviceAuth}"
             .set 'x-meshblu-as', 'cred-uuid'
-            .reply 200,
+            .send uuid: 'cred-uuid'
+            .reply 200, [
               uuid: 'cred-uuid'
               banana: 'pudding'
+            ]
 
         describe 'when called with a valid message', ->
           beforeEach (done) ->
@@ -124,17 +125,18 @@ describe 'messages', ->
       describe 'when we get an invalid credentials device', ->
         beforeEach ->
           serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
-
           @meshblu
-            .get '/v2/devices/cred-uuid'
-            .set 'Authorization', "Basic #{serviceAuth}"
+            .post '/search/devices'
+            .set 'Authorization', "Basic #{@serviceAuth}"
             .set 'x-meshblu-as', 'cred-uuid'
-            .reply 200,
-                uuid: 'cred-uuid'
-                endoSignature: 'John Hancock. Definitely, definitely John Hancock'
-                endo:
-                  credentialsDeviceUuid: 'cred-uuid'
-                  encrypted: @encrypted
+            .send uuid: 'cred-uuid'
+            .reply 200, [
+              uuid: 'cred-uuid'
+              endoSignature: 'John Hancock. Definitely, definitely John Hancock'
+              endo:
+                credentialsDeviceUuid: 'cred-uuid'
+                encrypted: @encrypted
+            ]
 
         describe 'when called with a valid message', ->
           beforeEach (done) ->
@@ -164,17 +166,19 @@ describe 'messages', ->
       describe 'when we have a real credentials device', ->
         beforeEach ->
           serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
-
           @meshblu
-            .get '/v2/devices/cred-uuid'
+            .post '/search/devices'
             .set 'Authorization', "Basic #{serviceAuth}"
-            .reply 200,
+            .set 'x-meshblu-as', 'cred-uuid'
+            .send uuid: 'cred-uuid'
+            .reply 200, [
                 uuid: 'cred-uuid'
                 endoSignature: 'LebOB6aPRQJC7HuLqVqwBeZOFITW+S+jTExlXKrnhvcbzgn6b82fwyh0Qin8ccMym9y4ymIWcKunfa9bZj2YsA=='
                 endo:
                   authorizedKey: 'some-uuid'
                   credentialsDeviceUuid: 'cred-uuid'
                   encrypted: @encrypted
+            ]
 
         describe 'when called with a message without metadata', ->
           beforeEach (done) ->

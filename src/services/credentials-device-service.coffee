@@ -26,10 +26,12 @@ class CredentialsDeviceService
       return @_getCredentialsDevice options, callback
 
   getEndoByUuid: (uuid, callback) =>
-    @meshblu.device uuid, as: uuid, (error, device) =>
+    @meshblu.search {uuid}, as: uuid, (error, devices) =>      
       if error?
         return @_updateDiscoverAsPermissionsAndGetEndo uuid, callback if error.code == 403
         return callback error
+
+      device = _.first devices
       return callback @_userError 'invalid credentials device', 400 unless @_isSignedCorrectly device
       return callback null, device.endo
 

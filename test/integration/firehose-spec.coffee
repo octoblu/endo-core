@@ -137,12 +137,15 @@ describe 'firehose', ->
         }
 
         @meshblu
-          .get '/v2/devices/cred-uuid'
+          .post '/search/devices'
           .set 'Authorization', "Basic #{@serviceAuth}"
-          .reply 200,
+          .set 'x-meshblu-as', 'cred-uuid'
+          .send uuid: 'cred-uuid'
+          .reply 200, [
             uuid: 'cred-uuid'
             endoSignature: endoSignature
             endo: endo
+          ]
 
       beforeEach (done) ->
         credentialsDeviceAuth = new Buffer('cred-uuid:cred-token').toString 'base64'

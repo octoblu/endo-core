@@ -169,13 +169,15 @@ describe 'v2 messages', ->
           }
 
           @meshblu
-            .get '/v2/devices/cred-uuid'
+            .post '/search/devices'
             .set 'Authorization', "Basic #{@serviceAuth}"
             .set 'x-meshblu-as', 'cred-uuid'
-            .reply 200,
+            .send uuid: 'cred-uuid'
+            .reply 200, [
               uuid: 'cred-uuid'
               endoSignature: endoSignature
               endo: endo
+            ]
 
         beforeEach (done) ->
           request.post '/v2/messages', @requestOptions, (error, @response) =>
@@ -203,13 +205,15 @@ describe 'v2 messages', ->
           }
 
           @meshblu
-            .get '/v2/devices/cred-uuid'
+            .post '/search/devices'
             .set 'Authorization', "Basic #{@serviceAuth}"
             .set 'x-meshblu-as', 'cred-uuid'
-            .reply 200,
+            .send uuid: 'cred-uuid'
+            .reply 200, [
               uuid: 'cred-uuid'
               endoSignature: endoSignature
               endo: endo
+            ]
 
         beforeEach (done) ->
           credentialsDeviceAuth = new Buffer('cred-uuid:cred-token').toString 'base64'
@@ -265,6 +269,24 @@ describe 'v2 messages', ->
             credentialsDeviceUuid: 'cred-uuid'
             encrypted: unencrypted
           }
+
+          @meshblu
+            .post '/search/devices'
+            .set 'Authorization', "Basic #{@serviceAuth}"
+            .set 'x-meshblu-as', 'cred-uuid'
+            .send uuid: 'cred-uuid'
+            .reply 403
+            .on 'done', =>
+              @meshblu
+                .post '/search/devices'
+                .set 'Authorization', "Basic #{@serviceAuth}"
+                .set 'x-meshblu-as', 'cred-uuid'
+                .send uuid: 'cred-uuid'
+                .reply 200, [
+                  uuid: 'cred-uuid'
+                  endoSignature: endoSignature
+                  endo: endo
+                ]
 
           @meshblu
             .get '/v2/devices/cred-uuid'
