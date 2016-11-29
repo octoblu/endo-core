@@ -201,6 +201,7 @@ describe 'Auth Spec', ->
               whitelists:
                 discover:
                   view: [{uuid: 'peter'}]
+                  as: [{uuid: 'peter'}]
                 configure:
                   update: [{uuid: 'peter'}]
                 message:

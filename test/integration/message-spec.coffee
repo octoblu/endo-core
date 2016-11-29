@@ -91,6 +91,7 @@ describe 'messages', ->
           @meshblu
             .get '/v2/devices/cred-uuid'
             .set 'Authorization', "Basic #{serviceAuth}"
+            .set 'x-meshblu-as', 'cred-uuid'
             .reply 200,
               uuid: 'cred-uuid'
               banana: 'pudding'
@@ -127,6 +128,7 @@ describe 'messages', ->
           @meshblu
             .get '/v2/devices/cred-uuid'
             .set 'Authorization', "Basic #{serviceAuth}"
+            .set 'x-meshblu-as', 'cred-uuid'
             .reply 200,
                 uuid: 'cred-uuid'
                 endoSignature: 'John Hancock. Definitely, definitely John Hancock'

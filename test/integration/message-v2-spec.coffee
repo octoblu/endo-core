@@ -171,6 +171,7 @@ describe 'v2 messages', ->
           @meshblu
             .get '/v2/devices/cred-uuid'
             .set 'Authorization', "Basic #{@serviceAuth}"
+            .set 'x-meshblu-as', 'cred-uuid'
             .reply 200,
               uuid: 'cred-uuid'
               endoSignature: endoSignature
@@ -204,6 +205,7 @@ describe 'v2 messages', ->
           @meshblu
             .get '/v2/devices/cred-uuid'
             .set 'Authorization', "Basic #{@serviceAuth}"
+            .set 'x-meshblu-as', 'cred-uuid'
             .reply 200,
               uuid: 'cred-uuid'
               endoSignature: endoSignature
@@ -245,3 +247,67 @@ describe 'v2 messages', ->
             data:
               greeting: 'hola'
           }
+
+      describe "and we can't discover.as the credentials device", ->
+        beforeEach 'credentials-device', ->
+          unencrypted =
+            secrets:
+              credentialsDeviceToken: 'cred-token'
+              credentials:
+                secret: 'this is secret'
+          endo =
+            authorizedKey: 'some-uuid'
+            credentialsDeviceUuid: 'cred-uuid'
+            encrypted: @encryption.encrypt unencrypted
+
+          endoSignature = @encryption.sign {
+            authorizedKey: 'some-uuid'
+            credentialsDeviceUuid: 'cred-uuid'
+            encrypted: unencrypted
+          }
+
+          @meshblu
+            .get '/v2/devices/cred-uuid'
+            .set 'Authorization', "Basic #{@serviceAuth}"
+            .set 'x-meshblu-as', 'cred-uuid'
+            .reply 403
+            .on 'done', =>
+              @meshblu
+                .get '/v2/devices/cred-uuid'
+                .set 'Authorization', "Basic #{@serviceAuth}"
+                .set 'x-meshblu-as', 'cred-uuid'
+                .reply 200,
+                  uuid: 'cred-uuid'
+                  endoSignature: endoSignature
+                  endo: endo
+
+          @updateCredentialsDevice =
+            @meshblu
+              .put '/v2/devices/cred-uuid'
+              .set 'Authorization', "Basic #{@serviceAuth}"
+              .send
+                $addToSet:
+                  "meshblu.whitelists.discover.as": {uuid: 'peter'}
+              .reply 204
+
+
+        beforeEach (done) ->
+          credentialsDeviceAuth = new Buffer('cred-uuid:cred-token').toString 'base64'
+          @messageHandler.onMessage.yields null, metadata: {code: 200}, data: {whatever: 'this is a response'}
+          @responseHandler = @meshblu
+            .post '/messages'
+            .set 'Authorization', "Basic #{credentialsDeviceAuth}"
+            .set 'x-meshblu-as', 'user-uuid'
+            .send
+              devices: ['flow-uuid']
+              metadata:
+                code: 200
+                to: { foo: 'bar' }
+              data:
+                whatever: 'this is a response'
+            .reply 201
+
+          request.post '/v2/messages', @requestOptions, (error, @response) => done error
+
+        it 'should update the credentials device discover.as whitelist', ->
+          @updateCredentialsDevice.done()

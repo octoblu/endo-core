@@ -26,10 +26,16 @@ class CredentialsDeviceService
       return @_getCredentialsDevice options, callback
 
   getEndoByUuid: (uuid, callback) =>
-    @meshblu.device uuid, (error, device) =>
-      return callback error if error?
+    @meshblu.device uuid, as: uuid, (error, device) =>
+      return @_updateDiscoverAsPermissionsAndGetEndo uuid, callback if error?
       return callback @_userError 'invalid credentials device', 400 unless @_isSignedCorrectly device
       return callback null, device.endo
+
+  _updateDiscoverAsPermissionsAndGetEndo: (uuid, callback) =>
+    update = '$addToSet': 'meshblu.whitelists.discover.as': {@uuid}
+    @meshblu.updateDangerously uuid, update, (error) =>
+      return callback error if error?
+      @getEndoByUuid uuid, callback
 
   getCredentialsTokenFromEndo: ({encrypted}) =>
      @encryption.decrypt(encrypted)?.secrets?.credentialsDeviceToken

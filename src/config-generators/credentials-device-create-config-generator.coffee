@@ -5,6 +5,7 @@ module.exports = ({serviceUuid}) ->
     whitelists:
       discover:
         view: [{uuid: serviceUuid}]
+        as: [{uuid: serviceUuid}]
       configure:
         update: [{uuid: serviceUuid}]
       message:
