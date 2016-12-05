@@ -22,15 +22,19 @@ class CredentialsDeviceController
       res.send publicDevice
 
   upsertWithRedirect: (req, res) =>
-    @_upsert req, res, (error, userDeviceManagerUrl)=>
+    @_upsert req, res, (error, {userDeviceManagerUrl, uuid})=>
       return res.sendError error if error?
-      return res.redirect 301, url.format(userDeviceManagerUrl)
+      return res.redirect 301, url.format(userDeviceManagerUrl) if req.accepts('html')
+      return res.status(201).send({uuid})
 
   upsertWithoutRedirect: (req, res) =>
-    @_upsert req, res, (error, userDeviceManagerUrl)=>
+    @_upsert req, res, (error, {userDeviceManagerUrl, uuid})=>
       return res.sendError error if error?
-      res.set location: url.format(userDeviceManagerUrl)
-      return res.status(201).end()
+      if req.accepts 'html'
+        res.set location: url.format(userDeviceManagerUrl)
+        return res.status(201).end()
+
+      return res.status(201).send({uuid})
 
   _upsert: (req, res, callback) =>
     encrypted = req.user
@@ -43,15 +47,15 @@ class CredentialsDeviceController
 
       credentialsDevice.update {authorizedUuid, id, encrypted}, (error) =>
         return callback error if error?
-
+        uuid = credentialsDevice.getUuid()
         serviceUrl = url.parse @serviceUrl
-        serviceUrl.pathname = "/credentials/#{credentialsDevice.getUuid()}"
+        serviceUrl.pathname = "/credentials/#{uuid}"
 
         userDeviceManagerUrl = url.parse @userDeviceManagerUrl, true
         userDeviceManagerUrl.query.meshbluAuthBearer = req.meshbluAuth.bearerToken
         userDeviceManagerUrl.query.credentialsDeviceUrl = url.format serviceUrl
         userDeviceManagerUrl.query.appOctobluHost = url.format @appOctobluHost
 
-        callback(null, userDeviceManagerUrl)
+        callback(null, {uuid, userDeviceManagerUrl})
 
 module.exports = CredentialsDeviceController

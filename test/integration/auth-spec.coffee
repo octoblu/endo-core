@@ -166,7 +166,7 @@ describe 'Auth Spec', ->
 
   describe 'On GET /auth/api/callback', ->
     describe 'when the credentials device does not exist', ->
-      beforeEach (done) ->
+      beforeEach ->
         @apiStub.yields null, {
           id:       'resource owner id'
           username: 'resource owner username'
@@ -239,32 +239,65 @@ describe 'Auth Spec', ->
           .set 'Authorization', "Basic #{serviceAuth}"
           .reply 201
 
-        options =
-          uri: '/auth/api/callback'
-          baseUrl: "http://localhost:#{@serverPort}"
-          followRedirect: false
-          auth:
-            username: 'some-uuid'
-            password: 'some-token'
+      describe 'when called without an accept header', ->
+        beforeEach (done) ->
+          options =
+            uri: '/auth/api/callback'
+            baseUrl: "http://localhost:#{@serverPort}"
+            followRedirect: false
+            auth:
+              username: 'some-uuid'
+              password: 'some-token'
 
-        request.get options, (error, @response, @body) =>
-          done error
+          request.get options, (error, @response, @body) =>
+            done error
 
-      it 'should return a 301', ->
-        expect(@response.statusCode).to.equal 301, @body
+        it 'should return a 301', ->
+          expect(@response.statusCode).to.equal 301, @body
 
-      it 'should create a credentials device', ->
-        @createCredentialsDevice.done()
+        it 'should create a credentials device', ->
+          @createCredentialsDevice.done()
 
-      it 'should update the credentials device with the new resourceOwnerSecret and authorizedUuid', ->
-        @updateCredentialsDevice.done()
+        it 'should update the credentials device with the new resourceOwnerSecret and authorizedUuid', ->
+          @updateCredentialsDevice.done()
 
-      it "should subscribe the service to the credential's received messages", ->
-        @createMessageReceivedSubscription.done()
+        it "should subscribe the service to the credential's received messages", ->
+          @createMessageReceivedSubscription.done()
 
-      it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
-        UNEXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcredentials%2Fcred-uuid&appOctobluHost=http%3A%2F%2Fapp.octoblu.biz%2F'
-        expect(@response.headers.location).to.equal UNEXPECTED
+        it 'should redirect to the userDeviceManagerUrl with the bearerToken and credentialsDeviceUrl', ->
+          UNEXPECTED = 'http://manage-my.endo/?meshbluAuthBearer=c29tZS11dWlkOnNvbWUtdG9rZW4%3D&credentialsDeviceUrl=http%3A%2F%2Fthe-endo-url%2Fcredentials%2Fcred-uuid&appOctobluHost=http%3A%2F%2Fapp.octoblu.biz%2F'
+          expect(@response.headers.location).to.equal UNEXPECTED
+
+      describe 'when called with a JSON accept header', ->
+        beforeEach (done) ->
+          options =
+            uri: '/auth/api/callback'
+            baseUrl: "http://localhost:#{@serverPort}"
+            followRedirect: false
+            json: true
+            headers:
+              Accept: 'application/json'
+            auth:
+              username: 'some-uuid'
+              password: 'some-token'
+
+          request.get options, (error, @response, @body) =>
+            done error
+
+        it 'should return a 201', ->
+          expect(@response.statusCode).to.equal 201, @body
+
+        it 'should create a credentials device', ->
+          @createCredentialsDevice.done()
+
+        it 'should update the credentials device with the new resourceOwnerSecret and authorizedUuid', ->
+          @updateCredentialsDevice.done()
+
+        it "should subscribe the service to the credential's received messages", ->
+          @createMessageReceivedSubscription.done()
+
+        it 'should return the credentials device uuid', ->
+          expect(@body).to.deep.equal uuid: 'cred-uuid'
 
     describe 'when the credentials device does exist', ->
       beforeEach (done) ->
