@@ -22,7 +22,7 @@ class CredentialsDeviceController
       res.send publicDevice
 
   upsertWithRedirect: (req, res) =>
-    @_upsert req, res, (error, {userDeviceManagerUrl, uuid})=>
+    @_upsert req, res, (error, {userDeviceManagerUrl, uuid}={})=>
       return res.sendError error if error?
       return res.redirect 301, url.format(userDeviceManagerUrl) if req.accepts('html')
       return res.status(201).send({uuid})
