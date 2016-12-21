@@ -2,6 +2,7 @@ http = require 'http'
 _    = require 'lodash'
 path = require 'path'
 glob = require 'glob'
+{validate} = require 'jsonschema'
 
 NOT_FOUND_RESPONSE = {metadata: {code: 404, status: http.STATUS_CODES[404]}}
 
@@ -14,6 +15,11 @@ class MessageHandler
     job = @jobs[metadata?.jobType]
     job ?= @jobs[@defaultJobType] if @defaultJobType?
     return callback null, NOT_FOUND_RESPONSE unless job?
+
+    schema = @_messageSchemaFromJob job, metadata?.jobType
+    validation = validate {metadata, data}, schema
+
+    return callback null, @_validationErrorsResponse(validation.errors) unless _.isEmpty validation.errors
 
     job.action {encrypted}, {data, metadata}, (error, response) =>
       return callback error if error?
@@ -87,6 +93,15 @@ class MessageHandler
 
   _responseSchemaFromJobs: (jobs) =>
     _.mapValues jobs, @_responseSchemaFromJob
+
+  _validationErrorsResponse: (errors) =>
+    return {
+      metadata:
+        code: 422
+        status: http.STATUS_CODES[422]
+      data:
+        errors: _.map(errors, 'message')
+    }
 
 
 module.exports = MessageHandler

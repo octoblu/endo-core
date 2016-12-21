@@ -1,0 +1,17 @@
+{
+  type: 'object'
+  title: 'Say Hello'
+  'x-group-name': 'Greetings'
+  required: ['data']
+  properties:
+    data:
+      type: 'object'
+      required: ['uuid']
+      properties:
+        uuid:
+          type: 'string'
+          title: 'UUID'
+        name:
+          type: 'string'
+          title: 'Name'
+}
