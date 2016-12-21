@@ -100,8 +100,10 @@ class MessageHandler
         code: 422
         status: http.STATUS_CODES[422]
       data:
-        errors: _.map(errors, 'message')
+        errors: _.map(errors, @_formatValidationError)
     }
 
+  _formatValidationError: (error) =>
+    return _.replace error.stack, /^instance\./, 'message.'
 
 module.exports = MessageHandler

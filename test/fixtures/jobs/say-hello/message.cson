@@ -14,4 +14,7 @@
         name:
           type: 'string'
           title: 'Name'
+        startTime:
+          type: 'string'
+          format: 'date-time'
 }

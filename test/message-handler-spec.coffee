@@ -27,7 +27,7 @@ describe.only 'MessageHandler', ->
             status: 'No Content'
         }
 
-    describe 'when called a message for a valid job that violates the schema', ->
+    describe 'when called with a message that omits a required property', ->
       beforeEach (done) ->
         message = {
           metadata:
@@ -43,7 +43,28 @@ describe.only 'MessageHandler', ->
             code: 422
             status: 'Unprocessable Entity'
           data:
-            errors: ['requires property "uuid"']
+            errors: ['message.data requires property "uuid"']
+        }
+
+    describe 'when called with a message that has an invalid format for a property', ->
+      beforeEach (done) ->
+        message = {
+          metadata:
+            jobType: 'SayHello'
+          data:
+            uuid: 'u-u-eye-d'
+            name: 'I have a malformed startTime'
+            startTime: 'Hi Mom!'
+        }
+        @sut.onMessage message, (error, @response) => done error
+
+      it 'should yield a 422', ->
+        expect(@response).to.deep.equal {
+          metadata:
+            code: 422
+            status: 'Unprocessable Entity'
+          data:
+            errors: ['message.data.startTime does not conform to the \"date-time\" format']
         }
 
     describe 'when called with a valid message for an dis-extant job', ->
