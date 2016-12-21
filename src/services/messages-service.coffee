@@ -5,10 +5,7 @@ moment      = require 'moment'
 Encryption  = require 'meshblu-encryption'
 MeshbluHTTP = require 'meshblu-http'
 
-debug = require('debug')('endo-core:messages-service')
-
 MISSING_METADATA     = 'Message is missing required property "metadata"'
-MISSING_ROUTE_HEADER = 'Missing x-meshblu-route header in request'
 
 class MessagesService
   constructor: ({@messageHandler, @meshbluConfig}) ->

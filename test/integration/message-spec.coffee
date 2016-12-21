@@ -86,7 +86,6 @@ describe 'messages', ->
 
       describe 'when we get some weird device instead of a credentials device', ->
         beforeEach ->
-          serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
           @meshblu
             .post '/search/devices'
             .set 'Authorization', "Basic #{@serviceAuth}"
@@ -124,7 +123,6 @@ describe 'messages', ->
 
       describe 'when we get an invalid credentials device', ->
         beforeEach ->
-          serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
           @meshblu
             .post '/search/devices'
             .set 'Authorization', "Basic #{@serviceAuth}"
@@ -171,14 +169,14 @@ describe 'messages', ->
             .set 'Authorization', "Basic #{serviceAuth}"
             .set 'x-meshblu-as', 'cred-uuid'
             .send uuid: 'cred-uuid'
-            .reply 200, [
-                uuid: 'cred-uuid'
-                endoSignature: 'LebOB6aPRQJC7HuLqVqwBeZOFITW+S+jTExlXKrnhvcbzgn6b82fwyh0Qin8ccMym9y4ymIWcKunfa9bZj2YsA=='
-                endo:
-                  authorizedKey: 'some-uuid'
-                  credentialsDeviceUuid: 'cred-uuid'
-                  encrypted: @encrypted
-            ]
+            .reply 200, [{
+              uuid: 'cred-uuid'
+              endoSignature: 'LebOB6aPRQJC7HuLqVqwBeZOFITW+S+jTExlXKrnhvcbzgn6b82fwyh0Qin8ccMym9y4ymIWcKunfa9bZj2YsA=='
+              endo:
+                authorizedKey: 'some-uuid'
+                credentialsDeviceUuid: 'cred-uuid'
+                encrypted: @encrypted
+            }]
 
         describe 'when called with a message without metadata', ->
           beforeEach (done) ->
@@ -340,7 +338,7 @@ describe 'messages', ->
             expect(@response.statusCode).to.equal 422
 
 
-        describe 'when called with a valid message that is the result of some other device\'s subscription to itself', ->
+        describe "when called with a valid message that's the result of some other device's subscription to itself", ->
           beforeEach (done) ->
             @messageHandler.onMessage.yields null, metadata: {code: 200}, data: {whatever: 'this is a response'}
             @responseHandler = @meshblu
