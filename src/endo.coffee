@@ -17,6 +17,7 @@ class Endo
       @disableLogging
       @logFn
       @firehoseMeshbluConfig
+      @healthcheckService
       @meshbluConfig
       @meshbluPublicKeyUri
       @messageHandler
@@ -33,6 +34,10 @@ class Endo
     throw new Error('messageHandler is required') unless @messageHandler?
     throw new Error('deviceType is required') unless @deviceType?
     throw new Error('serviceUrl is required') unless @serviceUrl?
+
+    unless @skipExpress
+      throw new Error 'healthcheckService is required' unless @healthcheckService?
+      throw new Error 'healthcheckService.get is not a function (and must be)' unless _.isFunction @healthcheckService.get
 
   address: =>
     @server?.address()
