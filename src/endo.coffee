@@ -59,6 +59,7 @@ class Endo
           @appOctobluHost
           credentialsDeviceService
           @disableLogging
+          @healthcheck
           @logFn
           @meshbluConfig
           @meshbluPublicKeyUri
