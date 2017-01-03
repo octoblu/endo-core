@@ -1,29 +1,30 @@
-cors               = require 'cors'
-morgan             = require 'morgan'
-express            = require 'express'
 bodyParser         = require 'body-parser'
 cookieParser       = require 'cookie-parser'
 cookieSession      = require 'cookie-session'
+cors               = require 'cors'
 errorHandler       = require 'errorhandler'
+express            = require 'express'
 meshbluHealthcheck = require 'express-meshblu-healthcheck'
+expressVersion     = require 'express-package-version'
 sendError          = require 'express-send-error'
+FetchPublicKey     = require 'fetch-meshblu-public-key'
+_                  = require 'lodash'
+morgan             = require 'morgan'
 path               = require 'path'
 passport           = require 'passport'
 favicon            = require 'serve-favicon'
-expressVersion     = require 'express-package-version'
-
-FetchPublicKey     = require 'fetch-meshblu-public-key'
 
 Router                   = require './router'
 debug                    = require('debug')('endo-core:server')
 
 class Server
-  constructor: (options)->
+  constructor: (options) ->
     {
       @apiStrategy
       @appOctobluHost
       @credentialsDeviceService
       @disableLogging
+      @healthcheckService
       @logFn
       @meshbluConfig
       @messagesService
@@ -47,6 +48,9 @@ class Server
     throw new Error('messageRouter is required') unless @messageRouter?
     throw new Error('messagesService is required') unless @messagesService?
     throw new Error('credentialsDeviceService is required') unless @credentialsDeviceService?
+
+    throw new Error 'healthcheckService is required' unless @healthcheckService?
+    throw new Error 'healthcheckService.get is not a function (and must be)' unless _.isFunction @healthcheckService.get
 
   address: =>
     @server.address()
@@ -89,6 +93,7 @@ class Server
         @messagesService
         meshbluPublicKey: publicKey
         @appOctobluHost
+        @healthcheckService
         @serviceUrl
         @userDeviceManagerUrl
         @staticSchemasPath
