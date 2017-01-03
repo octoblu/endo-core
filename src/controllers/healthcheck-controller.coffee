@@ -1,0 +1,14 @@
+_ = require 'lodash'
+
+class HealthcheckController
+  constructor: ({@healthcheckService})->
+    throw new Error 'healthcheckService is required' unless @healthcheckService?
+    throw new Error 'healthcheckService.healthcheck must be a function' unless _.isFunction @healthcheckService.healthcheck
+
+  get: (req, res) =>
+    @healthcheckService.healthcheck (error, response) =>
+      return res.sendError error if error?
+      return res.status(500).send({status: 'Unhealthy', components: response.components}) response.components unless response.healthy
+      return res.send status: 'Healthy', components: response.components
+
+module.exports = HealthcheckController

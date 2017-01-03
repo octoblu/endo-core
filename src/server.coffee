@@ -50,7 +50,7 @@ class Server
     throw new Error('credentialsDeviceService is required') unless @credentialsDeviceService?
 
     throw new Error 'healthcheckService is required' unless @healthcheckService?
-    throw new Error 'healthcheckService.get is not a function (and must be)' unless _.isFunction @healthcheckService.get
+    throw new Error 'healthcheckService.healthcheck is not a function (and must be)' unless _.isFunction @healthcheckService.healthcheck
 
   address: =>
     @server.address()

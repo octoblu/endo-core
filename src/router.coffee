@@ -4,6 +4,7 @@ passport                    = require 'passport'
 httpSignature               = require '@octoblu/connect-http-signature'
 CredentialsDeviceController = require './controllers/credentials-device-controller'
 FormSchemaController        = require './controllers/form-schema-controller'
+HealthcheckController       = require './controllers/healthcheck-controller'
 MessagesController          = require './controllers/messages-controller'
 MessagesV2Controller        = require './controllers/messages-v2-controller'
 MessageSchemaController     = require './controllers/message-schema-controller'
@@ -25,7 +26,7 @@ class Router
       userDeviceManagerUrl
       staticSchemasPath
       @skipRedirectAfterApiAuth
-      @healthcheckService
+      healthcheckService
     } = options
 
     throw new Error 'appOctobluHost is required' unless appOctobluHost?
@@ -36,11 +37,12 @@ class Router
     throw new Error 'messageRouter is required' unless messageRouter?
     throw new Error 'serviceUrl is required' unless serviceUrl?
     throw new Error 'userDeviceManagerUrl is required' unless userDeviceManagerUrl?
-    throw new Error 'healthcheckService is required' unless @healthcheckService?
-    throw new Error 'healthcheckService.get is not a function (and must be)' unless _.isFunction @healthcheckService.get
+    throw new Error 'healthcheckService is required' unless healthcheckService?
+    throw new Error 'healthcheckService.healthcheck is not a function (and must be)' unless _.isFunction healthcheckService.healthcheck
 
     @credentialsDeviceController = new CredentialsDeviceController {credentialsDeviceService, appOctobluHost, serviceUrl, userDeviceManagerUrl}
     @formSchemaController        = new FormSchemaController {messagesService}
+    @healthcheckController       = new HealthcheckController {healthcheckService}
     @messagesController          = new MessagesController {messageRouter}
     @messagesV2Controller        = new MessagesV2Controller {messageRouter}
     @messageSchemaController     = new MessageSchemaController {messagesService}
@@ -62,7 +64,7 @@ class Router
     app.get '/v1/response-schema', @responseSchemaController.list
     app.get '/schemas/:name', @staticSchemasController.get
 
-    app.get '/proofoflife', @healthcheckService.get
+    app.get '/proofoflife', @healthcheckController.get
 
     app.get '/auth/octoblu', passport.authenticate('octoblu')
     app.get '/auth/octoblu/callback', passport.authenticate('octoblu', failureRedirect: '/auth/octoblu'), @octobluAuthController.storeAuthAndRedirect
