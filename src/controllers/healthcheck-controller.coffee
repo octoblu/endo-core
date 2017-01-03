@@ -8,7 +8,7 @@ class HealthcheckController
   get: (req, res) =>
     @healthcheckService.healthcheck (error, response) =>
       return res.sendError error if error?
-      return res.status(500).send({status: 'Unhealthy', components: response.components}) response.components unless response.healthy
-      return res.send status: 'Healthy', components: response.components
+      return res.status(500).send(response) unless response.healthy
+      return res.send response
 
 module.exports = HealthcheckController
