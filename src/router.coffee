@@ -1,4 +1,5 @@
 MeshbluAuth                 = require 'express-meshblu-auth'
+_                           = require 'lodash'
 passport                    = require 'passport'
 httpSignature               = require '@octoblu/connect-http-signature'
 CredentialsDeviceController = require './controllers/credentials-device-controller'
@@ -24,6 +25,7 @@ class Router
       userDeviceManagerUrl
       staticSchemasPath
       @skipRedirectAfterApiAuth
+      @healthcheckService
     } = options
 
     throw new Error 'appOctobluHost is required' unless appOctobluHost?
@@ -34,6 +36,8 @@ class Router
     throw new Error 'messageRouter is required' unless messageRouter?
     throw new Error 'serviceUrl is required' unless serviceUrl?
     throw new Error 'userDeviceManagerUrl is required' unless userDeviceManagerUrl?
+    throw new Error 'healthcheckService is required' unless @healthcheckService?
+    throw new Error 'healthcheckService.get is not a function (and must be)' unless _.isFunction @healthcheckService.get
 
     @credentialsDeviceController = new CredentialsDeviceController {credentialsDeviceService, appOctobluHost, serviceUrl, userDeviceManagerUrl}
     @formSchemaController        = new FormSchemaController {messagesService}
@@ -44,7 +48,6 @@ class Router
     @responseSchemaController    = new ResponseSchemaController {messagesService}
     @staticSchemasController     = new StaticSchemasController {staticSchemasPath}
     @userDevicesController       = new UserDevicesController
-
 
   rejectIfNotServiceUuid: (req, res, next) =>
     return res.sendStatus 401 unless req.get('x-meshblu-uuid') == @meshbluConfig.uuid
@@ -58,6 +61,8 @@ class Router
     app.get '/v1/message-schema', @messageSchemaController.list
     app.get '/v1/response-schema', @responseSchemaController.list
     app.get '/schemas/:name', @staticSchemasController.get
+
+    app.get '/proofoflife', @healthcheckService.get
 
     app.get '/auth/octoblu', passport.authenticate('octoblu')
     app.get '/auth/octoblu/callback', passport.authenticate('octoblu', failureRedirect: '/auth/octoblu'), @octobluAuthController.storeAuthAndRedirect
