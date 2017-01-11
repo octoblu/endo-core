@@ -23,6 +23,8 @@ class MessageHandler
 
     job.action {encrypted}, {data, metadata}, (error, response) =>
       return callback error if error?
+      keys = _.keys _.omit response, ['data', 'metadata']
+      console.error("Only `data` and `metadata` will be used, ignoring all other keys") unless _.isEmpty keys
       return callback null, _.pick(response, 'data', 'metadata')
 
   formSchema: (callback) =>
