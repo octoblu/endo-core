@@ -4,7 +4,7 @@ path = require 'path'
 
 MessageHandler = require '../src/message-handler'
 
-describe.only 'MessageHandler', ->
+describe 'MessageHandler', ->
   describe 'with an instance', ->
     beforeEach ->
       @sut = new MessageHandler

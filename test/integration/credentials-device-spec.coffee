@@ -43,6 +43,7 @@ describe 'Credentials Device Spec', ->
       appOctobluHost: 'http://app.octoblu.luxury'
       userDeviceManagerUrl: 'http://manage-my.endo'
       meshbluPublicKeyUri: 'http://localhost:53261/publickey'
+      healthcheckService: healthcheck: =>
 
     serviceAuth = new Buffer('service-uuid:service-token').toString 'base64'
     @meshblu

@@ -60,6 +60,7 @@ describe 'message schema', ->
       appOctobluHost: 'http://app.octoblu.xxx'
       userDeviceManagerUrl: 'http://manage-my.endo'
       meshbluPublicKeyUri: 'http://localhost:53261/publickey'
+      healthcheckService: healthcheck: =>
 
     @server = new Server serverOptions
 

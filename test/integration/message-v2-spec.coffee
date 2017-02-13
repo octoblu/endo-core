@@ -63,6 +63,7 @@ describe 'v2 messages', ->
       appOctobluHost: 'http://app.octoblu.mom'
       userDeviceManagerUrl: 'http://manage-my.endo'
       meshbluPublicKeyUri: 'http://localhost:53261/publickey'
+      healthcheckService: healthcheck: =>
 
 
     @server = new Server serverOptions

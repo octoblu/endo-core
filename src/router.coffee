@@ -1,3 +1,4 @@
+debug                       = require('debug')('endo-core:router')
 MeshbluAuth                 = require 'express-meshblu-auth'
 _                           = require 'lodash'
 passport                    = require 'passport'
@@ -52,7 +53,12 @@ class Router
     @userDevicesController       = new UserDevicesController
 
   rejectIfNotServiceUuid: (req, res, next) =>
-    return res.sendStatus 401 unless req.get('x-meshblu-uuid') == @meshbluConfig.uuid
+    debug "checking service uuid"
+    incomingUuid = req.get 'x-meshblu-uuid'
+    unless incomingUuid  == @meshbluConfig.uuid
+      message = "x-meshblu-uuid should be #{@meshbluConfig.uuid}, but was #{incomingUuid}"
+      debug message
+      return res.status(401).send message
     next()
 
   route: (app) =>

@@ -63,6 +63,7 @@ describe 'static schemas', ->
       userDeviceManagerUrl: 'http://manage-my.endo'
       staticSchemasPath: path.join(__dirname, '../fixtures/schemas')
       meshbluPublicKeyUri: 'http://localhost:53261/publickey'
+      healthcheckService: healthcheck: =>
 
     @server = new Server serverOptions
 

@@ -44,6 +44,7 @@ describe 'User Devices Spec', ->
       appOctobluHost: 'http://app.octoblu.rentals'
       userDeviceManagerUrl: 'http://manage-my.endo'
       meshbluPublicKeyUri: 'http://localhost:53261/publickey'
+      healthcheckService: healthcheck: =>
 
     @meshblu
       .get '/v2/whoami'

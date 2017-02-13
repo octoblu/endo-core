@@ -66,6 +66,7 @@ describe 'Auth Spec', ->
       userDeviceManagerUrl: 'http://manage-my.endo'
       appOctobluHost: 'http://app.octoblu.biz/'
       meshbluPublicKeyUri: 'http://localhost:53261/publickey'
+      healthcheckService: healthcheck: =>
 
     @server = new Server serverOptions
 
