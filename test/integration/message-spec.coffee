@@ -24,7 +24,7 @@ describe 'messages', ->
           secret: 'this is secret'
     @encrypted = @encryption.encrypt encrypted
 
-    @meshblu = shmock 0xd00d
+    @meshblu = shmock()
     enableDestroy @meshblu
     @apiStrategy = new MockStrategy name: 'api'
     @octobluStrategy = new MockStrategy name: 'octoblu'
@@ -54,7 +54,7 @@ describe 'messages', ->
       meshbluConfig:
         hostname: 'localhost'
         protocol: 'http'
-        port: 0xd00d
+        port: @meshblu.address().port
         uuid: 'peter'
         token: 'i-could-eat'
         privateKey: @privateKey

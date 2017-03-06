@@ -7,8 +7,8 @@ express            = require 'express'
 meshbluHealthcheck = require 'express-meshblu-healthcheck'
 expressVersion     = require 'express-package-version'
 sendError          = require 'express-send-error'
-FetchPublicKey     = require 'fetch-meshblu-public-key'
 _                  = require 'lodash'
+MeshbluHttp        = require 'meshblu-http'
 morgan             = require 'morgan'
 path               = require 'path'
 passport           = require 'passport'
@@ -57,8 +57,8 @@ class Server
 
   run: (callback) =>
     debug 'running server'
-
-    new FetchPublicKey().fetch @meshbluPublicKeyUri, (error, {publicKey}={}) =>
+    meshblu = new MeshbluHttp _.cloneDeep(@meshbluConfig)
+    meshblu.getServerPublicKey (error, publicKey) =>
       if error?
         console.error "Error fetching public key: #{error.message}"
         process.exit 1

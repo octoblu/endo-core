@@ -43,16 +43,16 @@ class Endo
     @server?.address()
 
   run: (callback) =>
-    callback = _.after callback, 2 if @useFirehose && !@skipExpress
     meshblu = new MeshbluHTTP @meshbluConfig
     meshblu.whoami (error, device) =>
-      throw new Error('Could not authenticate with meshblu!') if error?
+      return callback new Error("Could not authenticate with meshblu: #{error.message}") if error?
 
       {imageUrl} = device.options ? {}
       credentialsDeviceService  = new CredentialsDeviceService {@meshbluConfig, @serviceUrl, @deviceType, imageUrl}
       messagesService           = new MessagesService {@meshbluConfig, @messageHandler}
       messageRouter             = new MessageRouter {@meshbluConfig, messagesService, credentialsDeviceService}
 
+      callback = _.after callback, 2 if @useFirehose && !@skipExpress
       unless @skipExpress
         @server = new Server {
           @apiStrategy
