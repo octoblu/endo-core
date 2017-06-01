@@ -49,6 +49,9 @@ class MessagesService
       return callback() if newError?
       return callback() unless statusDevice?
       update =
+        $set:
+          'status.errors':
+            $ref: '#/errors'
         $push:
           errors:
             $each: [

@@ -431,6 +431,9 @@ describe 'messages', ->
               .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
               .set 'x-meshblu-as', 'user-uuid'
               .send
+                $set:
+                  'status.errors':
+                    $ref: '#/errors'
                 $push:
                   errors:
                     $each: [
@@ -442,6 +445,7 @@ describe 'messages', ->
                         to: 'food'
                     ]
                     $slice: -99
+
               .reply 204
 
             request.post '/v1/messages', options, (error, @response, @body) =>

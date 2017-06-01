@@ -19,3 +19,7 @@ module.exports = ({userDeviceUuid, authorizedUuid}) ->
           {uuid: userDeviceUuid}
           {uuid: authorizedUuid}
         ]
+  errors: []
+  status:
+    errors:
+      $ref: '#/errors'
