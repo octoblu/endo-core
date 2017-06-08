@@ -301,10 +301,9 @@ describe 'User Devices Spec', ->
                     {uuid: 'user_device_uuid'}
                     {uuid: 'some-uuid'}
                   ]
-            errors: []
+                              
             status:
-              errors:
-                $ref: '#/errors'
+              errors: []
           .reply 201, uuid: 'status-device-uuid', token: 'status-device-token'
 
         @updateUserStatusDevice = @meshblu

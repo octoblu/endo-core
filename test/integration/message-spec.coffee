@@ -431,11 +431,8 @@ describe 'messages', ->
               .set 'Authorization', "Basic #{@credentialsDeviceAuth}"
               .set 'x-meshblu-as', 'user-uuid'
               .send
-                $set:
-                  'status.errors':
-                    $ref: '#/errors'
                 $push:
-                  errors:
+                  'status.errors':
                     $each: [
                       code: 500
                       message: 'Something very bad happened'

@@ -43,17 +43,16 @@ class MessagesService
       return callback newError if newError?
       @_updateStatusDeviceWithError {auth, senderUuid, userDeviceUuid, error, respondTo}, callback
 
-  _updateStatusDeviceWithError: ({auth, senderUuid, userDeviceUuid, error, respondTo}, callback) =>
+  _updateStatusDeviceWithError: (options, callback) =>
+    {auth, senderUuid, userDeviceUuid, error, respondTo, alreadyTried} = options
+
     meshblu = new MeshbluHTTP _.defaults auth, @meshbluConfig
     meshblu.device userDeviceUuid, (newError, {statusDevice}={}) =>
       return callback() if newError?
       return callback() unless statusDevice?
       update =
-        $set:
-          'status.errors':
-            $ref: '#/errors'
         $push:
-          errors:
+          'status.errors':
             $each: [
               senderUuid: senderUuid
               date: moment.utc().format()
@@ -63,7 +62,18 @@ class MessagesService
               message: error.message
             ]
             $slice: -99
-      meshblu.updateDangerously statusDevice, update, as: userDeviceUuid, callback
+
+      meshblu.updateDangerously statusDevice, update, as: userDeviceUuid, (error) =>
+        return callback() unless error?
+        return callback error if alreadyTried
+
+        if _.includes error.message, 'must be an array but is of type'
+          meshblu.updateDangerously statusDevice, {$set: 'status.errors': []}, (error) =>
+            return callback error if error?
+            newOptions = _.defaults {alreadyTried: true}, options
+            return @_updateStatusDeviceWithError newOptions, callback
+
+        return callback error
 
   responseSchema: (callback) =>
     @messageHandler.responseSchema callback
