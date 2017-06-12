@@ -384,10 +384,10 @@ describe 'messages', ->
         describe 'when called with a valid message, but theres an error', ->
 
           beforeEach 'Go back in time to 8am MST 2016-09-28 ', ->
-            sinon.useFakeTimers moment('2016-09-28T15:00:00Z').valueOf()
+            @clock = sinon.useFakeTimers moment('2016-09-28T15:00:00Z').valueOf()
 
           afterEach 'Back to the future', ->
-            sinon.restore()
+            @clock.restore()
 
           beforeEach (done) ->
             @messageHandler.onMessage.yields new Error 'Something very bad happened'

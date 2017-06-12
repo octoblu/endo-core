@@ -3,13 +3,15 @@
 sinon    = require 'sinon'
 
 fs            = require 'fs'
-request       = require 'request'
+_             = require 'lodash'
 Encryption    = require 'meshblu-encryption'
+request       = require 'request'
 enableDestroy = require 'server-destroy'
 shmock        = require 'shmock'
 
 MockStrategy  = require '../mock-strategy'
 Server        = require '../..'
+
 describe 'v2 messages', ->
   beforeEach (done) ->
     @serviceAuth = new Buffer('peter:i-could-eat').toString 'base64'
@@ -216,42 +218,125 @@ describe 'v2 messages', ->
               endo: endo
             ]
 
-        beforeEach (done) ->
-          credentialsDeviceAuth = new Buffer('cred-uuid:cred-token').toString 'base64'
-          @messageHandler.onMessage.yields null, metadata: {code: 200}, data: {whatever: 'this is a response'}
-          @responseHandler = @meshblu
-            .post '/messages'
-            .set 'Authorization', "Basic #{credentialsDeviceAuth}"
-            .set 'x-meshblu-as', 'user-uuid'
-            .send
-              devices: ['flow-uuid']
+        describe 'and the messageHandler yields a success', ->
+          beforeEach (done) ->
+            credentialsDeviceAuth = new Buffer('cred-uuid:cred-token').toString 'base64'
+            @messageHandler.onMessage.yields null, metadata: {code: 200}, data: {whatever: 'this is a response'}
+            @responseHandler = @meshblu
+              .post '/messages'
+              .set 'Authorization', "Basic #{credentialsDeviceAuth}"
+              .set 'x-meshblu-as', 'user-uuid'
+              .send
+                devices: ['flow-uuid']
+                metadata:
+                  code: 200
+                  to: { foo: 'bar' }
+                data:
+                  whatever: 'this is a response'
+              .reply 201
+
+            request.post '/v2/messages', @requestOptions, (error, @response) => done error
+
+          it 'should return a 201', ->
+            expect(@response.statusCode).to.equal 201
+
+          it 'should respond to the message via meshblu', ->
+            @responseHandler.done()
+
+          it 'should call the hello messageHandler with the message and auth', ->
+            expect(@messageHandler.onMessage).to.have.been.calledWith {
+              encrypted:
+                secrets:
+                  credentials:
+                    secret: 'this is secret'
               metadata:
-                code: 200
-                to: { foo: 'bar' }
+                jobType: 'hello'
+                respondTo: foo: 'bar'
               data:
-                whatever: 'this is a response'
-            .reply 201
+                greeting: 'hola'
+            }
 
-          request.post '/v2/messages', @requestOptions, (error, @response) => done error
+        describe 'and the messageHandler yields an error', ->
+          beforeEach (done) ->
+            credentialsDeviceAuth = new Buffer('cred-uuid:cred-token').toString 'base64'
+            @messageHandler.onMessage.yields new Error('whoops')
+            @responseHandler = @meshblu
+              .post '/messages'
+              .set 'Authorization', "Basic #{credentialsDeviceAuth}"
+              .set 'x-meshblu-as', 'user-uuid'
+              .send
+                devices: ['flow-uuid']
+                metadata:
+                  code: 500
+                  to: { foo: 'bar' }
+                  error:
+                    message: 'whoops'
+              .reply 201
 
-        it 'should return a 201', ->
-          expect(@response.statusCode).to.equal 201
+            request.post '/v2/messages', @requestOptions, (error, @response) => done error
 
-        it 'should respond to the message via meshblu', ->
-          @responseHandler.done()
+          it 'should return a 500', ->
+            expect(@response.statusCode).to.equal 500
 
-        it 'should call the hello messageHandler with the message and auth', ->
-          expect(@messageHandler.onMessage).to.have.been.calledWith {
-            encrypted:
-              secrets:
-                credentials:
-                  secret: 'this is secret'
-            metadata:
-              jobType: 'hello'
-              respondTo: foo: 'bar'
-            data:
-              greeting: 'hola'
-          }
+          it 'should respond to the message via meshblu', ->
+            @responseHandler.done()
+
+          it 'should call the hello messageHandler with the message and auth', ->
+            expect(@messageHandler.onMessage).to.have.been.calledWith {
+              encrypted:
+                secrets:
+                  credentials:
+                    secret: 'this is secret'
+              metadata:
+                jobType: 'hello'
+                respondTo: foo: 'bar'
+              data:
+                greeting: 'hola'
+            }
+
+        describe 'and the messageHandler yields twice', ->
+          beforeEach 'yield twice', (done) ->
+            credentialsDeviceAuth = new Buffer('cred-uuid:cred-token').toString 'base64'
+            @responseHandler = @meshblu
+              .post '/messages'
+              .set 'Authorization', "Basic #{credentialsDeviceAuth}"
+              .set 'x-meshblu-as', 'user-uuid'
+              .send
+                devices: ['flow-uuid']
+                metadata:
+                  code: 200
+                  to: { foo: 'bar' }
+                data:
+                  whatever: 'this is a response'
+              .reply 201
+
+            request.post '/v2/messages', @requestOptions, (error, @response) => done error
+            _.delay =>
+              @messageHandler.onMessage.yield null, metadata: {code: 200}, data: {whatever: 'this is a response'}
+              @messageHandler.onMessage.yield null, metadata: {code: 200}, data: {whatever: 'this is a response'}
+            , 20
+
+          it 'should not crash a split second later', (done) ->
+            _.delay done, 200
+
+          it 'should return a 201', ->
+            expect(@response.statusCode).to.equal 201
+
+          it 'should respond to the message via meshblu', ->
+            @responseHandler.done()
+
+          it 'should call the hello messageHandler with the message and auth', ->
+            expect(@messageHandler.onMessage).to.have.been.calledWith {
+              encrypted:
+                secrets:
+                  credentials:
+                    secret: 'this is secret'
+              metadata:
+                jobType: 'hello'
+                respondTo: foo: 'bar'
+              data:
+                greeting: 'hola'
+            }
 
       describe "and we can't discover.as the credentials device", ->
         beforeEach 'credentials-device', ->
