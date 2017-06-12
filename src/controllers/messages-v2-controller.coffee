@@ -10,7 +10,8 @@ class MessagesV2Controller
 
     hasResponded = false
     @messageRouter.route {message, route, respondTo}, (error) =>
-      return console.error 'warning: callback was called twice' if hasResponded
+      if hasResponded
+        return console.error 'warning: callback was called twice for jobType', message?.metadata?.jobType
       hasResponded = true
       return res.sendError error if error?
       res.sendStatus 201
