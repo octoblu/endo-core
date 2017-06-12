@@ -314,7 +314,7 @@ describe 'v2 messages', ->
             _.delay =>
               @messageHandler.onMessage.yield null, metadata: {code: 200}, data: {whatever: 'this is a response'}
               @messageHandler.onMessage.yield null, metadata: {code: 200}, data: {whatever: 'this is a response'}
-            , 20
+            , 100
 
           it 'should not crash a split second later', (done) ->
             _.delay done, 200
