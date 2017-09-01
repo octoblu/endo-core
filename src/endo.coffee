@@ -29,6 +29,7 @@ class Endo
       @staticSchemasPath
       @userDeviceManagerUrl
       @useFirehose
+      @refreshTokenHandler
     } = options
 
     throw new Error('messageHandler is required') unless @messageHandler?
@@ -48,7 +49,7 @@ class Endo
       return callback new Error("Could not authenticate with meshblu: #{error.message}") if error?
 
       {imageUrl} = device.options ? {}
-      credentialsDeviceService  = new CredentialsDeviceService {@meshbluConfig, @serviceUrl, @deviceType, imageUrl}
+      credentialsDeviceService  = new CredentialsDeviceService {@meshbluConfig, @serviceUrl, @deviceType, @refreshTokenHandler, imageUrl}
       messagesService           = new MessagesService {@meshbluConfig, @messageHandler}
       messageRouter             = new MessageRouter {@meshbluConfig, messagesService, credentialsDeviceService}
 

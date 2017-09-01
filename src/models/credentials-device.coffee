@@ -70,6 +70,13 @@ class CredentialsDevice
       return callback error if error?
       return callback null, @_userDevicesFromSubscriptions subscriptions
 
+  getUserDevice: (uuid, callback) =>
+    @meshblu.search { uuid }, {}, (error, devices) =>
+      return callback error if error
+      return callback @_userError 'User Device not found!', 404 if _.isEmpty devices
+      device = _.first devices
+      return callback null, device
+
   getUuid: => @uuid
 
   update: ({authorizedUuid, encrypted, id}, callback) =>

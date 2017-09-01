@@ -5,7 +5,7 @@ credentialsDeviceCreateGenerator = require '../config-generators/credentials-dev
 Encryption = require 'meshblu-encryption'
 
 class CredentialsDeviceService
-  constructor: ({@deviceType, @imageUrl, @meshbluConfig, @serviceUrl}) ->
+  constructor: ({@deviceType, @imageUrl, @meshbluConfig, @serviceUrl, @refreshTokenHandler}) ->
     throw new Error('deviceType is required') unless @deviceType?
     @uuid = @meshbluConfig.uuid
     @meshblu = new MeshbluHTTP @meshbluConfig
@@ -26,7 +26,7 @@ class CredentialsDeviceService
       return @_getCredentialsDevice options, callback
 
   getEndoByUuid: (uuid, callback) =>
-    @meshblu.search {uuid}, as: uuid, (error, devices) =>      
+    @meshblu.search {uuid}, as: uuid, (error, devices) =>
       if error?
         return @_updateDiscoverAsPermissionsAndGetEndo uuid, callback if error.code == 403
         return callback error
@@ -34,6 +34,30 @@ class CredentialsDeviceService
       device = _.first devices
       return callback @_userError 'invalid credentials device', 400 unless @_isSignedCorrectly device
       return callback null, device.endo
+
+  _handleRefreshToken: ({endo, credentialsUuid, userDeviceUuid}, callback) =>
+    return callback null, endo unless @refreshTokenHandler?
+    { encrypted } = endo
+    encrypted = @encryption.decrypt encrypted
+    { secrets } = encrypted
+
+    @refreshTokenHandler.isTokenValid secrets, (error, isValid) =>
+      return callback error if error?
+      return callback null, endo if isValid
+      @refreshTokenHandler.refreshToken secrets, (error, secrets) =>
+        return callback error if error?
+        encrypted.secrets = secrets
+        @_updateEncryptedCredentials { credentialsUuid, userDeviceUuid, encrypted }, (error) =>
+          return callback error if error?
+          @getEndoByUuid credentialsUuid, callback
+
+  _updateEncryptedCredentials: ({credentialsDevice, userDeviceUuid, encrypted }, callback) =>
+    resourceOwnerID = encrypted.id
+    @findOrCreate resourceOwnerID, (error, credentialsDevice) =>
+      credentialsDevice.getUserDevice userDeviceUuid, (error, userDevice) =>
+        authorizedUuid = userDevice.owner
+        id = resourceOwnerID
+        credentialsDevice.update { authorizedUuid, encrypted, id}, callback
 
   _updateDiscoverAsPermissionsAndGetEndo: (uuid, callback) =>
     update = '$addToSet': 'meshblu.whitelists.discover.as': {@uuid}

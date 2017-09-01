@@ -39,7 +39,7 @@ class CredentialsDeviceController
   _upsert: (req, res, callback) =>
     encrypted = req.user
     {id} = req.user
-
+    
     authorizedUuid = req.meshbluAuth.uuid
 
     @credentialsDeviceService.findOrCreate id, (error, credentialsDevice) =>

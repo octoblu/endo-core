@@ -58,7 +58,7 @@
     "lodash": "^4.17.4",
     "meshblu-encryption": "^2.0.0",
     "meshblu-firehose-socket.io": "^2.2.0",
-    "meshblu-http": "^9.8.0",
+    "meshblu-http": "^10.2.0",
     "moment": "^2.17.1",
     "morgan": "^1.8.1",
     "passport": "^0.3.2",
