@@ -55,6 +55,7 @@ class CredentialsDeviceService
     resourceOwnerID = encrypted.id
     @findOrCreate resourceOwnerID, (error, credentialsDevice) =>
       credentialsDevice.getUserDevice userDeviceUuid, (error, userDevice) =>
+        return callback error if error?
         authorizedUuid = userDevice.owner
         id = resourceOwnerID
         credentialsDevice.update { authorizedUuid, encrypted, id}, callback
